@@ -77,6 +77,10 @@ IM@S CG Helper(仮)
 
 その他
 ----------------
-カスタムメニューのアイコンに http://fortawesome.github.com/Font-Awesome/ を利用させていただいています。
-カスタムメニューの道場リンク初期値に http://saasan.github.io/mobamas-dojo/lv.html を利用させていただいています。
-アイドル相場リンクに http://mobile-trade.jp/fun/idolmaster/bazaar.php を利用させていただいています。
+カスタムメニューのアイコンに http://fortawesome.github.com/Font-Awesome/ を利用させて頂いています。
+
+カスタムメニューの道場リンク初期値に http://saasan.github.io/mobamas-dojo/lv.html を利用させて頂いています。
+
+アイドル相場リンクに http://mobile-trade.jp/fun/idolmaster/bazaar.php を利用させて頂いています。
+
+上記利用について問題等ございましたら、ご連絡お願い致します。
