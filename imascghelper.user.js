@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name IM@S CG Helper(仮)
-// @version 2013.10.15.632
+// @version 2013.10.16.14
 // @description IM@S CG を多少快適にするスクリプト。
 // @include http://sp.pf.mbga.jp/12008305
 // @include http://sp.pf.mbga.jp/12008305?*
@@ -75,10 +75,8 @@
 			padding:0;
 		}
 		input[type="checkbox"] {
-			-webkit-transform:scale(1.5);
-			transform:scale(1.5);
-			vertical-align: middle;
-			margin:3px 8px 3px 8px !important;
+			vertical-align: 0;
+			margin: 3px 8px;
 		}
 
 		#cghpCustomMenu {
@@ -130,7 +128,6 @@
 			width:320px;
 			background-color:#1d1d1d;
 			text-align:center;
-			line-height:normal;
 		}
 		#cghpOverlay {
 			position:absolute;
@@ -163,11 +160,7 @@
 			-ms-box-sizing:border-box;
 		}
 		#cghpSettingArea h2 {
-			margin-bottom:1.4rem;
 			font-size:1.4rem;
-		}
-		#cghpSettingArea h3 {
-			margin-bottom:1.17rem;
 		}
 		#cghpSettingArea p {
 			margin-top:5px;
@@ -193,8 +186,9 @@
 			text-align:center !important;
 		}
 		.cghp_cm_help_link {
+			margin:0;
 			color:#ffffff;
-			line-height:normal;
+			line-height:1;
 		}
 		.cghp_cm_help_list {
 			margin:0;
@@ -236,7 +230,7 @@
 			border:1px solid #444444;
 			-webkit-border-radius:5px;
 			background-color:#333333;
-			line-height:1.5em;
+			line-height:1.5;
 		}
 		.cghp_hide {
 			display:none !important;
@@ -313,9 +307,6 @@
 			text-align:center;
 			text-decoration:none;
 			text-shadow:0 0 2px #533713, 1px 1px 1px #1d1d1d;
-			font-weight:bold;
-			font-size:8pt;
-			line-height:normal;
 		}
 		.cghp_menu_list a:active,
 		.cghp_menu_list a:hover {
@@ -332,6 +323,9 @@
 			-moz-box-flex:1;
 			-ms-box-sizing:border-box;
 			-webkit-box-flex:1;
+			font-weight:bold;
+			font-size:8pt !important;
+			line-height:1 !important;
 		}
 		.cghp_menu_list li:first-child {
 			margin-left:0;
@@ -343,23 +337,26 @@
 			padding-bottom:5px;
 		}
 		.cghp_no_icon {
-			padding:12px 0;
+			padding:8px 0;
 		}
-		.cghp_power_ratio_area {
+		.cghp_idol_detail_area {
 			position:relative;
 		}
-		.cghp_power_ratio_area > .cghp_gray_area {
+		.cghp_idol_detail_area > .cghp_gray_area {
+			display:block;
 			position:absolute;
 			top:0;
 			right:0;
 			margin:0;
 			padding:5px;
 			width:110px;
+			color:#ffffff;
 			text-align:left;
+			text-decoration:none;
 			border-right:none;
 			-webkit-border-top-right-radius:0;
 			-webkit-border-bottom-right-radius:0;
-			line-height:1.2em;
+			line-height:1.2;
 		}
 		.cghp_show {
 			display:"" !important;
@@ -631,6 +628,7 @@
 
 	// -------------------------------------------------------------------------
 	// 各種アイドル一覧拡張
+	// @note 所属アイドル一覧、移籍、フリートレード、各種ユニット編成画面
 	// -------------------------------------------------------------------------
 	(function() {
 		if ((/%2F(:?card_list|card_sale|card_storage|auction)(?:%2F|%3F)/).test(_param) || (/(?:%2F|%3F)deck(?:%2F|%3F|_%w)/).test(_param)) {
@@ -643,7 +641,7 @@
 			var targetDivLen = targetDiv.length||0;
 			for (var i = 0; i < targetDivLen; i++) {
 				var nameDiv = targetDiv[i];
-				var idol = { 'id': null, 'name': null, 'type': null, 'rarity': null, 'cost': null, 'attack': null, 'defense': null, 'abilityLv': null };
+				var idol = { 'id': null, 'name': null, 'attribute': null, 'rarity': null, 'cost': null, 'attack': null, 'defense': null, 'skilLv': null };
 
 				// IDの取得
 				var nameAreaElement = nameDiv;
@@ -655,7 +653,7 @@
 				// 名前、属性、レアリティの取得（名前ブロックから）
 				var nameElements = (nameDiv.textContent.match(/(ﾊﾟｯｼｮﾝ|ｷｭｰﾄ|ｸｰﾙ)[\s\t\r\n]+([^\s\t\r\n]+)[\s\t\r\n]+(\([^\s\t\r\n]+\))/)||null);
 				if (nameElements && nameElements.length == 4) {
-					idol.type = nameElements[1];
+					idol.attribute = nameElements[1];
 					idol.name = nameElements[2];
 					idol.rarity = nameElements[3];
 				} else {
@@ -688,21 +686,12 @@
 						var label = statusDivLabel[j];
 						var labelText = label.textContent;
 						if ((/特技Lv:/).test(labelText)) {
-							idol.abilityLv = extractNum(label.nextSibling.textContent);
+							idol.skilLv = extractNum(label.nextSibling.textContent);
 							break;
 						}
 					}
 				}
-
-				// TODO アイドル詳細、相場リンク追加
-				/*
-				if (idol.name && idol.type && idol.rarity) {
-					var encIdolName = encodeURIComponent(idol.name);
-					var encIdolRarity = encodeURIComponent(idol.rarity);
-					var marketPriceUrl = 'http://mobile-trade.jp/fun/idolmaster/bazaar.php?_name=' + encIdolName + '&' + encIdolRarity;
-				}
-				*/
-				// コストあたりの発揮値、特技レベルの表示
+				// コストあたりの発揮値、特技レベルの表示、相場リンク追加
 				if (statusTable && isNumeric(idol.cost) && isNumeric(idol.attack) && isNumeric(idol.defense)) {
 					var targetTr = statusTable.querySelector('tr');
 					if (targetTr) {
@@ -711,7 +700,7 @@
 						var defenseRatio = round(idol.defense / idol.cost, 1);
 						// 特技レベル
 						var abilityText = '';
-						var ability = idol.abilityLv||0;
+						var ability = idol.skilLv||0;
 						for (var j = 0; j < 10; j++) {
 							if (j < ability) {
 								abilityText += '<i class="cghp_star_yellow"></i>';
@@ -719,12 +708,30 @@
 								abilityText += '<i class="cghp_star_gray"></i>';
 							}
 						}
+						// 相場リンク
+						var marketPriceUrl = 'javascript:void(0);';
+						if (idol.name && idol.attribute && idol.rarity) {
+							var encName = encodeURIComponent(idol.name);
+							var attribute = { 'ｷｭｰﾄ': '1', 'ｸｰﾙ': '2', 'ﾊﾟｯｼｮﾝ': '3'};
+							var attributeId = (idol.attribute in attribute) ? attribute[idol.attribute] : '';
+							var rarity = { '(ﾉｰﾏﾙ)': '1', '(ﾉｰﾏﾙ+)': '2', '(ﾚｱ)': '3', '(ﾚｱ+)': '4', '(Sﾚｱ)': '5', '(Sﾚｱ+)': '6'};
+							var rarityId = (idol.rarity in rarity) ? rarity[idol.rarity] : '';
+							var marketPriceUrl = 'http://mobile-trade.jp/fun/idolmaster/bazaar.php?' +
+								'_name=' + encName + '&' +
+								'attribute=' + attributeId + '&' +
+								'rarity=' + rarityId + '&' +
+								'cost_min=' + idol.cost + '&' +
+								'cost_max=' + idol.cost;
+						}
+						// 要素の生成
 						var ratioTd = _doc.createElement('td');
-						ratioTd.className = 'cghp_power_ratio_area';
-						var ratioDiv = ratioTd.appendChild(_doc.createElement("div"));
-						ratioDiv.className = 'cghp_gray_area';
-						ratioDiv.innerHTML = '<span class="blue">攻比:</span>' + attackRatio + '<br />' +
-						'<span class="blue">守比:</span>' + defenseRatio + '<br />' + abilityText;
+						ratioTd.className = 'cghp_idol_detail_area';
+						var marketPriceLink = ratioTd.appendChild(_doc.createElement('a'));
+						marketPriceLink.className = 'cghp_gray_area';
+						marketPriceLink.target = '_blank';
+						marketPriceLink.href = marketPriceUrl;
+						marketPriceLink.innerHTML = '<span class="blue">攻比:</span>' + attackRatio + '<br />' +
+							'<span class="blue">守比:</span>' + defenseRatio + '<br />' + abilityText;
 						targetTr.appendChild(ratioTd);
 					}
 				}
@@ -1325,7 +1332,7 @@
 				var hideBannerInMenuChecked = (_settings.hideBannerInMenu) ? 'checked="checked"' : '';
 				settingMenu.push('<h3><label>');
 				settingMenu.push('<input id="cghpSetHideBannerInMenu" type="checkbox" ' + hideBannerInMenuChecked + ' /> ');
-				settingMenu.push('メニュー内のバナーを非表示にする');
+				settingMenu.push('メニュー内のバナーを消す');
 				settingMenu.push('</label></h3>');
 				settingMenu.push('</section>');
 
@@ -1333,25 +1340,25 @@
 				var customMenuIconChecked = (_settings.customMenuIcon) ? 'checked="checked"' : '';
 				settingMenu.push('<h3><label>');
 				settingMenu.push('<input id="cghpSetCustomMenuIcon" type="checkbox" ' + customMenuIconChecked + ' /> ');
-				settingMenu.push('カスタムメニューにアイコンを表示する');
+				settingMenu.push('カスタムメニューにアイコンを表示');
 				settingMenu.push('</label></h3>');
 				settingMenu.push('</section>');
 
 				settingMenu.push('<section>');
 				settingMenu.push('<h3>カスタムメニュー1（0～8個まで）');
-				settingMenu.push('<a id="cghpHelpCustomMenu1" class="a_link cghp_cm_help_link">...</a>：');
+				settingMenu.push('<a id="cghpHelpCustomMenu1" class="a_link cghp_cm_help_link">...</a>：</h3>');
 				settingMenu.push('<p><input id="cghpSetCustomMenu1" type="text" value="' + _settings.customMenu1.join(',') + '" /></p>');
 				settingMenu.push('</section>');
 
 				settingMenu.push('<section>');
 				settingMenu.push('<h3>カスタムメニュー2（0～8個まで）');
-				settingMenu.push('<a id="cghpHelpCustomMenu2" class="a_link cghp_cm_help_link">...</a>：');
+				settingMenu.push('<a id="cghpHelpCustomMenu2" class="a_link cghp_cm_help_link">...</a>：</h3>');
 				settingMenu.push('<p><input id="cghpSetCustomMenu2" type="text" value="' + _settings.customMenu2.join(',') + '" /></p>');
 				settingMenu.push('</section>');
 
 				settingMenu.push('<section>');
 				settingMenu.push('<h3>カスタムメニュー3（0～8個まで）');
-				settingMenu.push('<a id="cghpHelpCustomMenu3" class="a_link cghp_cm_help_link">...</a>：');
+				settingMenu.push('<a id="cghpHelpCustomMenu3" class="a_link cghp_cm_help_link">...</a>：</h3>');
 				settingMenu.push('<p><input id="cghpSetCustomMenu3" type="text" value="' + _settings.customMenu3.join(',') + '" /></p>');
 				settingMenu.push('</section>');
 
@@ -1433,7 +1440,7 @@
 				settingMenu.push('</p>');
 				settingMenu.push('</div>');
 
-				var overlay = _doc.createElement("div");
+				var overlay = _doc.createElement('div');
 				overlay.id = 'cghpOverlay';
 				overlay.className = 'cghp_hide';
 				overlay.innerHTML = settingMenu.join('');
@@ -1652,7 +1659,7 @@
 				}
 			}
 			// 本スクリプトの設定画面呼び出しボタンを追加
-			var settingLink = _doc.createElement("a");
+			var settingLink = _doc.createElement('a');
 			settingLink.id = 'cghpSettingLink';
 			settingLink.innerHTML = '<div id="cghpSettingButton" class="nextLink">IM@S CG Helper(仮)設定</div>';
 			// リンクがクリックされたら設定画面を出して、閉じたときに有効な値だけを保存
@@ -1811,14 +1818,14 @@
 		var expInfoDiv = _doc.createElement('div');
 		expInfoDiv.id = 'cghpExpInfo';
 
-		var div1 = expInfoDiv.appendChild(_doc.createElement("div"));
+		var div1 = expInfoDiv.appendChild(_doc.createElement('div'));
 		div1.innerHTML = '次のLvupまでに必要なEx：<span class="yellow">' + restExp + '</span>';
-		var div2 = expInfoDiv.appendChild(_doc.createElement("div"));
+		var div2 = expInfoDiv.appendChild(_doc.createElement('div'));
 		div2.innerHTML = '現在のスタミナ：<span class="yellow">' + currentHP + '</span>';
-		expInfoDiv.appendChild(_doc.createElement("hr"));
+		expInfoDiv.appendChild(_doc.createElement('hr'));
 
 		if (restExp <= currentHP) {
-			var divError = expInfoDiv.appendChild(_doc.createElement("div"));
+			var divError = expInfoDiv.appendChild(_doc.createElement('div'));
 			divError.innerHTML = '<span class="red">スタミナが溢れています。<br />至急Lvupしましょう！</span>';
 		} else {
 			// 計算結果を時間(文字列)に変換
@@ -1894,7 +1901,7 @@
 			};
 
 			var exp = expCalc(restExp);
-			var divRecovery100 = expInfoDiv.appendChild(_doc.createElement("div"));
+			var divRecovery100 = expInfoDiv.appendChild(_doc.createElement('div'));
 			divRecovery100.className = (_settings.expCalcRecovery100) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery100.innerHTML = '100%回復アイテム (' + _settings.recovery100 + ')：<span class="yellow">' + exp.recovery100Count + '個 (' + exp.recovery100Cost + ')</span>';
 			$bind(divRecovery100, 'click', function() {
@@ -1902,7 +1909,7 @@
 				setStorage('cghp_exp_calc_recovery100', _settings.expCalcRecovery100);
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
-			var divRecovery50 = expInfoDiv.appendChild(_doc.createElement("div"));
+			var divRecovery50 = expInfoDiv.appendChild(_doc.createElement('div'));
 			divRecovery50.className = (_settings.expCalcRecovery50) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery50.innerHTML = '50%回復アイテム (' + _settings.recovery50 + ')：<span class="yellow">' + exp.recovery50Count + '個 (' + exp.recovery50Cost + ')</span>';
 			$bind(divRecovery50, 'click', function() {
@@ -1910,7 +1917,7 @@
 				setStorage('cghp_exp_calc_recovery50', _settings.expCalcRecovery50);
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
-			var divRecovery20 = expInfoDiv.appendChild(_doc.createElement("div"));
+			var divRecovery20 = expInfoDiv.appendChild(_doc.createElement('div'));
 			divRecovery20.className = (_settings.expCalcRecovery20) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery20.innerHTML = '20%回復アイテム (' + _settings.recovery20 + ')：<span class="yellow">' + exp.recovery20Count + '個 (' + exp.recovery20Cost + ')</span>';
 			$bind(divRecovery20, 'click', function() {
@@ -1918,10 +1925,10 @@
 				setStorage('cghp_exp_calc_recovery20', _settings.expCalcRecovery20);
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
-			var divRecoveryNatural = expInfoDiv.appendChild(_doc.createElement("div"));
+			var divRecoveryNatural = expInfoDiv.appendChild(_doc.createElement('div'));
 			divRecoveryNatural.innerHTML = '自然回復：<span class="yellow">' + exp.recoveryNaturalTime + ' (' + exp.recoveryNaturalCost + ')</span>';
-			expInfoDiv.appendChild(_doc.createElement("hr"));
-			var divRecoveryNatural = expInfoDiv.appendChild(_doc.createElement("div"));
+			expInfoDiv.appendChild(_doc.createElement('hr'));
+			var divRecoveryNatural = expInfoDiv.appendChild(_doc.createElement('div'));
 			divRecoveryNatural.innerHTML = '自然回復のみ：<span class="yellow">' + exp.recoveryNaturalOnlyTime + ' (' + exp.recoveryNaturalOnlyCost + ')</span>';
 		}
 
@@ -2104,7 +2111,7 @@
 		}
 		settings.dojoURL = getStorage('cghp_dojo_url');
 		if (settings.dojoURL == null) {
-			settings.dojoURL = 'http://dojo.sekai.in/';
+			settings.dojoURL = 'http://saasan.github.io/mobamas-dojo/lv.html';
 			setStorage('cghp_dojo_url', settings.dojoURL);
 		}
 		settings.customURL1 = getStorage('cghp_custom_url1');
