@@ -11,14 +11,53 @@ IM@S CG Helper(仮)
 
 使い方
 ------
-### PC(Google Chrome) ###
-拡張機能のタブを開いて、imascghelper.user.jsをD&D。
 
-### Android(Habit Browser) ###
-設定 > 詳細 > ユーザースクリプト > 新規スクリプト > ファイルから追加する > imascghelper.user.jsを選択。
+動作確認
+
+### PC (Google Chrome) ###
+- imascghelpser.user.js をPCの任意の場所に保存する。
+- Google Chromeを起動する。
+- [メニュー > ツール > 拡張機能] を選択する。
+- 拡張機能の画面上に、保存したimascghelper.user.jsをドラッグ&ドロップする。
+
+### Android 2.1以上 ([Sleipnir Mobile] (https://play.google.com/store/apps/details?id=jp.co.fenrir.android.sleipnir))
+
+スクリプト（エクステンション）インストール後の初回ページ読み込みは時間がかかります。
+
+- Sleipnir Mobileを起動する。
+- このページを開く。
+- mobile用のページになっている場合は、ページ下部の「Desktop version」を押す。
+- 「imascghelper.slex.js」のリンクを押す。  
+（ファイル名に注意）
+- 「Raw」ボタンがあるので、押す。
+- ダイアログが表示されるので「インストール」を押す。
+
+### Android 4.0.3以上 ([Habit Browser] (https://play.google.com/store/apps/details?id=jp.ddo.pigsty.HabitBrowser) / [Habit Browser classic](https://play.google.com/store/apps/details?id=jp.ddo.pigsty.Habit_Browser)) ###
+無印の方が新しいのですが、2013/10/16時点ではまだ不安定な感じです。  
+比較的安定しているclassicを使用する方が個人的にはお勧めです。
+
+- Habit Browserを起動する。
+- このページを開く。
+- mobile用のページになっている場合は、ページ下部の「Desktop version」を押す。
+- 「imascghelper.user.js」のリンクを押す。  
+（ファイル名に注意）
+- 「Raw」ボタンがあるので、長押してメニューを開く。
+- 「名前をつけて保存」を押し、任意のディレクトリに保存する。  
+（ファイル名はimascghelper.user.jsで保存）
+- [メニュー > 設定 > 詳細 > ユーザースクリプト > 新規スクリプト(＋) > ファイルから追加する] を選択する。
+- 先程保存したimascghelper.user.jsを選択する。
 
 ### その他ブラウザ ###
-ユーザースクリプトが使えるブラウザなら基本的には使えるかと。
+ユーザースクリプトが使えるブラウザなら基本的には使えるかと思います。
+  
+ただし、Androidでは選択肢があまりないというのが現状です。  
+前述のブラウザ以外だと以下のブラウザでユーザースクリプトを使用出来ます。
+
+- [Angel Browser] (https://play.google.com/store/apps/details?id=net.adgjm.angel) (スクリプトの実行が実用に耐えないレベルで遅い)
+- [Opera Mobile Classic] (https://play.google.com/store/apps/details?id=com.opera.browser.classic) (そもそもモバマスの表示が崩れる)
+- [Mikan Browser] (https://sites.google.com/site/cynthia2dev/) (野良アプリ。導入・設定が面倒)
+
+iOSでももしかしたら動作可能かも知れませんが、実機を持っていないため未確認です。
 
 機能概要
 ----------------
@@ -75,7 +114,7 @@ IM@S CG Helper(仮)
 
 本スクリプトを使用したことにより生じたいかなる損害、不利益等に対してはいかなる責任も負いません。
 
-その他
+謝辞
 ----------------
 カスタムメニューのアイコンに http://fortawesome.github.com/Font-Awesome/ を利用させて頂いています。
 

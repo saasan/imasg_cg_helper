@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name IM@S CG Helper (Tentative name)
 // @author sunokonoyakma
-// @version 2013.10.16.936
+// @version 2013.10.16.1132
 // @description The script to be somewhat comfortable to the IM@S CG.
 // @include http://sp.pf.mbga.jp/12008305
 // @include http://sp.pf.mbga.jp/12008305?*
@@ -713,9 +713,9 @@
 						var marketPriceUrl = 'javascript:void(0);';
 						if (idol.name && idol.attribute && idol.rarity) {
 							var encName = encodeURIComponent(idol.name);
-							var attribute = { 'ｷｭｰﾄ': '1', 'ｸｰﾙ': '2', 'ﾊﾟｯｼｮﾝ': '3'};
+							var attribute = { 'ｷｭｰﾄ': '1', 'ｸｰﾙ': '2', 'ﾊﾟｯｼｮﾝ': '3' };
 							var attributeId = (idol.attribute in attribute) ? attribute[idol.attribute] : '';
-							var rarity = { '(ﾉｰﾏﾙ)': '1', '(ﾉｰﾏﾙ+)': '2', '(ﾚｱ)': '3', '(ﾚｱ+)': '4', '(Sﾚｱ)': '5', '(Sﾚｱ+)': '6'};
+							var rarity = { '(ﾉｰﾏﾙ)': '1', '(ﾉｰﾏﾙ+)': '2', '(ﾚｱ)': '3', '(ﾚｱ+)': '4', '(Sﾚｱ)': '5', '(Sﾚｱ+)': '6' };
 							var rarityId = (idol.rarity in rarity) ? rarity[idol.rarity] : '';
 							var marketPriceUrl = 'http://mobile-trade.jp/fun/idolmaster/bazaar.php?' +
 								'_name=' + encName + '&' +
