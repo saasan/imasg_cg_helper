@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name IM@S CG Helper (Tentative name)
 // @author sunokonoyakma
-// @version 2013.10.21.230
+// @version 2013.10.21.241
 // @description The script to be somewhat comfortable to the IDOLM@STER CINDERELLA GIRLS.
 // @include http://sp.pf.mbga.jp/12008305
 // @include http://sp.pf.mbga.jp/12008305?*
@@ -679,7 +679,7 @@
 					continue;
 				}
 				// 各種情報を取得する基準としてクラス名を付ける（Android2系への暫定対応）
-				// コスト、攻発揮値、守発揮値の取得（名前ブロックの直後の要素がテーブルなら）
+				// コスト、攻発揮値、守発揮値の取得（名前ブロックの次のテーブル）
 				var statusTable = nameAreaElement.nextSibling.nextSibling; // #text -> table
 				if (statusTable && statusTable.tagName == 'TABLE') {
 					var statusTableLabel = statusTable.querySelectorAll('span.blue');
@@ -696,13 +696,13 @@
 						}
 					}
 				}
-				// 特技Lvの取得（ステータステーブルと兄弟要素の最初のDIV）
+				// 特技Lvの取得（ステータステーブルの次のDIV）
 				var statusDiv = statusTable.nextSibling.nextSibling; // #text -> div or img
 				if (statusDiv && statusDiv.tagName != 'DIV') {
 					// 余白用の画像と改行がある場合はその分飛ばす
 					statusDiv = statusDiv.nextSibling.nextSibling.nextSibling; // br -> #text -> div
 				}
-				if (statusDiv) {
+				if (statusDiv && statusTable.tagName == 'DIV') {
 					var statusDivLabel = statusDiv.querySelectorAll('span.blue');
 					var statusDivLabelLen = statusDivLabel.length||0;
 					for (var j = 0; j < statusDivLabelLen; j++) {
