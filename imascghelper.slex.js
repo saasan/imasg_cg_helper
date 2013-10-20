@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name IM@S CG Helper (Tentative name)
 // @author sunokonoyakma
-// @version 2013.10.16.1132
-// @description The script to be somewhat comfortable to the IM@S CG.
+// @version 2013.10.21.230
+// @description The script to be somewhat comfortable to the IDOLM@STER CINDERELLA GIRLS.
 // @include http://sp.pf.mbga.jp/12008305
 // @include http://sp.pf.mbga.jp/12008305?*
 // @include http://sp.pf.mbga.jp/12008305/*
@@ -17,7 +17,6 @@
 	var _location = window.location;
 	var _param = _location.search.substring(1);
 	var $id = function(a){return _doc.getElementById(a)};
-	var $xpath = function(h,f){if(!f){f=_doc}var g=function(i){var j=_doc.createNSResolver(f)(i);return j?j:(_doc.contentType=='text/html')?'':'http://www.w3.org/1999/xhtml'};var h=_doc.createExpression(h,g);var b=h.evaluate(f,XPathResult.ANY_TYPE,null);switch(b.resultType){case XPathResult.STRING_TYPE:return b.stringValue;case XPathResult.NUMBER_TYPE:return b.numberValue;case XPathResult.BOOLEAN_TYPE:return b.booleanValue;case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:b=h.evaluate(f,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);var c=[];for(var e=0,a=b.snapshotLength;e<a;e++){c.push(b.snapshotItem(e))}return c}return null};
 	var $bind = function(c,a,b){if(!c){return}c.addEventListener(a,b,false)};
 	var $unbind = function(c,a,b){if(!c){return}c.removeEventListener(a,b,false)};
 
@@ -71,13 +70,24 @@
 		.mbga-pf-footer-container {
 			width:300px !important;
 		}
+		.title_sub_blue,
+		.title_sub_gray {
+			margin:0 0 5px 0;
+			padding:5px 0;
+			line-height:1.4;
+		}
+		.title_sub_blue img[src="http://ava-a.mbga.jp/i/dot.gif"],
+		.title_sub_gray img[src="http://ava-a.mbga.jp/i/dot.gif"] {
+			height:0 !important;
+		}
 		body {
 			margin:0 auto;
 			padding:0;
 		}
-		input[type="checkbox"] {
+		input[type~="checkbox radio"] {
 			vertical-align: 0;
 			margin: 3px 8px;
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 		}
 
 		#cghpCustomMenu {
@@ -231,7 +241,7 @@
 			border:1px solid #444444;
 			-webkit-border-radius:5px;
 			background-color:#333333;
-			line-height:1.5;
+			line-height:1.4;
 		}
 		.cghp_hide {
 			display:none !important;
@@ -250,14 +260,17 @@
 		}
 		.cghp_idol_table {
 			border-collapse:separate !important;
-			border-spacing:2px !important;
+			border-spacing:0px !important;
 			border-color:gray !important;
+			line-height:1.4 !important;
+			vertical-align:middle !important;
 		}
-		.cghp_idol_table td:first-child {
-			width:80px !important;
-		}
+		.cghp_idol_table td:first-child,
 		.cghp_idol_table td:first-child > img {
 			width:75px !important;
+		}
+		.cghp_idol_table ~ div:first-child {
+			line-height:1.4 !important;
 		}
 		.cghp_link {
 			cursor:pointer;
@@ -340,10 +353,13 @@
 		.cghp_no_icon {
 			padding:8px 0;
 		}
-		.cghp_idol_detail_area {
+		.cghp_idol_detail_td {
+			vertical-align:top;
+		}
+		.cghp_idol_detail_div {
 			position:relative;
 		}
-		.cghp_idol_detail_area > .cghp_gray_area {
+		.cghp_idol_detail_div > .cghp_gray_area {
 			display:block;
 			position:absolute;
 			top:0;
@@ -469,73 +485,73 @@
 	_customMenu[105] = { 'fullName': 'カスタム5', 'shortName': 'ｶｽﾀﾑ5', 'icon': 'icon-cogs', 'url': _settings.customURL5 };
 
 	(function() {
-		var customMenu = [];
-		var customMenu1Len = _settings.customMenu1.length||0;
-		if (0 < customMenu1Len) {
-			customMenu.push('<ul id="cghpCustomMenuList1" class="cghp_menu_list">');
-			for (var i = 0; i < customMenu1Len; i++) {
-				var menuIndex = _settings.customMenu1[i];
-				customMenu.push('<li>');
-				if (_customMenu[menuIndex]) {
-					var menu = _customMenu[menuIndex];
-					var name = (customMenu1Len < 6) ? menu.fullName : menu.shortName;
-					if (_settings.customMenuIcon) {
-						customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
-					} else {
-						customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
-					}
-				}
-				customMenu.push('</li>');
-			}
-			customMenu.push('</ul>');
-		}
-
-		var customMenu2Len = _settings.customMenu2.length||0;
-		if (0 < customMenu2Len) {
-			customMenu.push('<ul id="cghpCustomMenuList2" class="cghp_menu_list">');
-			for (var i = 0; i < customMenu2Len; i++) {
-				var menuIndex = _settings.customMenu2[i];
-				customMenu.push('<li>');
-				if (_customMenu[menuIndex]) {
-					var menu = _customMenu[menuIndex];
-					var name = (customMenu2Len < 6) ? menu.fullName : menu.shortName;
-					if (_settings.customMenuIcon) {
-						customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
-					} else {
-						customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
-					}
-				}
-				customMenu.push('</li>');
-			}
-			customMenu.push('</ul>');
-		}
-
-		var customMenu3Len = _settings.customMenu3.length||0;
-		if (0 < customMenu3Len) {
-			customMenu.push('<ul id="cghpCustomMenuList3" class="cghp_menu_list">');
-			for (var i = 0; i < customMenu3Len; i++) {
-				var menuIndex = _settings.customMenu3[i];
-				customMenu.push('<li>');
-				if (_customMenu[menuIndex]) {
-					var menu = _customMenu[menuIndex];
-					var name = (customMenu3Len < 6) ? menu.fullName : menu.shortName;
-					if (_settings.customMenuIcon) {
-						customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
-					} else {
-						customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
-					}
-				}
-				customMenu.push('</li>');
-			}
-			customMenu.push('</ul>');
-		}
-
-		var customMenuDiv = _doc.createElement('div');
-		customMenuDiv.id = 'cghpCustomMenu';
-		customMenuDiv.innerHTML = customMenu.join('');
-
 		var headerNavi = $id('headerNavi');
 		if (headerNavi) {
+			var customMenu = [];
+			var customMenu1Len = _settings.customMenu1.length||0;
+			if (0 < customMenu1Len) {
+				customMenu.push('<ul id="cghpCustomMenuList1" class="cghp_menu_list">');
+				for (var i = 0; i < customMenu1Len; i++) {
+					var menuIndex = _settings.customMenu1[i];
+					customMenu.push('<li>');
+					if (_customMenu[menuIndex]) {
+						var menu = _customMenu[menuIndex];
+						var name = (customMenu1Len < 6) ? menu.fullName : menu.shortName;
+						if (_settings.customMenuIcon) {
+							customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
+						} else {
+							customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
+						}
+					}
+					customMenu.push('</li>');
+				}
+				customMenu.push('</ul>');
+			}
+
+			var customMenu2Len = _settings.customMenu2.length||0;
+			if (0 < customMenu2Len) {
+				customMenu.push('<ul id="cghpCustomMenuList2" class="cghp_menu_list">');
+				for (var i = 0; i < customMenu2Len; i++) {
+					var menuIndex = _settings.customMenu2[i];
+					customMenu.push('<li>');
+					if (_customMenu[menuIndex]) {
+						var menu = _customMenu[menuIndex];
+						var name = (customMenu2Len < 6) ? menu.fullName : menu.shortName;
+						if (_settings.customMenuIcon) {
+							customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
+						} else {
+							customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
+						}
+					}
+					customMenu.push('</li>');
+				}
+				customMenu.push('</ul>');
+			}
+
+			var customMenu3Len = _settings.customMenu3.length||0;
+			if (0 < customMenu3Len) {
+				customMenu.push('<ul id="cghpCustomMenuList3" class="cghp_menu_list">');
+				for (var i = 0; i < customMenu3Len; i++) {
+					var menuIndex = _settings.customMenu3[i];
+					customMenu.push('<li>');
+					if (_customMenu[menuIndex]) {
+						var menu = _customMenu[menuIndex];
+						var name = (customMenu3Len < 6) ? menu.fullName : menu.shortName;
+						if (_settings.customMenuIcon) {
+							customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
+						} else {
+							customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
+						}
+					}
+					customMenu.push('</li>');
+				}
+				customMenu.push('</ul>');
+			}
+
+			var customMenuDiv = _doc.createElement('div');
+			customMenuDiv.id = 'cghpCustomMenu';
+			customMenuDiv.innerHTML = customMenu.join('');
+
 			headerNavi.parentElement.insertBefore(customMenuDiv, headerNavi.nextSibling);
 		}
 	})();
@@ -544,10 +560,9 @@
 	// 贈り物拡張
 	// -------------------------------------------------------------------------
 	(function() {
-		if (/%2Fpresent%2Frecieve%2F(?:\d*%2F\d*)?%3Fview_auth_type%3D/.test(_param)) {
+		if (/%2Fpresent%2Frecieve%2F/.test(_param)) {
 			// 贈り物のチェックを外す
 			if (_settings.uncheckedGift = 1) {
-				var isChecked = false;
 				var checkLink = $id('chks_change');
 				if (checkLink) {
 					dispatchClick(checkLink);
@@ -629,17 +644,19 @@
 
 	// -------------------------------------------------------------------------
 	// 各種アイドル一覧拡張
-	// @note 所属アイドル一覧、移籍、フリートレード、各種ユニット編成画面
+	// @note 所属アイドル一覧、移籍、女子寮、レッスン、特訓、フリートレード、
+	//       メダル交換、各種ユニット編成画面
 	// -------------------------------------------------------------------------
 	(function() {
-		if ((/%2F(:?card_list|card_sale|card_storage|auction)(?:%2F|%3F)/).test(_param) || (/(?:%2F|%3F)deck(?:%2F|%3F|_%w)/).test(_param)) {
+		if ((/(?:%2F|%3F)(:?card_(?:list|sale|storage|str|union)|auction|exchange|deck)(?:%2F|%3F)/).test(_param) && _content) {
 			// 発揮値（コスト比）の表示や各種リンクの追加
 			var extractNum = function (val) {
 				return (val) ? parseInt(val.replace(/[^0-9]/, '')) : null;
 			};
 			// アイドルを取得（アイドル名のブロックを基準とする）
-			var targetDiv = _content.querySelectorAll('div.title_sub_blue, div.title_sub_gray, div[style="width:100%; text-align:center; background-color:#333333;"]');
+			var targetDiv = _content.querySelectorAll('div.title_sub_blue, div.title_sub_gray, div[style*="background-color:#333333;"]');
 			var targetDivLen = targetDiv.length||0;
+			var idolCount = 0;
 			for (var i = 0; i < targetDivLen; i++) {
 				var nameDiv = targetDiv[i];
 				var idol = { 'id': null, 'name': null, 'attribute': null, 'rarity': null, 'cost': null, 'attack': null, 'defense': null, 'skilLv': null };
@@ -661,9 +678,10 @@
 					// 上記が取得出来ない場合は大概失敗なので飛ばす
 					continue;
 				}
+				// 各種情報を取得する基準としてクラス名を付ける（Android2系への暫定対応）
 				// コスト、攻発揮値、守発揮値の取得（名前ブロックの直後の要素がテーブルなら）
-				var statusTable = $xpath('./following-sibling::*[1][self::table]', nameAreaElement)[0]||null;
-				if (statusTable) {
+				var statusTable = nameAreaElement.nextSibling.nextSibling; // #text -> table
+				if (statusTable && statusTable.tagName == 'TABLE') {
 					var statusTableLabel = statusTable.querySelectorAll('span.blue');
 					var statusTableLabelLen = statusTableLabel.length||0;
 					for (var j = 0; j < statusTableLabelLen; j++) {
@@ -679,7 +697,11 @@
 					}
 				}
 				// 特技Lvの取得（ステータステーブルと兄弟要素の最初のDIV）
-				var statusDiv = $xpath('./following-sibling::div[1]', statusTable)[0]||null;
+				var statusDiv = statusTable.nextSibling.nextSibling; // #text -> div or img
+				if (statusDiv && statusDiv.tagName != 'DIV') {
+					// 余白用の画像と改行がある場合はその分飛ばす
+					statusDiv = statusDiv.nextSibling.nextSibling.nextSibling; // br -> #text -> div
+				}
 				if (statusDiv) {
 					var statusDivLabel = statusDiv.querySelectorAll('span.blue');
 					var statusDivLabelLen = statusDivLabel.length||0;
@@ -726,8 +748,10 @@
 						}
 						// 要素の生成
 						var ratioTd = _doc.createElement('td');
-						ratioTd.className = 'cghp_idol_detail_area';
-						var marketPriceLink = ratioTd.appendChild(_doc.createElement('a'));
+						ratioTd.className = 'cghp_idol_detail_td';
+						var ratioDiv = ratioTd.appendChild(_doc.createElement('div'));
+						ratioDiv.className = 'cghp_idol_detail_div';
+						var marketPriceLink = ratioDiv.appendChild(_doc.createElement('a'));
 						marketPriceLink.className = 'cghp_gray_area';
 						marketPriceLink.target = '_blank';
 						marketPriceLink.href = marketPriceUrl;
@@ -750,18 +774,12 @@
 				}
 
 				// 画面レイアウトの調整
-				if ((/%2F(?:card_list|card_sale)(?:%2F|%3F)/).test(_param)) {
-					// 所属アイドル一覧、移籍画面
-					if (statusTable && statusDiv) {
-						statusTable.style.lineHeight = '1.5';
-						statusDiv.style.lineHeight = '1.5';
-					}
-				} else if ((/%2Fauction(?:%2F|%3F)/).test(_param)) {
-					// トレード画面
-					if (nameDiv && statusTable) {
-						nameDiv.className = 'title_sub_gray';
-						statusTable.className = 'cghp_idol_table';
-					}
+				if (statusTable) {
+					statusTable.className = 'cghp_idol_table';
+				}
+				if ((/%2F(?:card_storage|auction|exchange)(?:%2F|%3F)/).test(_param) && nameDiv) {
+					// 女子寮、トレード、メダル交換画面
+					nameDiv.className = 'title_sub_gray';
 				}
 			}
 		}
@@ -1007,7 +1025,7 @@
 	// Liveバトル拡張＠Live中
 	// -------------------------------------------------------------------------
 	(function() {
-		if ((/%2Fbattles%2Fbattle_processing%3F/).test(_param) || (/%2Fbattles%2Fflash%3F/).test(_param) || (/%2Fbattles%2Fwin_or_lose%2F/).test(_param)) {
+		if ((/%2Fbattles%2F(?:battle_processing|flash|win_or_lose)(?:%2F|%3F)/).test(_param)) {
 			var enemyId = (_param.match(/(?:%3F|%26)(?:rnd|enemy_id)%3D(\d+)/)||[])[1]||null;
 			if (enemyId != null) {
 
@@ -1063,7 +1081,7 @@
 	// レベルアップ計算＠通常お仕事(演出OFF)
 	// -------------------------------------------------------------------------
 	(function() {
-		if ((/%2Fquests%2F(?:get_nothing|get_card|get_rareparts|get_love)(?:%2F|%3F)/).test(_param)) {
+		if ((/%2Fquests%3Frnd%3D/).test(_param) || (/%2Fquests%2F(?:mission_list|get_\w+)(?:%2F|%3F)/).test(_param)) {
 			var status = getWorkStatus(0);
 			if (status) {
 				var insertTarget = _content.querySelector('form[name="quest_form"]').nextSibling;
@@ -1735,12 +1753,12 @@
 			for (var i = 0; i < targetAreaLen; i++) {
 				var span = targetArea[i];
 				if ((/ｽﾀﾐﾅ:/).test(span.textContent)) {
-					var targetTd = $xpath('./../../td[2]', span)[0]||null;
-					if (targetTd) {
+					var targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> #text -> td
+					if (targetTd && targetTd.tagName == 'TD') {
 						hpText = targetTd.textContent;
 					}
 				} else if ((/Ex:/).test(span.textContent)) {
-					var targetTd = $xpath('./../../td[2]', span)[0]||null;
+					var targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> #text -> td
 					if (targetTd) {
 						expText = targetTd.textContent;
 					}
@@ -1750,11 +1768,11 @@
 			// 演出ON
 			var targetArea = $id('get_condition');
 			if (targetArea) {
-				var hpDiv = $xpath('./div[2]', $id('hp'))[0]||null;
+				var hpDiv = $id('hp');
 				if (hpDiv) {
 					hpText = hpDiv.textContent;
 				}
-				var expDiv = $xpath('./div[2]', $id('exp'))[0]||null;
+				var expDiv = $id('exp');
 				if (expDiv) {
 					expText = expDiv.textContent;
 				}
@@ -1765,17 +1783,17 @@
 			return null;
 		}
 		var status = {};
-		var hpTextArray = hpText.split('/');
-		if (hpTextArray.length == 2) {
-			status.currentHP = hpTextArray[0];
-			status.maxHP = hpTextArray[1];
+		var hpTextArray = (hpText.match(/(\d+)\/(\d+)/)||[]);
+		if (hpTextArray.length == 3) {
+			status.currentHP = hpTextArray[1];
+			status.maxHP = hpTextArray[2];
 		} else {
 			return null;
 		}
-		var expTextArray = expText.split('/');
-		if (expTextArray.length == 2) {
-			status.currentExp = expTextArray[0];
-			status.maxExp = expTextArray[1];
+		var expTextArray = (expText.match(/(\d+)\/(\d+)/)||[]);
+		if (expTextArray.length == 3) {
+			status.currentExp = expTextArray[1];
+			status.maxExp = expTextArray[2];
 		} else {
 			return null;
 		}

@@ -10,22 +10,42 @@ IM@S CG Helper(仮)
 本スクリプトに関する問い合わせ等は絶対に行わないでください。
 
 
-動作環境 （確認済）
+最近の更新 (2013.10.21.230)
 ----------------
+* Android 2系で一部画面が表示出来なかった問題を修正 (2.3.4で確認)
+* アイドル一覧の詳細情報表示の対応ページを追加
+* その他軽微な修正
+
+
+動作環境
+----------------
+Adobe Flash Player をインストールしていない、又は未対応の場合、  
+一部機能が正常に動作しない可能性があります。
+
 ### Windows PC ###
 * Google Chrome
 
+### Android (1.6以上) ###
+* Angel Browser
+
+### Android (2.1以上) ###
+* Sleipnir Mobile
+
 ### Android (4.0.3以上) ###
+* Angel Browser
 * Sleipnir Mobile
 * Habit Browser
 * Habit Browser classic
 
+---------------
+### ※Androidの動作確認は以下の機器で確認しています。 ###
+* au Xperia acro IS11S
+* docomo Xperia SX SO-05D
+* Google Nexus 7
+
 
 動作環境？ （未確認）
 ----------------
-### Android (2.1～4.0.3未満) ###
-* Sleipnir Mobile
-
 ### iOS ###
 有料アプリですが、WebHub Browserというブラウザでユーザースクリプトが実行可能な様です。（動作しなくても責任は一切負いません）
 
@@ -41,9 +61,19 @@ IM@S CG Helper(仮)
 3. [メニュー > ツール > 拡張機能] を選択する。
 4. 拡張機能の画面上に、保存したimascghelper.user.jsをドラッグ&ドロップする。
 
+### Android 1.6以上 ([Angel Browser](https://play.google.com/store/apps/details?id=net.adgjm.angel))
+
+1. Angel Browserを起動する。
+2. このページを開く。
+3. mobile用のページになっている場合は、ページ下部の「Desktop version」を押す。
+4. 「imascghelper.user.js」のリンクを押す。  
+   （ファイル名に注意）
+5. 「Raw」ボタンを押す。
+6. ダイアログが表示されるので「OK」を押す。
+
 ### Android 2.1以上 ([Sleipnir Mobile](https://play.google.com/store/apps/details?id=jp.co.fenrir.android.sleipnir))
 
-スクリプト（エクステンション）インストール後の初回ページ読み込みは時間がかかる様です。
+スクリプト（エクステンション）インストール後、一度アプリケーションを終了しないと、ページ読み込みに時間がかかる様です。
 
 1. Sleipnir Mobileを起動する。
 2. このページを開く。
@@ -52,6 +82,8 @@ IM@S CG Helper(仮)
    （ファイル名に注意）
 5. 「Raw」ボタンを押す。
 6. ダイアログが表示されるので「インストール」を押す。
+7. [メニュー > その他 > アプリケーションを終了]を押す。
+8. ダイアログが表示されるので「OK」を押す。
 
 ### Android 4.0.3以上 ([Habit Browser](https://play.google.com/store/apps/details?id=jp.ddo.pigsty.HabitBrowser) / [Habit Browser classic](https://play.google.com/store/apps/details?id=jp.ddo.pigsty.Habit_Browser)) ###
 無印の方が新しいのですが、2013/10/16時点ではまだ不安定な感じです。  
@@ -113,11 +145,11 @@ IM@S CG Helper(仮)
 * LIVEバトル時の消費攻コストの上限値設定  
   LIVEバトル準備画面で設定したコスト以上の攻コストが使用される場合、LIVEバトルのボタンを非表示にする。
 
-* LIVEバトル(FLASH)画面に操作リンクを追加 :  
-  LIVEバトル時のFLASH画面にマイスタジオや道場へのリンクを追加する。
+* LIVEバトル画面に操作リンクを追加 :  
+  LIVEバトル時のFlash画面に道場や戻るリンクを追加する。
 
-* レッスン(FLASH)画面に操作リンクを追加 :  
-  レッスン時のFLASH画面にマイスタジオや所属アイドル一覧へのリンクを追加する。
+* レッスン画面に操作リンクを追加 :  
+  レッスン時のFlash画面に所属アイドル一覧や戻るリンクを追加する。
 
 * お仕事画面に経験値計算情報を表示 :  
   お仕事画面に次のレベルアップまでに必要なアイテムや時間を表示する。  
