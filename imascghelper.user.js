@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name IM@S CG Helper (Tentative name)
 // @author sunokonoyakma
-// @version 2013.10.21.241
+// @version 2013.10.28.57
 // @description The script to be somewhat comfortable to the IDOLM@STER CINDERELLA GIRLS.
 // @include http://sp.pf.mbga.jp/12008305
 // @include http://sp.pf.mbga.jp/12008305?*
@@ -14,11 +14,26 @@
 	// =========================================================================
 
 	var _doc = document;
-	var _location = window.location;
+	var _root = _doc.documentElement;
+	var _body = _doc.body;
+	var _location = location;
 	var _param = _location.search.substring(1);
+
 	var $id = function(a){return _doc.getElementById(a)};
-	var $bind = function(c,a,b){if(!c){return}c.addEventListener(a,b,false)};
-	var $unbind = function(c,a,b){if(!c){return}c.removeEventListener(a,b,false)};
+	var $addClass=function(d,b){if(d&&b){var e=b.split(' ')||[];var f=d.className.split(' ')||[];for(var c=0,a=e.length;c<a;c++){if(f.indexOf(e[c])==-1){f.push(e[c])}}d.className=f.join(' ')}};
+	var $removeClass=function(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g,j){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false}}return true});a.className=c.join(' ')}};
+	var $hasClass=function(a,d){var b=false;if(a&&d){var c=d.split(' ')||[];var e=a.className.split(/\s+/)||[];e.forEach(function(h){for(var g=0,f=c.length;g<f;g++){if(h.indexOf(d)!=-1){b=true;break}}})}return b};
+	var $toggleClass=function(a,c){var b=false;if(a&&c){if($hasClass(a,c)){$removeClass(a,c)}else{$addClass(a,c)}}};
+	var $create = function(a){return _doc.createElement(a)};
+	var $bind = function(a,b,c){if(!a){return}a.addEventListener(b,c,false)};
+	var $unbind = function(a,b,c){if(!a){return}a.removeEventListener(b,c,false)};
+
+	var getValue = function (a){var b=localStorage.getItem(a);return(b)?JSON.parse(b):null};
+	var setValue = function(a,b){localStorage.setItem(a,JSON.stringify(b))};
+	var deleteValue = function(a){localStorage.removeItem(a)};
+	var isNumeric = function(a){if(Number.isFinite){return Number.isFinite(a)}else{return(typeof a==='number')&&isFinite(a)}};
+	var	round = function(a,b){var c=Math.pow(10,b);return Math.round(a*c)/c};
+	var trim = function(a){return(a)?a.replace(/^[\s　]+|[\s　]+$/g,''):null};
 
 	var _topURL = 'http://sp.pf.mbga.jp/12008305/?guid=ON';
 	var _baseURL = _topURL + '&url=http%3A%2F%2F125.6.169.35%2Fidolmaster%2F';
@@ -36,13 +51,10 @@
 		if (cghpExecuted) {
 			_isExecuted = true;
 		} else {
-			var body = _doc.querySelector('body');
-			if (body) {
-				var span = _doc.createElement('span');
-				span.id = 'cghpExecuted';
-				span.style.display = 'none';
-				body.appendChild(span);
-			}
+			var span = $create('span');
+			span.id = 'cghpExecuted';
+			span.style.display = 'none';
+			_body.appendChild(span);
 		}
 	})();
 	if (_isExecuted) return;
@@ -64,7 +76,8 @@
 		// スタイルは極力ここで書いておく。
 		var css = (function() {/*
 
-		.a_link {
+		.a_link,
+		label {
 			cursor:pointer;
 		}
 		.mbga-pf-footer-container {
@@ -84,10 +97,10 @@
 			margin:0 auto;
 			padding:0;
 		}
-		input[type~="checkbox radio"] {
+		input[type="checkbox"],
+		input[type="radio"] {
 			vertical-align: 0;
 			margin: 3px 8px;
-			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 		}
 
 		#cghpCustomMenu {
@@ -106,7 +119,8 @@
 			background:#333333;
 			border:1px solid #444444;
 		}
-		#cghpCustomMenuHelp:after, #cghpCustomMenuHelp:before {
+		#cghpCustomMenuHelp:after,
+		#cghpCustomMenuHelp:before {
 			position:absolute;
 			bottom:100%;
 			height:0;
@@ -140,26 +154,49 @@
 			background-color:#1d1d1d;
 			text-align:center;
 		}
-		#cghpOverlay {
+		#cghpCharOverlay,
+		#cghpLoadingCharOverlay,
+		#cghpSettingOverlay {
 			position:absolute;
 			top:0;
 			left:0;
+			margin:0;
+			padding:0;
 			z-index:100;
 			width:100%;
-			min-height:100%;
+			height:3000px;
 			background-color:rgba(0, 0, 0, 0.85);
 			color:#ffffff;
 		}
-		#cghpOverlay input[type="text"] {
+		#cghpCharArea,
+		#cghpLoadingCharArea {
+			position:absolute;
+			left:0;
+			top:0;
+			margin:0;
+			padding:10px 0 0 0;
+			width:100%;
+			text-align:center;
+		}
+		#cghpCharArea .cghp_gray_area {
+			display:block;
+			margin:0 auto 10px auto;
+			width:320px;
+			text-decoration:none;
+			color:#ffffff;
+		}
+		#cghpCharImg1,
+		#cghpCharImg2 {
+			min-width:320px;
+			max-width:100%;
+		}
+		#cghpSettingOverlay input[type="text"] {
 			-webkit-box-sizing:border-box;
 			-moz-box-sizing:border-box;
 			box-sizing:border-box;
 			width:300px;
 			-ms-box-sizing:border-box;
 			ime-mode:disabled;
-		}
-		#cghpResetArea {
-			padding-top:150%;
 		}
 		#cghpSettingArea {
 			-webkit-box-sizing:border-box;
@@ -190,6 +227,9 @@
 		#cghpSettingLink {
 			display:block;
 			cursor:pointer;
+		}
+		#cghpResetArea {
+			padding-top:150%;
 		}
 		.cghp_center {
 			margin-right:auto !important;
@@ -263,14 +303,19 @@
 			border-spacing:0px !important;
 			border-color:gray !important;
 			line-height:1.4 !important;
-			vertical-align:middle !important;
 		}
 		.cghp_idol_table td:first-child,
 		.cghp_idol_table td:first-child > img {
 			width:75px !important;
 		}
+		.cghp_idol_table td:nth-of-type(2) > img {
+			vertical-align:top !important;
+		}
 		.cghp_idol_table ~ div:first-child {
 			line-height:1.4 !important;
+		}
+		.cghp_idol_table + img[src="http://ava-a.mbga.jp/i/dot.gif"] {
+			height:0 !important;
 		}
 		.cghp_link {
 			cursor:pointer;
@@ -375,6 +420,11 @@
 			-webkit-border-bottom-right-radius:0;
 			line-height:1.2;
 		}
+		.cghp_overlay a,
+		.cghp_overlay input,
+		.cghp_overlay select {
+			visibility:hidden !important;
+		}
 		.cghp_show {
 			display:"" !important;
 		}
@@ -383,6 +433,7 @@
 			font-size:10px;
 			color:#666666;
 			text-shadow:0 0 2px #533713, 1px 1px 1px #1d1d1d;
+			font-style:normal;
 		}
 		.cghp_star_yellow::after {
 			content:"★";
@@ -414,7 +465,7 @@
 
 		*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
 
-		var style = _doc.createElement('style');
+		var style = $create('style');
 		style.type = 'text/css';
 		style.innerHTML = css;
 		insertToHead(style);
@@ -426,7 +477,7 @@
 	(function() {
 		if (_settings.customMenuIcon) {
 			// Font Awesome (http://fortawesome.github.com/Font-Awesome/)
-			var link = _doc.createElement('link');
+			var link = $create('link');
 			link.href = '//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css';
 			link.rel = 'stylesheet';
 			insertToHead(link);
@@ -548,7 +599,7 @@
 				customMenu.push('</ul>');
 			}
 
-			var customMenuDiv = _doc.createElement('div');
+			var customMenuDiv = $create('div');
 			customMenuDiv.id = 'cghpCustomMenu';
 			customMenuDiv.innerHTML = customMenu.join('');
 
@@ -577,12 +628,12 @@
 	(function() {
 		if ((/%2Fdeck%2Fdeck_edit_top%3F/).test(_param)) {
 			// 編成リンク追加
-			var atkFormationLink = _doc.createElement('a');
+			var atkFormationLink = $create('a');
 			atkFormationLink.className = 'a_link';
 			atkFormationLink.href = _baseURL + 'deck%2Fdeck_modify_card%3Fno%3D1%26type%3D0';
 			atkFormationLink.innerHTML = '攻ﾌﾛﾝﾄ追加';
 
-			var defFormationLink = _doc.createElement('a');
+			var defFormationLink = $create('a');
 			defFormationLink.className = 'a_link';
 			defFormationLink.href = _baseURL + 'deck%2Fdeck_modify_card%3Fno%3D1%26type%3D1';
 			defFormationLink.innerHTML = '守ﾌﾛﾝﾄ追加';
@@ -634,7 +685,7 @@
 
 			var targetDiv1 = _content.querySelector('ul.tab_link');
 			if (targetDiv1) {
-				var formationDiv = _doc.createElement('div');
+				var formationDiv = $create('div');
 				formationDiv.className = 'cghp_center';
 				formationDiv.innerHTML = actionLink.join(' ');
 				targetDiv1.parentElement.insertBefore(formationDiv, targetDiv1.nextSibling);
@@ -680,7 +731,7 @@
 				}
 				// 各種情報を取得する基準としてクラス名を付ける（Android2系への暫定対応）
 				// コスト、攻発揮値、守発揮値の取得（名前ブロックの次のテーブル）
-				var statusTable = nameAreaElement.nextSibling.nextSibling; // #text -> table
+				var statusTable = nameAreaElement.nextElementSibling;
 				if (statusTable && statusTable.tagName == 'TABLE') {
 					var statusTableLabel = statusTable.querySelectorAll('span.blue');
 					var statusTableLabelLen = statusTableLabel.length||0;
@@ -697,12 +748,12 @@
 					}
 				}
 				// 特技Lvの取得（ステータステーブルの次のDIV）
-				var statusDiv = statusTable.nextSibling.nextSibling; // #text -> div or img
-				if (statusDiv && statusDiv.tagName != 'DIV') {
-					// 余白用の画像と改行がある場合はその分飛ばす
-					statusDiv = statusDiv.nextSibling.nextSibling.nextSibling; // br -> #text -> div
+				var statusDiv = statusTable.nextElementSibling;
+				// 余白用の画像と改行がある場合はその分飛ばす
+				if (statusDiv && statusDiv.tagName == 'IMG' && statusDiv.src == 'http://ava-a.mbga.jp/i/dot.gif') {
+					statusDiv = statusDiv.nextElementSibling.nextElementSibling; // br -> div
 				}
-				if (statusDiv && statusTable.tagName == 'DIV') {
+				if (statusDiv && statusDiv.tagName == 'DIV') {
 					var statusDivLabel = statusDiv.querySelectorAll('span.blue');
 					var statusDivLabelLen = statusDivLabel.length||0;
 					for (var j = 0; j < statusDivLabelLen; j++) {
@@ -713,6 +764,8 @@
 							break;
 						}
 					}
+				} else {
+					statusDiv = null;
 				}
 				// コストあたりの発揮値、特技レベルの表示、相場リンク追加
 				if (statusTable && isNumeric(idol.cost) && isNumeric(idol.attack) && isNumeric(idol.defense)) {
@@ -747,11 +800,11 @@
 								'cost_max=' + idol.cost;
 						}
 						// 要素の生成
-						var ratioTd = _doc.createElement('td');
+						var ratioTd = $create('td');
 						ratioTd.className = 'cghp_idol_detail_td';
-						var ratioDiv = ratioTd.appendChild(_doc.createElement('div'));
+						var ratioDiv = ratioTd.appendChild($create('div'));
 						ratioDiv.className = 'cghp_idol_detail_div';
-						var marketPriceLink = ratioDiv.appendChild(_doc.createElement('a'));
+						var marketPriceLink = ratioDiv.appendChild($create('a'));
 						marketPriceLink.className = 'cghp_gray_area';
 						marketPriceLink.target = '_blank';
 						marketPriceLink.href = marketPriceUrl;
@@ -762,10 +815,10 @@
 				}
 				// リーダー選択リンク追加＠所属アイドル一覧
 				if ((/%2Fcard_list(?:%2F|%3F)/).test(_param) || (/%2Fdeck%2Fdeck_modify_card(?:%2F|%3F)/).test(_param)) {
-					if (idol.id && nameDiv.className != "title_sub_blue") {
+					if (idol.id && !$hasClass(nameDiv, 'title_sub_blue')) {
 						var targetElement = (statusDiv||statusTable).nextSibling;
 						if (targetElement) {
-							var setLeaderDiv = _doc.createElement('div');
+							var setLeaderDiv = $create('div');
 							setLeaderDiv.className = 'moreButton right_float cghp_margin_t10';
 							setLeaderDiv.innerHTML = ('<a href="' + _baseURL + 'card_list%2Fset_leader%2F' + idol.id + '">ﾘｰﾀﾞｰにする</a>');
 							targetElement.parentElement.insertBefore(setLeaderDiv, targetElement);
@@ -774,12 +827,10 @@
 				}
 
 				// 画面レイアウトの調整
-				if (statusTable) {
-					statusTable.className = 'cghp_idol_table';
-				}
-				if ((/%2F(?:card_storage|auction|exchange)(?:%2F|%3F)/).test(_param) && nameDiv) {
+				$addClass(statusTable, 'cghp_margin_b5 cghp_idol_table');
+				if ((/%2F(?:card_storage|auction|exchange)(?:%2F|%3F)/).test(_param)) {
 					// 女子寮、トレード、メダル交換画面
-					nameDiv.className = 'title_sub_gray';
+					$addClass(nameDiv, 'title_sub_gray');
 				}
 			}
 		}
@@ -815,7 +866,7 @@
 					}
 					if (isLoveMax) {
 						var loveFlashURL = _baseURL + 'love%2Fflash%2F' + idolID;
-						var loveFlashArea = _doc.createElement('p');
+						var loveFlashArea = $create('p');
 						loveFlashArea.className = 'start_button cghp_width300 cghp_font_120pct cghp_margin_b10';
 						loveFlashArea.style = 'width:300px; font-size:120%;';
 						loveFlashArea.innerHTML = '<a href="' + loveFlashURL + '">親愛度MAX演出再生</a>';
@@ -846,7 +897,7 @@
 			var targetDiv = _content.querySelector('div.title_hanyo.area_name');
 			if (targetDiv) {
 				var storageNo = (_param.match(/%2Fpush_index%2F(?:\d+)%2F(?:\d+)%2F(?:\d+)%2F(?:\d+)%2F(\d+)/)||[])[1]||null;
-				var button = _doc.createElement('input');
+				var button = $create('input');
 				button.className = 'cghp_margin_b5';
 				button.type = 'submit';
 				button.value =  '第' + storageNo + '女子寮に一括で入寮させる';
@@ -869,7 +920,7 @@
 		if ((/%2Fcard_storage%2Fpop_index%2F/).test(_param)) {
 			var targetDiv = _content.querySelector('div.title_hanyo.area_name');
 			if (targetDiv) {
-				var button = _doc.createElement('input');
+				var button = $create('input');
 				button.className = 'cghp_margin_b5';
 				button.type = 'submit';
 				button.value =  '一括で呼び戻す';
@@ -913,13 +964,10 @@
 			}
 			flashMenu.push('</ul>');
 
-			var body = _doc.querySelector('body');
-			if (body) {
-				var menu = _doc.createElement('div');
-				menu.id = 'cghpFlashMenu';
-				menu.innerHTML = flashMenu.join('');
-				body.insertBefore(menu, body.firstChild);
-			}
+			var menu = $create('div');
+			menu.id = 'cghpFlashMenu';
+			menu.innerHTML = flashMenu.join('');
+			_body.insertBefore(menu, _body.firstChild);
 		}
 	})();
 
@@ -936,7 +984,7 @@
 				var divText = div.textContent;
 				var matches = divText.match(/攻ｺｽﾄ:(\d+)\s*⇒\s*(\d+)/);
 				if (matches) {
-					var setAttackCostLimitArea = _doc.createElement('div');
+					var setAttackCostLimitArea = $create('div');
 					setAttackCostLimitArea.className = 'cghp_center cghp_gray_area cghp_margin_t10 cghp_margin_b10';
 					var setAttackCostLimit = [];
 					setAttackCostLimit.push('消費攻ｺｽﾄ上限値：');
@@ -952,7 +1000,7 @@
 						if (limit) {
 							var value = parseInt(limit.value);
 							if (isNumeric(value) && (/\d+/).test(value)) {
-								setStorage('cghp_atack_cost_limit', value);
+								setValue('cghp_atack_cost_limit', value);
 								_location.reload();
 							} else {
 								alert('整数を入力してください。');
@@ -973,7 +1021,7 @@
 									if ((/(?:LIVEﾊﾞﾄﾙ|ﾘﾊｰｻﾙ)開始/).test(button.value)) {
 										var form = button.parentNode;
 										form.style.display = 'none';
-										var disabledMessage = _doc.createElement('div');
+										var disabledMessage = $create('div');
 										disabledMessage.className = 'gray cghp_center cghp_margin_t20 cghp_margin_b20';
 										disabledMessage.innerHTML = 'LIVEﾊﾞﾄﾙとかむーりぃー…';
 										form.parentElement.insertBefore(disabledMessage, form);
@@ -989,17 +1037,17 @@
 			// リンク追加
 			var enemyID = (_param.match(/%2Fbattles%2Fbattle_check%2F(\d+)/)||[])[1]||null;
 			if (enemyID != null) {
-				var cheerLink = _doc.createElement('a');
+				var cheerLink = $create('a');
 				cheerLink.className = 'a_link';
 				cheerLink.href = _baseURL + 'cheer%2Findex%2F' + enemyID + '%2F1';
 				cheerLink.innerHTML = '応　援';
 
-				var closeTabLink = _doc.createElement('a');
+				var closeTabLink = $create('a');
 				closeTabLink.id = 'cghpCloseTab';
 				closeTabLink.className = 'a_link';
 				closeTabLink.innerHTML = '閉じる';
 				$bind(closeTabLink, 'click', function() {
-					(window.open('', '_self').opener = top).close();
+					(open('', '_self').opener = top).close();
 				});
 
 				var space1 = _doc.createTextNode(' ');
@@ -1059,18 +1107,15 @@
 				flashMenu.push('</li>');
 				flashMenu.push('</ul>');
 
-				var body = _doc.querySelector('body');
-				if (body) {
-					var menu = _doc.createElement('div');
-					menu.id = 'cghpFlashMenu';
-					menu.innerHTML = flashMenu.join('');
-					body.insertBefore(menu, body.firstChild);
-				}
+				var menu = $create('div');
+				menu.id = 'cghpFlashMenu';
+				menu.innerHTML = flashMenu.join('');
+				_body.insertBefore(menu, _body.firstChild);
 
 				var cghpCloseTab = $id('cghpCloseTab');
 				if (cghpCloseTab) {
 					$bind(cghpCloseTab, 'click', function() {
-						(window.open('', '_self').opener = top).close();
+						(open('', '_self').opener = top).close();
 					});
 				}
 			}
@@ -1187,7 +1232,7 @@
 					if ((/↑自動で割り振る↑/).test(link.textContent)) {
 						link.style.display = 'none';
 
-						var div = _doc.createElement('div');
+						var div = $create('div');
 						div.className = 'gray';
 						div.textContent =  '自動振り分け無効';
 						link.parentElement.insertBefore(div, link);
@@ -1227,7 +1272,7 @@
 					rankingLink1.push('<input id="kojinRankInput" type="text" size="8" maxlength="8" style="width:70px;" /> 位 ');
 					rankingLink1.push('<a id="kojinRankButton" class="a_link cghp_margin_t0 cghp_margin_b0">表示</a></div>');
 
-					var div = _doc.createElement('div');
+					var div = $create('div');
 					div.innerHTML = rankingLink1.join('');
 					var linkParent = link.parentElement;
 					linkParent.parentElement.insertBefore(div, linkParent.nextSibling);
@@ -1266,7 +1311,7 @@
 					rankingLink2.push('<input id="proRankInput" type="text" size="8" maxlength="8" style="width:70px;" /> 位 ');
 					rankingLink2.push('<a id="proRankButton" class="a_link cghp_margin_t0 cghp_margin_b0">表示</a></div>');
 
-					var div = _doc.createElement('div');
+					var div = $create('div');
 					div.innerHTML = rankingLink2.join('');
 					var linkParent = link.parentElement;
 					linkParent.parentElement.insertBefore(div, linkParent.nextSibling);
@@ -1302,7 +1347,7 @@
 				for (var i = 0; i < targetButtonLen; i++) {
 					var button = targetButton[i];
 					if ((/ﾕﾆｯﾄﾘｰﾀﾞｰ以外を解散/).test(button.textContent)) {
-						var link = _doc.createElement('a');
+						var link = $create('a');
 						link.className = 'grayButton260';
 						link.href = _baseURL + 'event_assault%2Fdeck_modify_card%3Fno%3D%26type%3D' + unitNo;
 						link.innerHTML = 'ﾒﾝﾊﾞｰを追加する';
@@ -1324,7 +1369,7 @@
 			for (var i = 0; i < targetButtonLen; i++) {
 				var button = targetButton[i];
 				if ((/ﾘｰﾀﾞｰ以外を解散/).test(button.textContent)) {
-					var link = _doc.createElement('a');
+					var link = $create('a');
 					link.className = 'grayButton300';
 					link.href = _baseURL + 'event_dream%2Fdeck_modify_card%3Fdeck%3D1';
 					link.innerHTML = 'ﾒﾝﾊﾞｰを追加する';
@@ -1339,353 +1384,353 @@
 	// ユーザー設定画面の拡張
 	// -------------------------------------------------------------------------
 	(function() {
-		if (/%2Fpersonal_option(?:%3F|$)/.test(_param)) {
+		if ((/%2Fpersonal_option(?:%3F|$)/).test(_param)) {
 			// 設定画面準備
-			var body = _doc.querySelector('body');
-			if (body) {
-				var settingMenu = [];
-				settingMenu.push('<div id="cghpSettingArea">');
-				settingMenu.push('<h2>IM@S CG Helper(仮) 設定</h2>');
+			var settingMenu = [];
+			settingMenu.push('<div id="cghpSettingArea">');
+			settingMenu.push('<h2>IM@S CG Helper(仮) 設定</h2>');
 
-				settingMenu.push('<section>');
-				var hideBannerInMenuChecked = (_settings.hideBannerInMenu) ? 'checked="checked"' : '';
-				settingMenu.push('<h3><label>');
-				settingMenu.push('<input id="cghpSetHideBannerInMenu" type="checkbox" ' + hideBannerInMenuChecked + ' /> ');
-				settingMenu.push('メニュー内のバナーを消す');
-				settingMenu.push('</label></h3>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			var hideBannerInMenuChecked = (_settings.hideBannerInMenu) ? 'checked="checked"' : '';
+			settingMenu.push('<h3><label>');
+			settingMenu.push('<input id="cghpSetHideBannerInMenu" type="checkbox" ' + hideBannerInMenuChecked + ' /> ');
+			settingMenu.push('メニュー内のバナーを消す');
+			settingMenu.push('</label></h3>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				var customMenuIconChecked = (_settings.customMenuIcon) ? 'checked="checked"' : '';
-				settingMenu.push('<h3><label>');
-				settingMenu.push('<input id="cghpSetCustomMenuIcon" type="checkbox" ' + customMenuIconChecked + ' /> ');
-				settingMenu.push('カスタムメニューにアイコンを表示');
-				settingMenu.push('</label></h3>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			var customMenuIconChecked = (_settings.customMenuIcon) ? 'checked="checked"' : '';
+			settingMenu.push('<h3><label>');
+			settingMenu.push('<input id="cghpSetCustomMenuIcon" type="checkbox" ' + customMenuIconChecked + ' /> ');
+			settingMenu.push('カスタムメニューにアイコンを表示');
+			settingMenu.push('</label></h3>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムメニュー1（0～8個まで）');
-				settingMenu.push('<a id="cghpHelpCustomMenu1" class="a_link cghp_cm_help_link">...</a>：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomMenu1" type="text" value="' + _settings.customMenu1.join(',') + '" /></p>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>カスタムメニュー1（0～8個まで）');
+			settingMenu.push('<a id="cghpHelpCustomMenu1" class="a_link cghp_cm_help_link">...</a>：</h3>');
+			settingMenu.push('<p><input id="cghpSetCustomMenu1" type="text" value="' + _settings.customMenu1.join(',') + '" /></p>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムメニュー2（0～8個まで）');
-				settingMenu.push('<a id="cghpHelpCustomMenu2" class="a_link cghp_cm_help_link">...</a>：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomMenu2" type="text" value="' + _settings.customMenu2.join(',') + '" /></p>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>カスタムメニュー2（0～8個まで）');
+			settingMenu.push('<a id="cghpHelpCustomMenu2" class="a_link cghp_cm_help_link">...</a>：</h3>');
+			settingMenu.push('<p><input id="cghpSetCustomMenu2" type="text" value="' + _settings.customMenu2.join(',') + '" /></p>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムメニュー3（0～8個まで）');
-				settingMenu.push('<a id="cghpHelpCustomMenu3" class="a_link cghp_cm_help_link">...</a>：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomMenu3" type="text" value="' + _settings.customMenu3.join(',') + '" /></p>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>カスタムメニュー3（0～8個まで）');
+			settingMenu.push('<a id="cghpHelpCustomMenu3" class="a_link cghp_cm_help_link">...</a>：</h3>');
+			settingMenu.push('<p><input id="cghpSetCustomMenu3" type="text" value="' + _settings.customMenu3.join(',') + '" /></p>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>道場URL：</h3>');
-				settingMenu.push('<p><input id="cghpSetDojoURL" type="text" value="' + _settings.dojoURL + '" /></p>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>道場URL：</h3>');
+			settingMenu.push('<p><input id="cghpSetDojoURL" type="text" value="' + _settings.dojoURL + '" /></p>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムURL1：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomURL1" type="text" value="' + _settings.customURL1 + '" /></p>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>カスタムURL1：</h3>');
+			settingMenu.push('<p><input id="cghpSetCustomURL1" type="text" value="' + _settings.customURL1 + '" /></p>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムURL2：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomURL2" type="text" value="' + _settings.customURL2 + '" /></p>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>カスタムURL2：</h3>');
+			settingMenu.push('<p><input id="cghpSetCustomURL2" type="text" value="' + _settings.customURL2 + '" /></p>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムURL3：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomURL3" type="text" value="' + _settings.customURL3 + '" /></p>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>カスタムURL3：</h3>');
+			settingMenu.push('<p><input id="cghpSetCustomURL3" type="text" value="' + _settings.customURL3 + '" /></p>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムURL4：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomURL4" type="text" value="' + _settings.customURL4 + '" /></p>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>カスタムURL4：</h3>');
+			settingMenu.push('<p><input id="cghpSetCustomURL4" type="text" value="' + _settings.customURL4 + '" /></p>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムURL5：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomURL5" type="text" value="' + _settings.customURL5 + '" /></p>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>カスタムURL5：</h3>');
+			settingMenu.push('<p><input id="cghpSetCustomURL5" type="text" value="' + _settings.customURL5 + '" /></p>');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>ポイント振り分けフィルタ：</h3>');
-				var pointFilterHPChecked = (_settings.pointFilterHP) ? 'checked="checked"' : '';
-				settingMenu.push('<label>');
-				settingMenu.push('<input id="cghpPointFilterHP" type="checkbox" ' + pointFilterHPChecked + ' /> ');
-				settingMenu.push('スタミナ');
-				settingMenu.push('</label><br />');
-				var pointFilterAtkChecked = (_settings.pointFilterAtk) ? 'checked="checked"' : '';
-				settingMenu.push('<label>');
-				settingMenu.push('<input id="cghpPointFilterAtk" type="checkbox" ' + pointFilterAtkChecked + ' /> ');
-				settingMenu.push('攻コスト');
-				settingMenu.push('</label><br />');
-				var pointFilterDefChecked = (_settings.pointFilterDef) ? 'checked="checked"' : '';
-				settingMenu.push('<label>');
-				settingMenu.push('<input id="cghpPointFilterDef" type="checkbox" ' + pointFilterDefChecked + ' /> ');
-				settingMenu.push('守コスト');
-				settingMenu.push('</label><br />');
-				var pointFilterAutoChecked = (_settings.pointFilterAuto) ? 'checked="checked"' : '';
-				settingMenu.push('<label>');
-				settingMenu.push('<input id="cghpPointFilterAuto" type="checkbox" ' + pointFilterAutoChecked + ' /> ');
-				settingMenu.push('自動振り分け');
-				settingMenu.push('</label><br />');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>ポイント振り分けフィルタ：</h3>');
+			var pointFilterHPChecked = (_settings.pointFilterHP) ? 'checked="checked"' : '';
+			settingMenu.push('<label>');
+			settingMenu.push('<input id="cghpPointFilterHP" type="checkbox" ' + pointFilterHPChecked + ' /> ');
+			settingMenu.push('スタミナ');
+			settingMenu.push('</label><br />');
+			var pointFilterAtkChecked = (_settings.pointFilterAtk) ? 'checked="checked"' : '';
+			settingMenu.push('<label>');
+			settingMenu.push('<input id="cghpPointFilterAtk" type="checkbox" ' + pointFilterAtkChecked + ' /> ');
+			settingMenu.push('攻コスト');
+			settingMenu.push('</label><br />');
+			var pointFilterDefChecked = (_settings.pointFilterDef) ? 'checked="checked"' : '';
+			settingMenu.push('<label>');
+			settingMenu.push('<input id="cghpPointFilterDef" type="checkbox" ' + pointFilterDefChecked + ' /> ');
+			settingMenu.push('守コスト');
+			settingMenu.push('</label><br />');
+			var pointFilterAutoChecked = (_settings.pointFilterAuto) ? 'checked="checked"' : '';
+			settingMenu.push('<label>');
+			settingMenu.push('<input id="cghpPointFilterAuto" type="checkbox" ' + pointFilterAutoChecked + ' /> ');
+			settingMenu.push('自動振り分け');
+			settingMenu.push('</label><br />');
+			settingMenu.push('</section>');
 
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>');
-				settingMenu.push('LIVEバトル時の消費コスト上限値：');
-				settingMenu.push('<p><input id="cghpSetAttackCostLimit" type="text" maxlength="4" value="' + _settings.attackCostLimit + '" /></p>');
-				settingMenu.push('</h3>');
-				settingMenu.push('</section>');
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>');
+			settingMenu.push('LIVEバトル時の消費コスト上限値：');
+			settingMenu.push('<p><input id="cghpSetAttackCostLimit" type="text" maxlength="4" value="' + _settings.attackCostLimit + '" /></p>');
+			settingMenu.push('</h3>');
+			settingMenu.push('</section>');
 
-				/* 通常使用しないので隠しておく
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>FLASHページのメニュー拡大率：</h3>');
-				settingMenu.push('<p><input id="cghpSetSwfZoom" type="text" value="' + _settings.swfZoom + '" /></p>');
-				settingMenu.push('</section>');
-				*/
+			/* 通常使用しないので隠しておく
+			settingMenu.push('<section>');
+			settingMenu.push('<h3>FLASHページのメニュー拡大率：</h3>');
+			settingMenu.push('<p><input id="cghpSetSwfZoom" type="text" value="' + _settings.swfZoom + '" /></p>');
+			settingMenu.push('</section>');
+			*/
 
-				settingMenu.push('<p class="cghp_center cghp_margin_t20">');
-				settingMenu.push('<input id="cghpOkButton" class="home" type="button" value="OK" />');
-				settingMenu.push('&nbsp;&nbsp;&nbsp;&nbsp;');
-				settingMenu.push('<input id="cghpCancelButton" class="double" type="button" value="キャンセル" />');
-				settingMenu.push('</p>');
-				settingMenu.push('<p id="cghpResetArea">');
-				settingMenu.push('<input id="cghpResetButton" class="home grayButton300" type="button" value="設定を初期化" />');
-				settingMenu.push('</p>');
-				settingMenu.push('</div>');
+			settingMenu.push('<p class="cghp_center cghp_margin_t20">');
+			settingMenu.push('<input id="cghpOkButton" class="home" type="button" value="OK" />');
+			settingMenu.push('&nbsp;&nbsp;&nbsp;&nbsp;');
+			settingMenu.push('<input id="cghpCancelButton" class="double" type="button" value="キャンセル" />');
+			settingMenu.push('</p>');
+			settingMenu.push('<p id="cghpResetArea">');
+			settingMenu.push('<input id="cghpResetButton" class="home grayButton300" type="button" value="設定を初期化" />');
+			settingMenu.push('</p>');
+			settingMenu.push('</div>');
 
-				var overlay = _doc.createElement('div');
-				overlay.id = 'cghpOverlay';
-				overlay.className = 'cghp_hide';
-				overlay.innerHTML = settingMenu.join('');
-				body.insertBefore(overlay, body.firstChild);
+			var overlay = $create('div');
+			overlay.id = 'cghpSettingOverlay';
+			overlay.className = 'cghp_hide';
+			overlay.innerHTML = settingMenu.join('');
+			_body.insertBefore(overlay, _body.firstChild);
 
-				// カスタムメニューのヘルプを作成
-				var customMenus = ['1', '2', '3'];
-				for (var i = 0; i < 3; i++) {
-					var help = $id('cghpHelpCustomMenu' + customMenus[i]);
-					var text = $id('cghpSetCustomMenu' + customMenus[i]);
-					if (help && text) {
-						help.visible = false;
-						// ヘルプのトグル表示関数
-						var toggleHelp = (function(element) {
-							return function() {
-								var helpArea = $id('cghpCustomMenuHelp');
-								if (helpArea) {
-									helpArea.parentElement.removeChild(helpArea);
-								} else {
-									var helpArea = element.parentElement.insertBefore(_doc.createElement('div'), element.nextSibling);
-									helpArea.id = 'cghpCustomMenuHelp';
-									var helpList = helpArea.appendChild(_doc.createElement('ul'));
-									helpList.className = 'cghp_cm_help_list';
-									_customMenu.forEach(function(value, index, array) {
-										var helpItem = helpList.appendChild(_doc.createElement('li'));
-										var helpLink = helpItem.appendChild(_doc.createElement('a'));
-										//helpLink.className = 'a_link';
-										helpLink.className = 'cghp_link';
-										helpLink.innerHTML = index + "：" + value.fullName;
-										$bind(helpLink, 'click', function() {
-											element.value += (element.value === '') ? index : ',' + index;
-										});
+			// カスタムメニューのヘルプを作成
+			var customMenus = ['1', '2', '3'];
+			for (var i = 0; i < 3; i++) {
+				var help = $id('cghpHelpCustomMenu' + customMenus[i]);
+				var text = $id('cghpSetCustomMenu' + customMenus[i]);
+				if (help && text) {
+					help.visible = false;
+					// ヘルプのトグル表示関数
+					var toggleHelp = (function(element) {
+						return function() {
+							var helpArea = $id('cghpCustomMenuHelp');
+							if (helpArea) {
+								helpArea.parentElement.removeChild(helpArea);
+							} else {
+								var helpArea = element.parentElement.insertBefore($create('div'), element.nextSibling);
+								helpArea.id = 'cghpCustomMenuHelp';
+								var helpList = helpArea.appendChild($create('ul'));
+								helpList.className = 'cghp_cm_help_list';
+								_customMenu.forEach(function(value, index, array) {
+									var helpItem = helpList.appendChild($create('li'));
+									var helpLink = helpItem.appendChild($create('a'));
+									helpLink.className = 'cghp_link';
+									helpLink.innerHTML = index + "：" + value.fullName;
+									$bind(helpLink, 'click', function() {
+										element.value += (element.value === '') ? index : ',' + index;
 									});
-								}
-								help.visible = !help.visible;
-							};
-						})(text);
-						$bind(help, 'click', toggleHelp);
+								});
+							}
+							help.visible = !help.visible;
+						};
+					})(text);
+					$bind(help, 'click', toggleHelp);
+				}
+			};
+
+			// OKボタン クリックイベント
+			var okButton = $id('cghpOkButton');
+			if (okButton) {
+				$bind(okButton, 'click', function() {
+					var urlPattern = /^s?https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:@&=+$,%#]+$/;
+
+					var hideBannerInMenu = $id('cghpSetHideBannerInMenu');
+					if (hideBannerInMenu) {
+						_settings.hideBannerInMenu = hideBannerInMenu.checked;
 					}
-				};
 
-				// OKボタン クリックイベント
-				var okButton = $id('cghpOkButton');
-				if (okButton) {
-					$bind(okButton, 'click', function() {
-						var urlPattern = /^s?https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:@&=+$,%#]+$/;
+					var customMenuIcon = $id('cghpSetCustomMenuIcon');
+					if (customMenuIcon) {
+						_settings.customMenuIcon = customMenuIcon.checked;
+					}
 
-						var hideBannerInMenu = $id('cghpSetHideBannerInMenu');
-						if (hideBannerInMenu) {
-							_settings.hideBannerInMenu = hideBannerInMenu.checked;
-						}
-
-						var customMenuIcon = $id('cghpSetCustomMenuIcon');
-						if (customMenuIcon) {
-							_settings.customMenuIcon = customMenuIcon.checked;
-						}
-
-						var customMenu1 = $id('cghpSetCustomMenu1');
-						if (customMenu1) {
-							var customMenu1List = customMenu1.value.split(',');
-							var customMenu1ListLen = customMenu1List.length||0;
-							var menu1 = [];
-							for (var i = 0; i < customMenu1ListLen; i++) {
-								var value = parseInt(trim((customMenu1List[i]).toString()));
-								if (isNumeric(value) && (/^\d+/).test(value)) {
-									menu1.push(value);
-								}
-							}
-							if (menu1.length <= 8) {
-								_settings.customMenu1 = menu1;
+					var customMenu1 = $id('cghpSetCustomMenu1');
+					if (customMenu1) {
+						var customMenu1List = customMenu1.value.split(',');
+						var customMenu1ListLen = customMenu1List.length||0;
+						var menu1 = [];
+						for (var i = 0; i < customMenu1ListLen; i++) {
+							var value = parseInt(trim((customMenu1List[i]).toString()));
+							if (isNumeric(value) && (/^\d+/).test(value)) {
+								menu1.push(value);
 							}
 						}
-
-						var customMenu2 = $id('cghpSetCustomMenu2');
-						if (customMenu2) {
-						var customMenu2List = customMenu2.value.split(',');
-						var customMenu2ListLen = customMenu2List.length||0;
-							var manu2 = [];
-							for (var i = 0; i < customMenu2ListLen; i++) {
-								var value = parseInt(trim((customMenu2List[i]).toString()));
-								if (isNumeric(value) && (/^\d+/).test(value)) {
-									manu2.push(value);
-								}
-							}
-							if (manu2.length <= 8) {
-								_settings.customMenu2 = manu2;
-							}
+						if (menu1.length <= 8) {
+							_settings.customMenu1 = menu1;
 						}
+					}
 
-						var customMenu3 = $id('cghpSetCustomMenu3');
-						if (customMenu3) {
-							var customMenu3List = customMenu3.value.split(',');
-							var customMenu3ListLen = customMenu3List.length||0;
-							var manu3 = [];
-							for (var i = 0; i < customMenu3ListLen; i++) {
-								var value = parseInt(trim((customMenu3List[i]).toString()));
-								if (isNumeric(value) && (/^\d+/).test(value)) {
-									manu3.push(value);
-								}
-							}
-							if (manu3.length <= 8) {
-								_settings.customMenu3 = manu3;
+					var customMenu2 = $id('cghpSetCustomMenu2');
+					if (customMenu2) {
+					var customMenu2List = customMenu2.value.split(',');
+					var customMenu2ListLen = customMenu2List.length||0;
+						var manu2 = [];
+						for (var i = 0; i < customMenu2ListLen; i++) {
+							var value = parseInt(trim((customMenu2List[i]).toString()));
+							if (isNumeric(value) && (/^\d+/).test(value)) {
+								manu2.push(value);
 							}
 						}
+						if (manu2.length <= 8) {
+							_settings.customMenu2 = manu2;
+						}
+					}
 
-						var dojoURL = $id('cghpSetDojoURL');
-						if (dojoURL) {
-							var value = trim(dojoURL.value);
-							if (urlPattern.test(value)) {
-								_settings.dojoURL = value;
+					var customMenu3 = $id('cghpSetCustomMenu3');
+					if (customMenu3) {
+						var customMenu3List = customMenu3.value.split(',');
+						var customMenu3ListLen = customMenu3List.length||0;
+						var manu3 = [];
+						for (var i = 0; i < customMenu3ListLen; i++) {
+							var value = parseInt(trim((customMenu3List[i]).toString()));
+							if (isNumeric(value) && (/^\d+/).test(value)) {
+								manu3.push(value);
 							}
 						}
-
-						var customURL1 = $id('cghpSetCustomURL1');
-						if (customURL1) {
-							var value = trim(customURL1.value);
-							if (urlPattern.test(value)) {
-								_settings.customURL1 = value;
-							}
+						if (manu3.length <= 8) {
+							_settings.customMenu3 = manu3;
 						}
+					}
 
-						var customURL2 = $id('cghpSetCustomURL2');
-						if (customURL2) {
-							var value = trim(customURL2.value);
-							if (urlPattern.test(value)) {
-								_settings.customURL2 = value;
-							}
+					var dojoURL = $id('cghpSetDojoURL');
+					if (dojoURL) {
+						var value = trim(dojoURL.value);
+						if (urlPattern.test(value)) {
+							_settings.dojoURL = value;
 						}
+					}
 
-						var customURL3 = $id('cghpSetCustomURL3');
-						if (customURL3) {
-							var value = trim(customURL3.value);
-							if (urlPattern.test(value)) {
-								_settings.customURL3 = value;
-							}
+					var customURL1 = $id('cghpSetCustomURL1');
+					if (customURL1) {
+						var value = trim(customURL1.value);
+						if (urlPattern.test(value)) {
+							_settings.customURL1 = value;
 						}
+					}
 
-						var customURL4 = $id('cghpSetCustomURL4');
-						if (customURL4) {
-							var value = trim(customURL4.value);
-							if (urlPattern.test(value)) {
-								_settings.customURL4 = value;
-							}
+					var customURL2 = $id('cghpSetCustomURL2');
+					if (customURL2) {
+						var value = trim(customURL2.value);
+						if (urlPattern.test(value)) {
+							_settings.customURL2 = value;
 						}
+					}
 
-						var customURL5 = $id('cghpSetCustomURL5');
-						if (customURL5) {
-							var value = trim(customURL5.value);
-							if (urlPattern.test(value)) {
-								_settings.customURL5 = value;
-							}
+					var customURL3 = $id('cghpSetCustomURL3');
+					if (customURL3) {
+						var value = trim(customURL3.value);
+						if (urlPattern.test(value)) {
+							_settings.customURL3 = value;
 						}
+					}
 
-						var pointFilterHP = $id('cghpPointFilterHP');
-						if (pointFilterHP) {
-							_settings.pointFilterHP = pointFilterHP.checked;
+					var customURL4 = $id('cghpSetCustomURL4');
+					if (customURL4) {
+						var value = trim(customURL4.value);
+						if (urlPattern.test(value)) {
+							_settings.customURL4 = value;
 						}
+					}
 
-						var pointFilterAtk = $id('cghpPointFilterAtk');
-						if (pointFilterAtk) {
-							_settings.pointFilterAtk = pointFilterAtk.checked;
+					var customURL5 = $id('cghpSetCustomURL5');
+					if (customURL5) {
+						var value = trim(customURL5.value);
+						if (urlPattern.test(value)) {
+							_settings.customURL5 = value;
 						}
+					}
 
-						var pointFilterDef = $id('cghpPointFilterDef');
-						if (pointFilterDef) {
-							_settings.pointFilterDef = pointFilterDef.checked;
+					var pointFilterHP = $id('cghpPointFilterHP');
+					if (pointFilterHP) {
+						_settings.pointFilterHP = pointFilterHP.checked;
+					}
+
+					var pointFilterAtk = $id('cghpPointFilterAtk');
+					if (pointFilterAtk) {
+						_settings.pointFilterAtk = pointFilterAtk.checked;
+					}
+
+					var pointFilterDef = $id('cghpPointFilterDef');
+					if (pointFilterDef) {
+						_settings.pointFilterDef = pointFilterDef.checked;
+					}
+
+					var pointFilterAuto = $id('cghpPointFilterAuto');
+					if (pointFilterAuto) {
+						_settings.pointFilterAuto = pointFilterAuto.checked;
+					}
+
+					var attackCostLimit = $id('cghpSetAttackCostLimit');
+					if (attackCostLimit) {
+						var value = parseInt(attackCostLimit.value);
+						if (isNumeric(value) && (/\d+/).test(value)) {
+							_settings.attackCostLimit = value;
 						}
+					}
 
-						var pointFilterAuto = $id('cghpPointFilterAuto');
-						if (pointFilterAuto) {
-							_settings.pointFilterAuto = pointFilterAuto.checked;
+					/* 通常使用しないので隠しておく
+					var swfZoom = $id('cghpSetSwfZoom');
+					if (swfZoom) {
+						var value = parseFloat(swfZoom.value);
+						if (isNumeric(value) && 1 < value) {
+							_settings.swfZoom = value;
 						}
+					}
+					*/
 
-						var attackCostLimit = $id('cghpSetAttackCostLimit');
-						if (attackCostLimit) {
-							var value = parseInt(attackCostLimit.value);
-							if (isNumeric(value) && (/\d+/).test(value)) {
-								_settings.attackCostLimit = value;
-							}
-						}
-
-						/* 通常使用しないので隠しておく
-						var swfZoom = $id('cghpSetSwfZoom');
-						if (swfZoom) {
-							var value = parseFloat(swfZoom.value);
-							if (isNumeric(value) && 1 < value) {
-								_settings.swfZoom = value;
-							}
-						}
-						*/
-
-						saveSettings();
+					saveSettings();
+					_location.reload();
+					return false;
+				});
+			}
+			// キャンセルボタン クリックイベント
+			var cancelButton = $id('cghpCancelButton');
+			if (cancelButton) {
+				$bind(cancelButton, 'click', function() {
+					// 非表示にしていた下位レイヤーの要素を表示する
+					var pageArea = $id('pageArea');
+					if (pageArea) {
+						$removeClass(pageArea, 'cghp_overlay');
+					}
+					$addClass($id('cghpSettingOverlay'), 'cghp_hide');
+				});
+			}
+			// 初期化ボタン クリックイベント
+			var resetButton = $id('cghpResetButton');
+			if (resetButton) {
+				$bind(resetButton, 'click', function() {
+					if (confirm('設定を初期化します。よろしいですか？')) {
+						deleteSettings();
 						_location.reload();
-						return false;
-					});
-				}
-				// キャンセルボタン クリックイベント
-				var cancelButton = $id('cghpCancelButton');
-				if (cancelButton) {
-					$bind(cancelButton, 'click', function() {
-						var overlay = $id('cghpOverlay');
-						if (overlay) {
-							overlay.className = 'cghp_hide';
-						}
-					});
-				}
-				// 初期化ボタン クリックイベント
-				var resetButton = $id('cghpResetButton');
-				if (resetButton) {
-					$bind(resetButton, 'click', function() {
-						if (confirm('設定を初期化します。よろしいですか？')) {
-							deleteSettings();
-							_location.reload();
-						}
-					});
-				}
+					}
+				});
 			}
 			// 本スクリプトの設定画面呼び出しボタンを追加
-			var settingLink = _doc.createElement('a');
+			var settingLink = $create('a');
 			settingLink.id = 'cghpSettingLink';
 			settingLink.innerHTML = '<div id="cghpSettingButton" class="nextLink">IM@S CG Helper(仮)設定</div>';
 			// リンクがクリックされたら設定画面を出して、閉じたときに有効な値だけを保存
 			$bind(settingLink, 'click', function() {
-				var overlay = $id('cghpOverlay');
-				if (overlay) {
-					overlay.className = 'cghp_show';
+				$removeClass($id('cghpSettingOverlay'), 'cghp_hide');
+				// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
+				var pageArea = $id('pageArea');
+				if (pageArea) {
+					$addClass(pageArea, 'cghp_overlay');
 				}
 				return false;
 			});
@@ -1709,26 +1754,183 @@
 
 	// -------------------------------------------------------------------------
 	// FLASH画面用メニューの拡大率を変更する
-	// (画面表示再開後に実行しないとFlashが2重に表示されたりする)
 	// -------------------------------------------------------------------------
 	(function() {
 		var embed = _doc.querySelector('embed');
 		var flashMenu = $id('cghpFlashMenu');
 		if (embed && flashMenu) {
-			var displaySet = getStorage('DisplayPositionSet');
+			var displaySet = getValue('DisplayPositionSet');
 
 			// 拡大表示設定
 			if (flashMenu) {
 				if (displaySet == 1 && navigator.userAgent.indexOf('Android') > 0) {
 					$bind(window, 'resize', function() {
-						flashMenu.style.zoom = window.innerWidth / 320 * _settings.swfZoom;
+						flashMenu.style.zoom = innerWidth / 320 * _settings.swfZoom;
 					});
 					var event = _doc.createEvent('UIEvent');
 					event.initEvent('resize', false, true);
-					window.dispatchEvent(event);
+					dispatchEvent(event);
 				} else {
 					flashMenu.style.zoom = _settings.swfZoom;
 				}
+			}
+		}
+	})();
+
+	// -------------------------------------------------------------------------
+	// 肩書画像をクリックでローディングキャラを表示
+	// -------------------------------------------------------------------------
+	(function() {
+		// 肩書画像を取得
+		var exists = false;
+		var targetImage = _doc.querySelectorAll('img[src*="%2Fimage_sp%2Fui%2Ftrophy%2Ftitle_charge_"]');
+		var targetImageLen = targetImage.length||0;
+		for (var i = 0; i < targetImageLen; i++) {
+			var image = targetImage[i];
+			var imageFile = (image.src.match(/%2Fimage_sp%2Fui%2Ftrophy%2Ftitle_charge_(\d+)/)||[])[1]||null;
+			if (imageFile) {
+				// ローディングキャラ表示関数
+				var showImage = (function(imageFile) {
+					return function(e) {
+						// スクロール位置に画像を移動
+						// ページを拡大or縮小していると座標がずれるので計算にいれる
+						var scrollTop = (_root.scrollTop || _body.scrollTop || pageYOffset);
+						var zoom = _root.style.zoom||1;
+						$id('cghpLoadingCharArea').style.top = (scrollTop / zoom) + 'px';
+
+						// 肩書画像IDが3桁なら先頭に5を付与、それ以外はそのまま
+						imageFile = (imageFile.length == 3) ? '5' + imageFile : imageFile;
+						$id('cghpLoadingCharImg').src = _baseURL + 'image_sp%2Fui%2Frich%2Fquest%2Floading%2F' + imageFile + '.gif';
+						$removeClass($id('cghpLoadingCharOverlay'), 'cghp_hide');
+
+						// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
+						var pageArea = $id('pageArea');
+						if (pageArea) {
+							$addClass(pageArea, 'cghp_overlay');
+						}
+						e.stopPropagation();
+					};
+				})(imageFile);
+				$addClass(image, 'cghp_link');
+				$bind(image, 'click', showImage);
+				exists = true;
+			}
+		}
+
+		// 肩書き画像が見つかった場合はローディングキャラ表示用の要素を追加
+		if (exists) {
+			// ローディングキャラ非表示関数
+			var hideImage = function(e) {
+				// 非表示にしていた下位レイヤーの要素を表示する
+				var pageArea = $id('pageArea');
+				if (pageArea) {
+					$removeClass(pageArea, 'cghp_overlay');
+				}
+				$addClass($id('cghpLoadingCharOverlay'), 'cghp_hide');
+				$id('cghpLoadingCharArea').style.top = 0;
+				e.stopPropagation();
+			};
+
+			var overlay = $create('div');
+			overlay.id = 'cghpLoadingCharOverlay';
+			overlay.className = 'cghp_link cghp_hide';
+			$bind(overlay, 'click', hideImage);
+
+			var imageArea = overlay.appendChild($create('div'));
+			imageArea.id = 'cghpLoadingCharArea';
+
+			var loadingImage = imageArea.appendChild($create('img'));
+			loadingImage.id = 'cghpLoadingCharImg';
+
+			_body.insertBefore(overlay, _body.firstChild);
+		}
+	})();
+
+	// -------------------------------------------------------------------------
+	// アイドル画像をクリックでズーム表示
+	// -------------------------------------------------------------------------
+	(function() {
+		if (!(/%2Farchive%2F/).test(_param)) {
+			// アイドル画像を取得
+			var exists = false;
+			var imageBaseURL = 'http://sp.pf-img-a.mbga.jp/12008305?url=http%3A%2F%2F125.6.169.35%2Fidolmaster%2F';
+			var framePath = 'image_sp%2Fcard%2Fl%2F';
+			var noFramePath = 'image_sp%2Fcard%2Fl_noframe%2F';
+			var targetImage = _doc.querySelectorAll('img[src*="%2Fimage_sp%2Fcard%2F"]');
+			var targetImageLen = targetImage.length||0;
+			for (var i = 0; i < targetImageLen; i++) {
+				var image = targetImage[i];
+				var imageFile = (image.src.match(/%2Fimage_sp%2Fcard%2F(?:\w+)%2F(\w+\.jpg)/)||[])[1]||null;
+				if (imageFile) {
+					// アイドル画像(大)表示関数
+					var showImage = (function(imageFile) {
+						return function(e) {
+							// スクロール位置に画像を移動
+							// ページを拡大or縮小していると座標がずれるので計算にいれる
+							var scrollTop = (_root.scrollTop || _body.scrollTop || pageYOffset);
+							var zoom = _root.style.zoom||1;
+							$id('cghpCharArea').style.top = (scrollTop / zoom) + 'px';
+
+							$id('cghpCharImg1').src = imageBaseURL + framePath + imageFile;
+							$id('cghpCharImg2').src = imageBaseURL + noFramePath + imageFile;
+							$removeClass($id('cghpCharOverlay'), 'cghp_hide');
+
+							// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
+							var pageArea = $id('pageArea');
+							if (pageArea) {
+								$addClass(pageArea, 'cghp_overlay');
+							}
+							e.stopPropagation();
+						};
+					})(imageFile);
+					$addClass(image, 'cghp_link');
+					$bind(image, 'click', showImage);
+					exists = true;
+				}
+			}
+
+			// アイドル画像が見つかった場合はアイドル画像(大)表示用の要素を追加
+			if (exists) {
+				// アイドル画像(大)非表示関数
+				var hideImage = function(e) {
+					// 非表示にしていた下位レイヤーの要素を表示する
+					var pageArea = $id('pageArea');
+					if (pageArea) {
+						$removeClass(pageArea, 'cghp_overlay');
+					}
+					$addClass($id('cghpCharOverlay'), 'cghp_hide');
+					$removeClass($id('cghpCharImg1'), 'cghp_hide');
+					$addClass($id('cghpCharImg2'), 'cghp_hide');
+					e.stopPropagation();
+				};
+				// アイドル画像(大)切替関数
+				var toggleImage = function(e) {
+					$toggleClass($id('cghpCharImg1'), 'cghp_hide');
+					$toggleClass($id('cghpCharImg2'), 'cghp_hide');
+					e.stopPropagation();
+				};
+
+				var overlay = $create('div');
+				overlay.id = 'cghpCharOverlay';
+				overlay.className = 'cghp_link cghp_hide';
+				$bind(overlay, 'click', hideImage);
+
+				var imageArea = overlay.appendChild($create('div'));
+				imageArea.id = 'cghpCharArea';
+
+				var switchImageLink = imageArea.appendChild($create('a'));
+				switchImageLink.className = 'cghp_gray_area';
+				switchImageLink.innerHTML = '画像切り替え(Sﾚｱ, Sﾚｱ+のみ)';
+				$bind(switchImageLink, 'click', toggleImage);
+
+				var charImage1 = imageArea.appendChild($create('img'));
+				charImage1.id = 'cghpCharImg1';
+
+				var charImage2 = imageArea.appendChild($create('img'));
+				charImage2.id = 'cghpCharImg2';
+				charImage2.className = 'cghp_hide';
+
+				_body.insertBefore(overlay, _body.firstChild);
 			}
 		}
 	})();
@@ -1753,12 +1955,12 @@
 			for (var i = 0; i < targetAreaLen; i++) {
 				var span = targetArea[i];
 				if ((/ｽﾀﾐﾅ:/).test(span.textContent)) {
-					var targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> #text -> td
+					var targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
 					if (targetTd && targetTd.tagName == 'TD') {
 						hpText = targetTd.textContent;
 					}
 				} else if ((/Ex:/).test(span.textContent)) {
-					var targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> #text -> td
+					var targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
 					if (targetTd) {
 						expText = targetTd.textContent;
 					}
@@ -1830,21 +2032,21 @@
 		}
 
 		// 必要コストの算出とElementの作成
-		setStorage('cghp_recovery100', maxHP);
-		setStorage('cghp_recovery50', Math.ceil(maxHP / 2));
-		setStorage('cghp_recovery20', Math.ceil(maxHP / 5));
+		setValue('cghp_recovery100', maxHP);
+		setValue('cghp_recovery50', Math.ceil(maxHP / 2));
+		setValue('cghp_recovery20', Math.ceil(maxHP / 5));
 
-		var expInfoDiv = _doc.createElement('div');
+		var expInfoDiv = $create('div');
 		expInfoDiv.id = 'cghpExpInfo';
 
-		var div1 = expInfoDiv.appendChild(_doc.createElement('div'));
+		var div1 = expInfoDiv.appendChild($create('div'));
 		div1.innerHTML = '次のLvupまでに必要なEx：<span class="yellow">' + restExp + '</span>';
-		var div2 = expInfoDiv.appendChild(_doc.createElement('div'));
+		var div2 = expInfoDiv.appendChild($create('div'));
 		div2.innerHTML = '現在のスタミナ：<span class="yellow">' + currentHP + '</span>';
-		expInfoDiv.appendChild(_doc.createElement('hr'));
+		expInfoDiv.appendChild($create('hr'));
 
 		if (restExp <= currentHP) {
-			var divError = expInfoDiv.appendChild(_doc.createElement('div'));
+			var divError = expInfoDiv.appendChild($create('div'));
 			divError.innerHTML = '<span class="red">スタミナが溢れています。<br />至急Lvupしましょう！</span>';
 		} else {
 			// 計算結果を時間(文字列)に変換
@@ -1920,34 +2122,34 @@
 			};
 
 			var exp = expCalc(restExp);
-			var divRecovery100 = expInfoDiv.appendChild(_doc.createElement('div'));
+			var divRecovery100 = expInfoDiv.appendChild($create('div'));
 			divRecovery100.className = (_settings.expCalcRecovery100) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery100.innerHTML = '100%回復アイテム (' + _settings.recovery100 + ')：<span class="yellow">' + exp.recovery100Count + '個 (' + exp.recovery100Cost + ')</span>';
 			$bind(divRecovery100, 'click', function() {
 				_settings.expCalcRecovery100 = !_settings.expCalcRecovery100;
-				setStorage('cghp_exp_calc_recovery100', _settings.expCalcRecovery100);
+				setValue('cghp_exp_calc_recovery100', _settings.expCalcRecovery100);
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
-			var divRecovery50 = expInfoDiv.appendChild(_doc.createElement('div'));
+			var divRecovery50 = expInfoDiv.appendChild($create('div'));
 			divRecovery50.className = (_settings.expCalcRecovery50) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery50.innerHTML = '50%回復アイテム (' + _settings.recovery50 + ')：<span class="yellow">' + exp.recovery50Count + '個 (' + exp.recovery50Cost + ')</span>';
 			$bind(divRecovery50, 'click', function() {
 				_settings.expCalcRecovery50 = !_settings.expCalcRecovery50;
-				setStorage('cghp_exp_calc_recovery50', _settings.expCalcRecovery50);
+				setValue('cghp_exp_calc_recovery50', _settings.expCalcRecovery50);
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
-			var divRecovery20 = expInfoDiv.appendChild(_doc.createElement('div'));
+			var divRecovery20 = expInfoDiv.appendChild($create('div'));
 			divRecovery20.className = (_settings.expCalcRecovery20) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery20.innerHTML = '20%回復アイテム (' + _settings.recovery20 + ')：<span class="yellow">' + exp.recovery20Count + '個 (' + exp.recovery20Cost + ')</span>';
 			$bind(divRecovery20, 'click', function() {
 				_settings.expCalcRecovery20 = !_settings.expCalcRecovery20;
-				setStorage('cghp_exp_calc_recovery20', _settings.expCalcRecovery20);
+				setValue('cghp_exp_calc_recovery20', _settings.expCalcRecovery20);
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
-			var divRecoveryNatural = expInfoDiv.appendChild(_doc.createElement('div'));
+			var divRecoveryNatural = expInfoDiv.appendChild($create('div'));
 			divRecoveryNatural.innerHTML = '自然回復：<span class="yellow">' + exp.recoveryNaturalTime + ' (' + exp.recoveryNaturalCost + ')</span>';
-			expInfoDiv.appendChild(_doc.createElement('hr'));
-			var divRecoveryNatural = expInfoDiv.appendChild(_doc.createElement('div'));
+			expInfoDiv.appendChild($create('hr'));
+			var divRecoveryNatural = expInfoDiv.appendChild($create('div'));
 			divRecoveryNatural.innerHTML = '自然回復のみ：<span class="yellow">' + exp.recoveryNaturalOnlyTime + ' (' + exp.recoveryNaturalOnlyCost + ')</span>';
 		}
 
@@ -1981,7 +2183,7 @@
 	 * @param element イベントを発生させる対象の要素
 	 */
 	function dispatchClick(element) {
-		if (window.start == 'touchstart') {
+		if (window.start && window.start == 'touchstart') {
 			// タップイベント (touchstart → touchend → click)
 			var event_start = _doc.createEvent('TouchEvent');
 			var event_end = _doc.createEvent('TouchEvent');
@@ -2031,49 +2233,10 @@
 			if (head) {
 				head.appendChild(element);
 			} else {
-				head = _doc.createElement('head');
+				head = $create('head');
 				head.appendChild(element);
-				var html = _doc.querySelector('html');
-				if (html) {
-					html.insertBefore(element, html.firstChild);
-				}
+				_root.insertBefore(element, _root.firstChild);
 			}
-		}
-	}
-
-	/**
-	 * 文字列両端の空白文字を除去する
-	 *
-	 * @param str 文字列
-	 * @return 両端の空白を除去した文字列
-	 */
-	function trim(str) {
-		return (str) ? str.replace(/^[\s　]+|[\s　]+$/g, '') : null;
-	}
-
-	/**
-	 * 数値を指定桁数で四捨五入する
-	 *
-	 * @param num 数値
-	 * @param num 桁数
-	 * @return 四捨五入された数値
-	 */
-	function round(num, digits) {
-		var d = Math.pow(10, digits);
-		return Math.round(num * d) / d;
-	}
-
-	/**
-	 * 数字かどうか判定する
-	 *
-	 * @param num 調べる値
-	 * @return true 数字、false 数字以外
-	 */
-	function isNumeric(num) {
-		if (Number.isFinite) {
-			return Number.isFinite(num);
-		} else {
-			return (typeof num === 'number') && isFinite(num);
 		}
 	}
 
@@ -2093,135 +2256,135 @@
 				var eventLink = headerAccordion.querySelector('div.bannerArea2 a');
 				if (eventLink && eventLink.href != settings.eventURL) {
 					settings.eventURL = eventLink.href;
-					setStorage('cghp_event_url', settings.eventURL);
+					setValue('cghp_event_url', settings.eventURL);
 				}
 			}
 		} else {
-			settings.eventURL = getStorage('cghp_event_url');
+			settings.eventURL = getValue('cghp_event_url');
 		}
 		if (settings.eventURL == null) {
 			settings.eventURL = _baseURL + 'quests';
-			setStorage('cghp_event_url', settings.eventURL);
+			setValue('cghp_event_url', settings.eventURL);
 		}
-		settings.hideBannerInMenu = getStorage('cghp_hide_banner_in_menu');
+		settings.hideBannerInMenu = getValue('cghp_hide_banner_in_menu');
 		if (settings.hideBannerInMenu == null) {
 			settings.hideBannerInMenu = true;
-			setStorage('cghp_hide_banner_in_menu', settings.hideBannerInMenu);
+			setValue('cghp_hide_banner_in_menu', settings.hideBannerInMenu);
 		}
-		settings.customMenuIcon = getStorage('cghp_custom_menu_icon');
+		settings.customMenuIcon = getValue('cghp_custom_menu_icon');
 		if (settings.customMenuIcon == null) {
 			settings.customMenuIcon = true;
-			setStorage('cghp_custom_menu_icon', settings.customMenuIcon);
+			setValue('cghp_custom_menu_icon', settings.customMenuIcon);
 		}
-		settings.customMenu1 = getStorage('cghp_custom_menu1');
+		settings.customMenu1 = getValue('cghp_custom_menu1');
 		if (settings.customMenu1 == null) {
 			settings.customMenu1 = [3, 2, 10, 14, 26, 16];
-			setStorage('cghp_custom_menu1', settings.customMenu1);
+			setValue('cghp_custom_menu1', settings.customMenu1);
 		}
-		settings.customMenu2 = getStorage('cghp_custom_menu2');
+		settings.customMenu2 = getValue('cghp_custom_menu2');
 		if (settings.customMenu2 == null) {
 			settings.customMenu2 = [4, 6, 8, 25, 24];
-			setStorage('cghp_custom_menu2', settings.customMenu2);
+			setValue('cghp_custom_menu2', settings.customMenu2);
 		}
-		settings.customMenu3 = getStorage('cghp_custom_menu3');
+		settings.customMenu3 = getValue('cghp_custom_menu3');
 		if (settings.customMenu3 == null) {
 			settings.customMenu3 = [];
-			setStorage('cghp_custom_menu3', settings.customMenu3);
+			setValue('cghp_custom_menu3', settings.customMenu3);
 		}
-		settings.dojoURL = getStorage('cghp_dojo_url');
+		settings.dojoURL = getValue('cghp_dojo_url');
 		if (settings.dojoURL == null) {
 			settings.dojoURL = 'http://saasan.github.io/mobamas-dojo/lv.html';
-			setStorage('cghp_dojo_url', settings.dojoURL);
+			setValue('cghp_dojo_url', settings.dojoURL);
 		}
-		settings.customURL1 = getStorage('cghp_custom_url1');
+		settings.customURL1 = getValue('cghp_custom_url1');
 		if (settings.customURL1 == null) {
 			settings.customURL1 = _topURL;
-			setStorage('cghp_custom_url1', settings.customURL1);
+			setValue('cghp_custom_url1', settings.customURL1);
 		}
-		settings.customURL2 = getStorage('cghp_custom_url2');
+		settings.customURL2 = getValue('cghp_custom_url2');
 		if (settings.customURL2 == null) {
 			settings.customURL2 = _topURL;
-			setStorage('cghp_custom_url2', settings.customURL2);
+			setValue('cghp_custom_url2', settings.customURL2);
 		}
-		settings.customURL3 = getStorage('cghp_custom_url3');
+		settings.customURL3 = getValue('cghp_custom_url3');
 		if (settings.customURL3 == null) {
 			settings.customURL3 = _topURL;
-			setStorage('cghp_custom_url3', settings.customURL3);
+			setValue('cghp_custom_url3', settings.customURL3);
 		}
-		settings.customURL4 = getStorage('cghp_custom_url4');
+		settings.customURL4 = getValue('cghp_custom_url4');
 		if (settings.customURL4 == null) {
 			settings.customURL4 = _topURL;
-			setStorage('cghp_custom_url4', settings.customURL4);
+			setValue('cghp_custom_url4', settings.customURL4);
 		}
-		settings.customURL5 = getStorage('cghp_custom_url5');
+		settings.customURL5 = getValue('cghp_custom_url5');
 		if (settings.customURL5 == null) {
 			settings.customURL5 = _topURL;
-			setStorage('cghp_custom_url5', settings.customURL5);
+			setValue('cghp_custom_url5', settings.customURL5);
 		}
-		settings.uncheckedGift = getStorage('cghp_unchecked_gift');
+		settings.uncheckedGift = getValue('cghp_unchecked_gift');
 		if (settings.uncheckedGift == null) {
 			settings.uncheckedGift = 1;
-			setStorage('cghp_unchecked_gift', settings.uncheckedGift);
+			setValue('cghp_unchecked_gift', settings.uncheckedGift);
 		}
-		settings.pointFilterHP = getStorage('cghp_point_filter_hp');
+		settings.pointFilterHP = getValue('cghp_point_filter_hp');
 		if (settings.pointFilterHP == null) {
 			settings.pointFilterHP = true;
-			setStorage('cghp_point_filter_hp', settings.pointFilterHP);
+			setValue('cghp_point_filter_hp', settings.pointFilterHP);
 		}
-		settings.pointFilterAtk = getStorage('cghp_point_filter_atk');
+		settings.pointFilterAtk = getValue('cghp_point_filter_atk');
 		if (settings.pointFilterAtk == null) {
 			settings.pointFilterAtk = true;
-			setStorage('cghp_point_filter_atk', settings.pointFilterAtk);
+			setValue('cghp_point_filter_atk', settings.pointFilterAtk);
 		}
-		settings.pointFilterDef = getStorage('cghp_point_filter_def');
+		settings.pointFilterDef = getValue('cghp_point_filter_def');
 		if (settings.pointFilterDef == null) {
 			settings.pointFilterDef = false;
-			setStorage('cghp_point_filter_def', settings.pointFilterDef);
+			setValue('cghp_point_filter_def', settings.pointFilterDef);
 		}
-		settings.pointFilterAuto = getStorage('cghp_point_filter_auto');
+		settings.pointFilterAuto = getValue('cghp_point_filter_auto');
 		if (settings.pointFilterAuto == null) {
 			settings.pointFilterAuto = false;
-			setStorage('cghp_point_filter_auto', settings.pointFilterAuto);
+			setValue('cghp_point_filter_auto', settings.pointFilterAuto);
 		}
-		settings.attackCostLimit = getStorage('cghp_atack_cost_limit');
+		settings.attackCostLimit = getValue('cghp_atack_cost_limit');
 		if (settings.attackCostLimit == null) {
 			settings.attackCostLimit = 5;
-			setStorage('cghp_atack_cost_limit', settings.attackCostLimit);
+			setValue('cghp_atack_cost_limit', settings.attackCostLimit);
 		}
-		settings.recovery100 = getStorage('cghp_recovery100');
+		settings.recovery100 = getValue('cghp_recovery100');
 		if (settings.recovery100 == null) {
 			settings.recovery100 = 0;
-			setStorage('cghp_recovery100', settings.recovery100);
+			setValue('cghp_recovery100', settings.recovery100);
 		}
-		settings.recovery50 = getStorage('cghp_recovery50');
+		settings.recovery50 = getValue('cghp_recovery50');
 		if (settings.recovery50 == null) {
 			settings.recovery50 = 0;
-			setStorage('cghp_recovery50', settings.recovery50);
+			setValue('cghp_recovery50', settings.recovery50);
 		}
-		settings.recovery20 = getStorage('cghp_recovery20');
+		settings.recovery20 = getValue('cghp_recovery20');
 		if (settings.recovery20 == null) {
 			settings.recovery20 = 0;
-			setStorage('cghp_recovery20', settings.recovery20);
+			setValue('cghp_recovery20', settings.recovery20);
 		}
-		settings.expCalcRecovery100 = getStorage('cghp_exp_calc_recovery100');
+		settings.expCalcRecovery100 = getValue('cghp_exp_calc_recovery100');
 		if (settings.expCalcRecovery100 == null) {
 			settings.expCalcRecovery100 = true;
-			setStorage('cghp_exp_calc_recovery100', settings.expCalcRecovery100);
+			setValue('cghp_exp_calc_recovery100', settings.expCalcRecovery100);
 		}
-		settings.expCalcRecovery50 = getStorage('cghp_exp_calc_recovery50');
+		settings.expCalcRecovery50 = getValue('cghp_exp_calc_recovery50');
 		if (settings.expCalcRecovery50 == null) {
 			settings.expCalcRecovery50 = true;
-			setStorage('cghp_exp_calc_recovery50', settings.expCalcRecovery50);
+			setValue('cghp_exp_calc_recovery50', settings.expCalcRecovery50);
 		}
-		settings.expCalcRecovery20 = getStorage('cghp_exp_calc_recovery20');
+		settings.expCalcRecovery20 = getValue('cghp_exp_calc_recovery20');
 		if (settings.expCalcRecovery20 == null) {
 			settings.expCalcRecovery20 = false;
-			setStorage('cghp_exp_calc_recovery20', settings.expCalcRecovery20);
+			setValue('cghp_exp_calc_recovery20', settings.expCalcRecovery20);
 		}
-		settings.swfZoom = getStorage('cghp_swf_zoom');
+		settings.swfZoom = getValue('cghp_swf_zoom');
 		if (settings.swfZoom == null) {
 			settings.swfZoom = 1.0;
-			setStorage('cghp_swf_zoom', settings.swfZoom);
+			setValue('cghp_swf_zoom', settings.swfZoom);
 		}
 
 		return settings;
@@ -2232,31 +2395,31 @@
 	 *
 	 */
 	function saveSettings() {
-		setStorage('cghp_event_url', _settings.eventURL);
-		setStorage('cghp_hide_banner_in_menu', _settings.hideBannerInMenu);
-		setStorage('cghp_custom_menu_icon', _settings.customMenuIcon);
-		setStorage('cghp_custom_menu1', _settings.customMenu1);
-		setStorage('cghp_custom_menu2', _settings.customMenu2);
-		setStorage('cghp_custom_menu3', _settings.customMenu3);
-		setStorage('cghp_dojo_url', _settings.dojoURL);
-		setStorage('cghp_custom_url1', _settings.customURL1);
-		setStorage('cghp_custom_url2', _settings.customURL2);
-		setStorage('cghp_custom_url3', _settings.customURL3);
-		setStorage('cghp_custom_url4', _settings.customURL4);
-		setStorage('cghp_custom_url5', _settings.customURL5);
-		setStorage('cghp_unchecked_gift', _settings.uncheckedGift);
-		setStorage('cghp_point_filter_hp', _settings.pointFilterHP);
-		setStorage('cghp_point_filter_atk', _settings.pointFilterAtk);
-		setStorage('cghp_point_filter_def', _settings.pointFilterDef);
-		setStorage('cghp_point_filter_auto', _settings.pointFilterAuto);
-		setStorage('cghp_atack_cost_limit', _settings.attackCostLimit);
-		setStorage('cghp_recovery100', _settings.recovery100);
-		setStorage('cghp_recovery50', _settings.recovery50);
-		setStorage('cghp_recovery20', _settings.recovery20);
-		setStorage('cghp_exp_calc_recovery100', _settings.expCalcRecovery100);
-		setStorage('cghp_exp_calc_recovery50', _settings.expCalcRecovery50);
-		setStorage('cghp_exp_calc_recovery20', _settings.expCalcRecovery20);
-		setStorage('cghp_swf_zoom', _settings.swfZoom);
+		setValue('cghp_event_url', _settings.eventURL);
+		setValue('cghp_hide_banner_in_menu', _settings.hideBannerInMenu);
+		setValue('cghp_custom_menu_icon', _settings.customMenuIcon);
+		setValue('cghp_custom_menu1', _settings.customMenu1);
+		setValue('cghp_custom_menu2', _settings.customMenu2);
+		setValue('cghp_custom_menu3', _settings.customMenu3);
+		setValue('cghp_dojo_url', _settings.dojoURL);
+		setValue('cghp_custom_url1', _settings.customURL1);
+		setValue('cghp_custom_url2', _settings.customURL2);
+		setValue('cghp_custom_url3', _settings.customURL3);
+		setValue('cghp_custom_url4', _settings.customURL4);
+		setValue('cghp_custom_url5', _settings.customURL5);
+		setValue('cghp_unchecked_gift', _settings.uncheckedGift);
+		setValue('cghp_point_filter_hp', _settings.pointFilterHP);
+		setValue('cghp_point_filter_atk', _settings.pointFilterAtk);
+		setValue('cghp_point_filter_def', _settings.pointFilterDef);
+		setValue('cghp_point_filter_auto', _settings.pointFilterAuto);
+		setValue('cghp_atack_cost_limit', _settings.attackCostLimit);
+		setValue('cghp_recovery100', _settings.recovery100);
+		setValue('cghp_recovery50', _settings.recovery50);
+		setValue('cghp_recovery20', _settings.recovery20);
+		setValue('cghp_exp_calc_recovery100', _settings.expCalcRecovery100);
+		setValue('cghp_exp_calc_recovery50', _settings.expCalcRecovery50);
+		setValue('cghp_exp_calc_recovery20', _settings.expCalcRecovery20);
+		setValue('cghp_swf_zoom', _settings.swfZoom);
 	}
 
 	/**
@@ -2264,50 +2427,25 @@
 	 *
 	 */
 	function deleteSettings() {
-		deleteStorage('cghp_event_url');
-		deleteStorage('cghp_hide_banner_in_menu');
-		deleteStorage('cghp_custom_menu_icon');
-		deleteStorage('cghp_custom_menu1');
-		deleteStorage('cghp_custom_menu2');
-		deleteStorage('cghp_custom_menu3');
-		deleteStorage('cghp_dojo_url');
-		deleteStorage('cghp_custom_url1');
-		deleteStorage('cghp_custom_url2');
-		deleteStorage('cghp_custom_url3');
-		deleteStorage('cghp_custom_url4');
-		deleteStorage('cghp_custom_url5');
-		deleteStorage('cghp_unchecked_gift');
-		deleteStorage('cghp_point_filter_hp');
-		deleteStorage('cghp_point_filter_atk');
-		deleteStorage('cghp_point_filter_def');
-		deleteStorage('cghp_point_filter_auto');
-		deleteStorage('cghp_atack_cost_limit');
-		deleteStorage('cghp_swf_zoom');
-	}
-
-	/**
-	 * localStorageに設定を書き込む
-	 *
-	 */
-	function setStorage(key, value) {
-		window.localStorage.setItem(key, JSON.stringify(value));
-	}
-
-	/*
-	 * localStorageから設定を読み込む
-	 *
-	 */
-	function getStorage(key) {
-		var data = window.localStorage.getItem(key);
-		return (data) ? JSON.parse(data) : null;
-	}
-
-	/*
-	 * localStorageから設定を削除する
-	 *
-	 */
-	function deleteStorage(key) {
-		localStorage.removeItem(key);
+		deleteValue('cghp_event_url');
+		deleteValue('cghp_hide_banner_in_menu');
+		deleteValue('cghp_custom_menu_icon');
+		deleteValue('cghp_custom_menu1');
+		deleteValue('cghp_custom_menu2');
+		deleteValue('cghp_custom_menu3');
+		deleteValue('cghp_dojo_url');
+		deleteValue('cghp_custom_url1');
+		deleteValue('cghp_custom_url2');
+		deleteValue('cghp_custom_url3');
+		deleteValue('cghp_custom_url4');
+		deleteValue('cghp_custom_url5');
+		deleteValue('cghp_unchecked_gift');
+		deleteValue('cghp_point_filter_hp');
+		deleteValue('cghp_point_filter_atk');
+		deleteValue('cghp_point_filter_def');
+		deleteValue('cghp_point_filter_auto');
+		deleteValue('cghp_atack_cost_limit');
+		deleteValue('cghp_swf_zoom');
 	}
 
 })();
