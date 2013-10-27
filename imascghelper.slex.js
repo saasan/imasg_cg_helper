@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name IM@S CG Helper (Tentative name)
 // @author sunokonoyakma
-// @version 2013.10.28.57
+// @version 2013.10.28.121
 // @description The script to be somewhat comfortable to the IDOLM@STER CINDERELLA GIRLS.
 // @include http://sp.pf.mbga.jp/12008305
 // @include http://sp.pf.mbga.jp/12008305?*
@@ -96,6 +96,7 @@
 		body {
 			margin:0 auto;
 			padding:0;
+			-webkit-tap-highlight-color: rgba(0,0,0,0);
 		}
 		input[type="checkbox"],
 		input[type="radio"] {
