@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name IM@S CG Helper (Tentative name)
 // @author sunokonoyakma
-// @version 2013.10.28.121
+// @version 2013.11.5.230
 // @description The script to be somewhat comfortable to the IDOLM@STER CINDERELLA GIRLS.
 // @include http://sp.pf.mbga.jp/12008305
 // @include http://sp.pf.mbga.jp/12008305?*
@@ -22,7 +22,7 @@
 	var $id = function(a){return _doc.getElementById(a)};
 	var $addClass=function(d,b){if(d&&b){var e=b.split(' ')||[];var f=d.className.split(' ')||[];for(var c=0,a=e.length;c<a;c++){if(f.indexOf(e[c])==-1){f.push(e[c])}}d.className=f.join(' ')}};
 	var $removeClass=function(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g,j){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false}}return true});a.className=c.join(' ')}};
-	var $hasClass=function(a,d){var b=false;if(a&&d){var c=d.split(' ')||[];var e=a.className.split(/\s+/)||[];e.forEach(function(h){for(var g=0,f=c.length;g<f;g++){if(h.indexOf(d)!=-1){b=true;break}}})}return b};
+	var $hasClass=function(d,b){var e=false;if(d&&b){var a=b.split(' ')||[];var c=d.className.split(' ')||[];c.forEach(function(g){for(var f=0,h=a.length;f<h;f++){if(g===a[f]){e=true;break}}})}return e};
 	var $toggleClass=function(a,c){var b=false;if(a&&c){if($hasClass(a,c)){$removeClass(a,c)}else{$addClass(a,c)}}};
 	var $create = function(a){return _doc.createElement(a)};
 	var $bind = function(a,b,c){if(!a){return}a.addEventListener(b,c,false)};
@@ -32,6 +32,7 @@
 	var setValue = function(a,b){localStorage.setItem(a,JSON.stringify(b))};
 	var deleteValue = function(a){localStorage.removeItem(a)};
 	var isNumeric = function(a){if(Number.isFinite){return Number.isFinite(a)}else{return(typeof a==='number')&&isFinite(a)}};
+	var toNumber = function(a){if(a){return a-0}};
 	var	round = function(a,b){var c=Math.pow(10,b);return Math.round(a*c)/c};
 	var trim = function(a){return(a)?a.replace(/^[\s　]+|[\s　]+$/g,''):null};
 
@@ -76,6 +77,9 @@
 		// スタイルは極力ここで書いておく。
 		var css = (function() {/*
 
+		#headerAccordion {
+			margin-bottom:10px;
+		}
 		.a_link,
 		label {
 			cursor:pointer;
@@ -165,9 +169,10 @@
 			padding:0;
 			z-index:100;
 			width:100%;
-			height:3000px;
+			min-height:100%;
 			background-color:rgba(0, 0, 0, 0.85);
 			color:#ffffff;
+			overflow:auto;
 		}
 		#cghpCharArea,
 		#cghpLoadingCharArea {
@@ -179,7 +184,7 @@
 			width:100%;
 			text-align:center;
 		}
-		#cghpCharArea .cghp_gray_area {
+		#cghpCharArea .cghp_add_area_gray {
 			display:block;
 			margin:0 auto 10px auto;
 			width:320px;
@@ -196,7 +201,6 @@
 			-moz-box-sizing:border-box;
 			box-sizing:border-box;
 			width:300px;
-			-ms-box-sizing:border-box;
 			ime-mode:disabled;
 		}
 		#cghpSettingArea {
@@ -206,7 +210,6 @@
 			margin:0 auto;
 			padding:10px;
 			width:320px;
-			-ms-box-sizing:border-box;
 		}
 		#cghpSettingArea h2 {
 			font-size:1.4rem;
@@ -230,7 +233,57 @@
 			cursor:pointer;
 		}
 		#cghpResetArea {
-			padding-top:150%;
+			padding-top:50em;
+		}
+		.cghp_add_area_gray,
+		.cghp_add_area_green,
+		.cghp_add_area_red {
+			-webkit-box-sizing:border-box;
+			-moz-box-sizing:border-box;
+			box-sizing:border-box;
+			margin:0 10px;
+			padding:5px 10px;
+			width:300px;
+			border:1px solid #444444;
+			-webkit-border-radius:10px;
+			background-color:#333333;
+			text-align:center;
+			line-height:1.4;
+		}
+		.cghp_add_area_gray > h4:first-child,
+		.cghp_add_area_green > h4:first-child,
+		.cghp_add_area_red > h4:first-child {
+			margin:0 0 5px 0;
+			-webkit-border-radius:10px;
+			background-color:#444444;
+		}
+		.cghp_add_area_green {
+			border:1px solid #568856 !important;
+			background-color:#346634 !important;
+		}
+		.cghp_add_area_green > h4:first-child {
+			background-color:#459945 !important;
+		}
+		.cghp_add_area_red {
+			border:1px solid #885656 !important;
+			background-color:#663434 !important;
+		}
+		.cghp_add_area_red > h4:first-child {
+			background-color:#994545 !important;
+		}
+		.cghp_button {
+			display:inline-block;
+			-webkit-box-sizing:border-box;
+			-moz-box-sizing:border-box;
+			box-sizing:border-box;
+			margin:5px;
+			padding:8px 10px;
+			background:-webkit-gradient(linear, left top, left bottom, color-stop(0%, #444444), color-stop(50%, #1d1d1d), color-stop(100%, #444444));
+			text-decoration:none;
+			color:#ffffff;
+			border:1px solid #666666;
+			-webkit-border-radius: 5px;
+			cursor:pointer;
 		}
 		.cghp_center {
 			margin-right:auto !important;
@@ -266,23 +319,15 @@
 			margin:0;
 			padding:0;
 			width:96px;
-			-ms-box-sizing:border-box;
+		}
+		.cghp_fg_blue {
+			color:#00ccff;
+		}
+		.cghp_fg_yellow {
+			color:#ff9933;
 		}
 		.cghp_font_120pct {
 			font-size:120% !important;
-		}
-		.cghp_gray_area {
-			-webkit-box-sizing:border-box;
-			-moz-box-sizing:border-box;
-			box-sizing:border-box;
-			margin:0 10px;
-			padding:5px 10px;
-			width:300px;
-			-ms-box-sizing:border-box;
-			border:1px solid #444444;
-			-webkit-border-radius:5px;
-			background-color:#333333;
-			line-height:1.4;
 		}
 		.cghp_hide {
 			display:none !important;
@@ -315,6 +360,7 @@
 		.cghp_idol_table ~ div:first-child {
 			line-height:1.4 !important;
 		}
+		.cghp_idol_table ~ div > img[src="http://ava-a.mbga.jp/i/dot.gif"]:first-child,
 		.cghp_idol_table + img[src="http://ava-a.mbga.jp/i/dot.gif"] {
 			height:0 !important;
 		}
@@ -381,7 +427,6 @@
 			padding:0;
 			width:320px;
 			-moz-box-flex:1;
-			-ms-box-sizing:border-box;
 			-webkit-box-flex:1;
 			font-weight:bold;
 			font-size:8pt !important;
@@ -392,6 +437,11 @@
 		}
 		.cghp_menu_list li:last-child {
 			margin-right:0;
+		}
+		.cghp_menu_text {
+			padding:8px 0;
+			color:#ffffff;
+			font-size:9pt;
 		}
 		.cghp_name_area {
 			padding-bottom:5px;
@@ -405,7 +455,7 @@
 		.cghp_idol_detail_div {
 			position:relative;
 		}
-		.cghp_idol_detail_div > .cghp_gray_area {
+		.cghp_idol_detail_div > .cghp_add_area_gray {
 			display:block;
 			position:absolute;
 			top:0;
@@ -429,7 +479,8 @@
 		.cghp_show {
 			display:"" !important;
 		}
-		.cghp_star_gray::after {
+		.cghp_star_gray::after,
+		.cghp_star_yellow::after {
 			content:"★";
 			font-size:10px;
 			color:#666666;
@@ -437,10 +488,7 @@
 			font-style:normal;
 		}
 		.cghp_star_yellow::after {
-			content:"★";
-			font-size:10px;
-			color:#ffcc00;
-			text-shadow:0 0 2px #533713, 1px 1px 1px #1d1d1d;
+			color:#ffcc00 !important;
 		}
 		.cghp_strike {
 			text-decoration:line-through;
@@ -476,7 +524,7 @@
 	// アイコン用CSS読み込み
 	// -------------------------------------------------------------------------
 	(function() {
-		if (_settings.customMenuIcon) {
+		if (_settings.custom_menu_icon) {
 			// Font Awesome (http://fortawesome.github.com/Font-Awesome/)
 			var link = $create('link');
 			link.href = '//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css';
@@ -486,15 +534,39 @@
 	})();
 
 	// -------------------------------------------------------------------------
-	// メニュー内のバナーを非表示にする
+	// マイスタジオ拡張
+	// (イベントURLの取得があるので、カスタムメニュー生成より先に実行する事)
 	// -------------------------------------------------------------------------
 	(function() {
-		if (_settings.hideBannerInMenu) {
+		if (/%2Fmypage(?:%2F|%3F)?/.test(_param)) {
+			// イベントURL取得
 			var headerAccordion = $id('headerAccordion');
 			if (headerAccordion) {
-				var bannerDiv = headerAccordion.querySelector('div.bannerArea2');
-				if (bannerDiv) {
-					bannerDiv.style.display = 'none';
+				var eventLink = headerAccordion.querySelector('div.bannerArea2 a');
+				if (eventLink && eventLink.href != _settings.event_url) {
+					_settings.event_url = eventLink.href;
+					saveSettings('event_url');
+				}
+			}
+			// ID取得
+			var mobageId = null;
+			var profileTagTable = _content.querySelector('section.areaLine01 table');
+			if (profileTagTable) {
+				var profileURL = profileTagTable.querySelector('section.areaLine01 input[type="text"]');
+				if (profileURL) {
+					mobageId = (profileURL.value.match(/%2Fprofile%2Fshow%2F(\d+)/)||[])[1]||null;
+					if (mobageId) {
+						if (_settings.mobage_id != mobageId) {
+							_settings.mobage_id = mobageId;
+							saveSettings('mobage_id');
+						}
+						// 画面にIDを表示
+						var myIdArea = $create('div');
+						myIdArea.id = 'cghpMyId';
+						myIdArea.className = 'cghp_margin_t10';
+						myIdArea.innerHTML = 'ID：' + mobageId;
+						profileTagTable.parentElement.insertBefore(myIdArea, profileTagTable.nextSibling);
+					}
 				}
 			}
 		}
@@ -522,82 +594,45 @@
 	_customMenu[16] = { 'fullName': '設　定', 'shortName': '設　定', 'icon': 'icon-cog', 'url': _baseURL + 'personal_option' };
 	_customMenu[17] = { 'fullName': 'ヘルプ', 'shortName': 'ヘルプ', 'icon': 'icon-question-sign', 'url': _baseURL + 'advise%2Findex%2Ftop' };
 	_customMenu[18] = { 'fullName': 'トップ', 'shortName': 'トップ', 'icon': 'icon-star', 'url': _topURL };
-	_customMenu[19] = { 'fullName': '特　訓', 'shortName': '特　訓', 'icon': 'icon-music', 'url': _baseURL + 'card_union%3Fl_frm%3DMypage_2%26' };
+	_customMenu[19] = { 'fullName': '特　訓', 'shortName': '特　訓', 'icon': 'icon-music', 'url': _baseURL + 'card_union' };
 	_customMenu[20] = { 'fullName': '移　籍', 'shortName': '移　籍', 'icon': 'icon-remove', 'url': _baseURL + 'card_sale%2Findex' };
 	_customMenu[21] = { 'fullName': 'お仕事', 'shortName': 'お仕事', 'icon': 'icon-calendar', 'url': _baseURL + 'quests' };
 	_customMenu[22] = { 'fullName': 'LIVEバトル', 'shortName': 'LIVE', 'icon': 'icon-bolt', 'url': _baseURL + 'battle' };
 	_customMenu[23] = { 'fullName': 'ﾌﾟﾛﾀﾞｸｼｮﾝ', 'shortName': 'プ　ロ', 'icon': 'icon-building', 'url': _baseURL + 'knights%2Fknights_top_for_member' };
 	_customMenu[24] = { 'fullName': 'プロ掲示板', 'shortName': '掲示板', 'icon': 'icon-comments', 'url': _baseURL + 'knights%2Fbbs' };
-	_customMenu[25] = { 'fullName': 'イベント', 'shortName': 'ｲﾍﾞﾝﾄ', 'icon': 'icon-flag', 'url': _settings.eventURL };
-	_customMenu[26] = { 'fullName': '道　場', 'shortName': '道　場', 'icon': 'icon-list-ol', 'url': _settings.dojoURL };
-	_customMenu[101] = { 'fullName': 'カスタム1', 'shortName': 'ｶｽﾀﾑ1', 'icon': 'icon-cogs', 'url': _settings.customURL1 };
-	_customMenu[102] = { 'fullName': 'カスタム2', 'shortName': 'ｶｽﾀﾑ2', 'icon': 'icon-cogs', 'url': _settings.customURL2 };
-	_customMenu[103] = { 'fullName': 'カスタム3', 'shortName': 'ｶｽﾀﾑ3', 'icon': 'icon-cogs', 'url': _settings.customURL3 };
-	_customMenu[104] = { 'fullName': 'カスタム4', 'shortName': 'ｶｽﾀﾑ4', 'icon': 'icon-cogs', 'url': _settings.customURL4 };
-	_customMenu[105] = { 'fullName': 'カスタム5', 'shortName': 'ｶｽﾀﾑ5', 'icon': 'icon-cogs', 'url': _settings.customURL5 };
+	_customMenu[25] = { 'fullName': 'イベント', 'shortName': 'ｲﾍﾞﾝﾄ', 'icon': 'icon-flag', 'url': _settings.event_url };
+	_customMenu[26] = { 'fullName': '道　場', 'shortName': '道　場', 'icon': 'icon-list-ol', 'url': _settings.dojo_url };
+	_customMenu[101] = { 'fullName': 'カスタム1', 'shortName': 'ｶｽﾀﾑ1', 'icon': 'icon-cogs', 'url': _settings.custom_url1 };
+	_customMenu[102] = { 'fullName': 'カスタム2', 'shortName': 'ｶｽﾀﾑ2', 'icon': 'icon-cogs', 'url': _settings.custom_url2 };
+	_customMenu[103] = { 'fullName': 'カスタム3', 'shortName': 'ｶｽﾀﾑ3', 'icon': 'icon-cogs', 'url': _settings.custom_url3 };
+	_customMenu[104] = { 'fullName': 'カスタム4', 'shortName': 'ｶｽﾀﾑ4', 'icon': 'icon-cogs', 'url': _settings.custom_url4 };
+	_customMenu[105] = { 'fullName': 'カスタム5', 'shortName': 'ｶｽﾀﾑ5', 'icon': 'icon-cogs', 'url': _settings.custom_url5 };
 
 	(function() {
 		var headerNavi = $id('headerNavi');
 		if (headerNavi) {
 			var customMenu = [];
-			var customMenu1Len = _settings.customMenu1.length||0;
-			if (0 < customMenu1Len) {
-				customMenu.push('<ul id="cghpCustomMenuList1" class="cghp_menu_list">');
-				for (var i = 0; i < customMenu1Len; i++) {
-					var menuIndex = _settings.customMenu1[i];
-					customMenu.push('<li>');
-					if (_customMenu[menuIndex]) {
-						var menu = _customMenu[menuIndex];
-						var name = (customMenu1Len < 6) ? menu.fullName : menu.shortName;
-						if (_settings.customMenuIcon) {
-							customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
-						} else {
-							customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
+			for (var i = 1; i <= 3; i++) {
+				var key = 'custom_menu' + i;
+				var menuItemLen = _settings[key].length||0;
+				if (0 < menuItemLen) {
+					customMenu.push('<ul id="cghpCustomMenuList' + i + '" class="cghp_menu_list">');
+					for (var j = 0; j < menuItemLen; j++) {
+						var menuIndex = _settings[key][j];
+						customMenu.push('<li>');
+						if (_customMenu[menuIndex]) {
+							var menu = _customMenu[menuIndex];
+							var name = (menuItemLen < 6) ? menu.fullName : menu.shortName;
+							if (_settings.custom_menu_icon) {
+								customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
+							} else {
+								customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
+							}
 						}
+						customMenu.push('</li>');
 					}
-					customMenu.push('</li>');
+					customMenu.push('</ul>');
 				}
-				customMenu.push('</ul>');
-			}
-
-			var customMenu2Len = _settings.customMenu2.length||0;
-			if (0 < customMenu2Len) {
-				customMenu.push('<ul id="cghpCustomMenuList2" class="cghp_menu_list">');
-				for (var i = 0; i < customMenu2Len; i++) {
-					var menuIndex = _settings.customMenu2[i];
-					customMenu.push('<li>');
-					if (_customMenu[menuIndex]) {
-						var menu = _customMenu[menuIndex];
-						var name = (customMenu2Len < 6) ? menu.fullName : menu.shortName;
-						if (_settings.customMenuIcon) {
-							customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
-						} else {
-							customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
-						}
-					}
-					customMenu.push('</li>');
-				}
-				customMenu.push('</ul>');
-			}
-
-			var customMenu3Len = _settings.customMenu3.length||0;
-			if (0 < customMenu3Len) {
-				customMenu.push('<ul id="cghpCustomMenuList3" class="cghp_menu_list">');
-				for (var i = 0; i < customMenu3Len; i++) {
-					var menuIndex = _settings.customMenu3[i];
-					customMenu.push('<li>');
-					if (_customMenu[menuIndex]) {
-						var menu = _customMenu[menuIndex];
-						var name = (customMenu3Len < 6) ? menu.fullName : menu.shortName;
-						if (_settings.customMenuIcon) {
-							customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + name + '</div></a>');
-						} else {
-							customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
-						}
-					}
-					customMenu.push('</li>');
-				}
-				customMenu.push('</ul>');
 			}
 
 			var customMenuDiv = $create('div');
@@ -609,16 +644,55 @@
 	})();
 
 	// -------------------------------------------------------------------------
+	// アコーディオンメニュー拡張
+	// -------------------------------------------------------------------------
+	(function() {
+		// イベントバナーを非表示にする
+		if (_settings.hide_banner_in_menu) {
+			var headerAccordion = $id('headerAccordion');
+			if (headerAccordion) {
+				var bannerDiv = headerAccordion.querySelector('div.bannerArea2');
+				if (bannerDiv) {
+					bannerDiv.style.display = 'none';
+				}
+			}
+		}
+		// IDジャンプ用フォーム追加
+		var acSubMenu = $id('acSubMenu');
+		if (acSubMenu) {
+			var idJumpArea = $create('div');
+			idJumpArea.id = 'cghpIdJumpArea';
+			idJumpArea.className = 'cghp_add_area_gray cghp_margin_t10';
+			var idJumpHtml = ['<h4>指定したIDのﾌﾟﾛﾌｨｰﾙﾍﾟｰｼに移動</h4>'];
+			idJumpHtml.push('ID：<input id="cghpIdJumpTarget" type="text" size="10" />');
+			idJumpHtml.push('<a id="cghpIdJumpButton" class="cghp_button cghp_margin_t0 cghp_margin_b0">O K</a>');
+			idJumpArea.innerHTML = idJumpHtml.join('');
+			acSubMenu.parentElement.insertBefore(idJumpArea, acSubMenu.nextSibling);
+			var idJumpButton = $id('cghpIdJumpButton');
+			$bind(idJumpButton, 'click', function() {
+				var targetId = $id('cghpIdJumpTarget');
+				if (targetId) {
+					var id = toNumber(targetId.value);
+					if (isNumeric(id) && (/\d+/).test(id)) {
+						var profileURL = _baseURL + 'profile%2Fshow%2F' + id + '%3Fl_frm%3DMypage_1'
+						_location.assign(profileURL);
+					} else {
+						alert('整数を入力してください。');
+					}
+				}
+			});
+		}
+	})();
+
+	// -------------------------------------------------------------------------
 	// 贈り物拡張
 	// -------------------------------------------------------------------------
 	(function() {
 		if (/%2Fpresent%2Frecieve%2F/.test(_param)) {
 			// 贈り物のチェックを外す
-			if (_settings.uncheckedGift = 1) {
-				var checkLink = $id('chks_change');
-				if (checkLink) {
-					dispatchClick(checkLink);
-				}
+			var checkLink = $id('chks_change');
+			if (checkLink) {
+				dispatchClick(checkLink);
 			}
 		}
 	})();
@@ -700,10 +774,10 @@
 	//       メダル交換、各種ユニット編成画面
 	// -------------------------------------------------------------------------
 	(function() {
-		if ((/(?:%2F|%3F)(:?card_(?:list|sale|storage|str|union)|auction|exchange|deck)(?:%2F|%3F)/).test(_param) && _content) {
+		if ((/(?:%2F|%3F)(:?card_(?:list|sale|storage|str|union)|deck(_modify_card)?|auction|exchange)(?:%2F|%3F|$)/).test(_param) && _content) {
 			// 発揮値（コスト比）の表示や各種リンクの追加
 			var extractNum = function (val) {
-				return (val) ? parseInt(val.replace(/[^0-9]/, '')) : null;
+				return (val) ? toNumber(val.replace(/[^0-9]/, '')) : null;
 			};
 			// アイドルを取得（アイドル名のブロックを基準とする）
 			var targetDiv = _content.querySelectorAll('div.title_sub_blue, div.title_sub_gray, div[style*="background-color:#333333;"]');
@@ -721,8 +795,8 @@
 					idol.id = (nameDivParent.href.match(/%2Fcard_list%2Fdesc%2F(\d+)/)||[])[1]||null;
 				}
 				// 名前、属性、レアリティの取得（名前ブロックから）
-				var nameElements = (nameDiv.textContent.match(/(ﾊﾟｯｼｮﾝ|ｷｭｰﾄ|ｸｰﾙ)[\s\t\r\n]+([^\s\t\r\n]+)[\s\t\r\n]+(\([^\s\t\r\n]+\))/)||null);
-				if (nameElements && nameElements.length == 4) {
+				var nameElements = (nameDiv.textContent.match(/(ﾊﾟｯｼｮﾝ|ｷｭｰﾄ|ｸｰﾙ)\s+(\S+)\s+(\(\S+\))/)||[]);
+				if (nameElements.length == 4) {
 					idol.attribute = nameElements[1];
 					idol.name = nameElements[2];
 					idol.rarity = nameElements[3];
@@ -730,7 +804,7 @@
 					// 上記が取得出来ない場合は大概失敗なので飛ばす
 					continue;
 				}
-				// 各種情報を取得する基準としてクラス名を付ける（Android2系への暫定対応）
+				// 各種情報を取得する基準としてクラス名を付ける
 				// コスト、攻発揮値、守発揮値の取得（名前ブロックの次のテーブル）
 				var statusTable = nameAreaElement.nextElementSibling;
 				if (statusTable && statusTable.tagName == 'TABLE') {
@@ -806,7 +880,7 @@
 						var ratioDiv = ratioTd.appendChild($create('div'));
 						ratioDiv.className = 'cghp_idol_detail_div';
 						var marketPriceLink = ratioDiv.appendChild($create('a'));
-						marketPriceLink.className = 'cghp_gray_area';
+						marketPriceLink.className = 'cghp_add_area_gray';
 						marketPriceLink.target = '_blank';
 						marketPriceLink.href = marketPriceUrl;
 						marketPriceLink.innerHTML = '<span class="blue">攻比:</span>' + attackRatio + '<br />' +
@@ -942,11 +1016,68 @@
 	// -------------------------------------------------------------------------
 	(function() {
 		if ((/%2Fcard_str%2Fflash%3F/).test(_param)) {
+			// 追加メニュー表示
 			var flashMenuList = [
 				{ 'name': 'マイスタジオ', 'icon': 'icon-headphones', 'url': _baseURL + 'mypage' },
-				{ 'name': 'ｱｲﾄﾞﾙ一覧', 'icon': 'icon-list-alt', 'url': _baseURL + 'card_list%2Findex' },
-				{ 'name': '女子寮', 'icon': 'icon-home', 'url': _baseURL + 'card_storage%2Findex' },
-				{ 'name': '戻　る', 'icon': 'icon-undo', 'url': _baseURL + 'card_str' }
+				{ 'name': 'レッスン画面に戻る', 'icon': 'icon-undo', 'url': _baseURL + 'card_str' }
+			];
+
+			var flashMenu = [];
+
+			flashMenu.push('<ul class="cghp_menu_list">');
+			for (var i = 0, len = flashMenuList.length, menu; i < len; i++) {
+				menu = flashMenuList[i];
+				flashMenu.push('<li>');
+				if (_settings.custom_menu_icon) {
+					flashMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + menu.name + '</div></a>');
+				} else {
+					flashMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + menu.name + '</a>');
+				}
+				flashMenu.push('</li>');
+			}
+			flashMenu.push('</ul>');
+
+			// レッスン情報表示
+			var pattern = /(?:%3F|%26)(\w+)%3D(\w+)/g;
+			var match = [];
+			var qs = {};
+			while (match = pattern.exec(_param)) {
+				qs[match[1]] = match[2];
+			}
+			flashMenu.push('<ul class="cghp_menu_list"><li class="cghp_add_area_gray">');
+			flashMenu.push('<div class="cghp_menu_text">');
+			// 成長度
+			var grow_prm = toNumber(qs.fix_prm) - toNumber(qs.now_prm);
+			flashMenu.push('Ex：<span class="cghp_fg_yellow">' + grow_prm + '%</span>');
+			// レベル
+			var grow_lv = Math.floor(grow_prm / 100);
+			var now_lv = toNumber(qs.bef_lv)+ grow_lv;
+			flashMenu.push(' Lv：<span class="cghp_fg_yellow">' + now_lv + ' (+' + grow_lv + ')' + '</span>');
+			// 特技レベル
+			if (toNumber(qs.skill_lv_up) === 1) {
+				var aft_mys = toNumber(qs.aft_mys);
+				var bef_mys = qs.aft_mys - 1;
+				flashMenu.push(' <span class="cghp_fg_blue">特技LvUP! (' + bef_mys + ' → ' + aft_mys + ')</span>');
+			}
+			flashMenu.push('</div>');
+			flashMenu.push('</li></ul>');
+
+			var menu = $create('div');
+			menu.id = 'cghpFlashMenu';
+			menu.innerHTML = flashMenu.join('');
+			_body.insertBefore(menu, _body.firstChild);
+		}
+	})();
+
+	// -------------------------------------------------------------------------
+	// 特訓拡張
+	// -------------------------------------------------------------------------
+	(function() {
+		if ((/%2Fcard_union%2Fflush%3F/).test(_param)) {
+			// 追加メニュー表示
+			var flashMenuList = [
+				{ 'name': 'マイスタジオ', 'icon': 'icon-headphones', 'url': _baseURL + 'mypage' },
+				{ 'name': '別のｱｲﾄﾞﾙを特訓させる', 'icon': 'icon-music', 'url': _baseURL + 'card_union' }
 			];
 
 			var flashMenu = [];
@@ -956,7 +1087,7 @@
 			for (var i = 0; i < flashMenuListLen; i++) {
 				var menu = flashMenuList[i];
 				flashMenu.push('<li>');
-				if (_settings.customMenuIcon) {
+				if (_settings.custom_menu_icon) {
 					flashMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + menu.name + '</div></a>');
 				} else {
 					flashMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + menu.name + '</a>');
@@ -978,43 +1109,42 @@
 	(function() {
 		if ((/%2Fbattles%2Fbattle_check%2F/).test(_param)) {
 			// LIVE消費攻コスト上限
-			var targetDiv = _content.querySelectorAll('div');
-			var targetDivLen = targetDiv.length||0;
-			for (var i = 0; i < targetDivLen; i++) {
-				var div = targetDiv[i];
-				var divText = div.textContent;
+			var targetDiv = _content.querySelector('div.m-Btm5.t-Cnt');
+			if (targetDiv) {
+				var divText = targetDiv.textContent;
 				var matches = divText.match(/攻ｺｽﾄ:(\d+)\s*⇒\s*(\d+)/);
 				if (matches) {
 					var setAttackCostLimitArea = $create('div');
-					setAttackCostLimitArea.className = 'cghp_center cghp_gray_area cghp_margin_t10 cghp_margin_b10';
+					setAttackCostLimitArea.className = 'cghp_center cghp_add_area_gray cghp_margin_t10 cghp_margin_b10';
 					var setAttackCostLimit = [];
 					setAttackCostLimit.push('消費攻ｺｽﾄ上限値：');
-					setAttackCostLimit.push('<input id="cghpAttackCostLimit" type="text" size="4" maxlength="4" value="' + _settings.attackCostLimit + '" />');
-					setAttackCostLimit.push('&nbsp;&nbsp;');
-					setAttackCostLimit.push('<a id="cghpSetAttackCostLimit" class="a_link cghp_margin_t0 cghp_margin_b0">O K</a>');
+					setAttackCostLimit.push('<input id="cghpAttackCostLimit" type="text" size="4" maxlength="4" value="' + _settings.atack_cost_limit + '" />');
+					setAttackCostLimit.push('<a id="cghpSetAttackCostLimit" class="cghp_button cghp_margin_t0">O K</a>');
+					setAttackCostLimit.push('<div class="yellow">0を設定すると機能が無効になります</div>');
 					setAttackCostLimitArea.innerHTML = setAttackCostLimit.join('');
-					div.parentElement.insertBefore(setAttackCostLimitArea, div.nextSibling);
+					targetDiv.parentElement.insertBefore(setAttackCostLimitArea, targetDiv.nextSibling);
 
 					var setAttackCostButton = $id('cghpSetAttackCostLimit');
 					$bind(setAttackCostButton, 'click', function() {
 						var limit = $id('cghpAttackCostLimit');
 						if (limit) {
-							var value = parseInt(limit.value);
+							var value = toNumber(limit.value);
 							if (isNumeric(value) && (/\d+/).test(value)) {
-								setValue('cghp_atack_cost_limit', value);
-								_location.reload();
+								_settings.atack_cost_limit = value;
+								saveSettings('atack_cost_limit');
+								_location.replace(_location.href);
 							} else {
 								alert('整数を入力してください。');
 							}
 						}
 					});
 
-					if (0 < _settings.attackCostLimit) {
-						var beforeCost = parseInt(matches[1] || 0);
-						var afterCost = parseInt(matches[2] || 0);
+					if (0 < _settings.atack_cost_limit) {
+						var beforeCost = toNumber(matches[1]);
+						var afterCost = toNumber(matches[2]);
 						if (isNumeric(beforeCost) && isNumeric(afterCost)) {
 							var cost = beforeCost - afterCost;
-							if (_settings.attackCostLimit < cost) {
+							if (_settings.atack_cost_limit < cost) {
 								var targetButton = _content.querySelectorAll('input[type="submit"]');
 								var targetButtonLen = targetButton.length||0;
 								for (var i = 0; i < targetButtonLen; i++) {
@@ -1030,7 +1160,6 @@
 								}
 							}
 						}
-						break;
 					}
 				}
 			}
@@ -1081,7 +1210,7 @@
 				var flashMenuList = [
 					{ 'name': 'ﾏｲｽﾀｼﾞｵ', 'icon': 'icon-headphones', 'url': _baseURL + 'mypage' },
 					{ 'name': '相手ﾌﾟﾛﾌ', 'icon': 'icon-user', 'url': _baseURL + 'profile%2Fshow%2F' + enemyId },
-					{ 'name': '道　場', 'icon': 'icon-list-ol', 'url': _settings.dojoURL },
+					{ 'name': '道　場', 'icon': 'icon-list-ol', 'url': _settings.dojo_url },
 					{ 'name': '戻　る', 'icon': 'icon-undo', 'url': _baseURL + 'battles%2Fbattle_check%2F' + enemyId }
 				];
 
@@ -1092,7 +1221,7 @@
 				for (var i = 0; i < flashMenuListLen; i++) {
 					var menu = flashMenuList[i];
 					flashMenu.push('<li>');
-					if (_settings.customMenuIcon) {
+					if (_settings.custom_menu_icon) {
 						flashMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' cghp_icon"></i></div><div class="cghp_name_area">' + menu.name + '</div></a>');
 					} else {
 						flashMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + menu.name + '</a>');
@@ -1100,7 +1229,7 @@
 					flashMenu.push('</li>');
 				}
 				flashMenu.push('<li>');
-				if (_settings.customMenuIcon) {
+				if (_settings.custom_menu_icon) {
 					flashMenu.push('<a id="cghpCloseTab" class="cghp_link"><div class="cghp_icon_area"><i class="icon-remove cghp_icon"></i></div><div class="cghp_name_area">閉じる</div></a>');
 				} else {
 					flashMenu.push('<a id="cghpCloseTab" class="cghp_no_icon cghp_link">閉じる</a>');
@@ -1133,7 +1262,7 @@
 				var insertTarget = _content.querySelector('form[name="quest_form"]').nextSibling;
 				var expInfoDiv = getExpInfo(status.currentHP, status.maxHP, status.currentExp, status.maxExp);
 				if (expInfoDiv != null && insertTarget != null) {
-					expInfoDiv.className = 'cghp_margin_t10 cghp_gray_area';
+					expInfoDiv.className = 'cghp_margin_t10 cghp_add_area_gray';
 					insertTarget.parentElement.insertBefore(expInfoDiv, insertTarget);
 				}
 			}
@@ -1151,7 +1280,7 @@
 				var insertTarget = _content.querySelector('img[src*="%2Fline_hoshi.jpg"]');
 				var expInfoDiv = getExpInfo(status.currentHP, status.maxHP, status.currentExp, status.maxExp);
 				if (expInfoDiv != null && insertTarget != null) {
-					expInfoDiv.className = 'cghp_margin_t10 cghp_margin_b10 cghp_gray_area';
+					expInfoDiv.className = 'cghp_margin_t10 cghp_margin_b10 cghp_add_area_gray';
 					insertTarget.parentElement.insertBefore(expInfoDiv, insertTarget);
 				}
 			}
@@ -1168,7 +1297,7 @@
 				var insertTarget = $id('play_area').nextSibling;
 				var expInfoDiv = getExpInfo(status.currentHP, status.maxHP, status.currentExp, status.maxExp);
 				if (expInfoDiv != null && insertTarget != null) {
-					expInfoDiv.className = 'cghp_margin_b10 cghp_gray_area';
+					expInfoDiv.className = 'cghp_margin_b10 cghp_add_area_gray';
 					insertTarget.parentElement.insertBefore(expInfoDiv, insertTarget);
 				}
 				// ステータス変化時に表示を更新
@@ -1197,16 +1326,16 @@
 		if ((/%2Fbonus_point/).test(_param)) {
 			var disabledMessage = '<div class="gray">振り分け無効</div>';
 
-			if (!_settings.pointFilterHP) {
+			if (!_settings.point_filter_hp) {
 				$id('add_hp').parentNode.innerHTML = disabledMessage;
 			}
-			if (!_settings.pointFilterAtk) {
+			if (!_settings.point_filter_atk) {
 				$id('add_atk').parentNode.innerHTML = disabledMessage;
 			}
-			if (!_settings.pointFilterDef) {
+			if (!_settings.point_filter_def) {
 				$id('add_def').parentNode.innerHTML = disabledMessage;
 			}
-			if (!_settings.pointFilterAuto) {
+			if (!_settings.point_filter_auto) {
 				var targetLink = _content.querySelectorAll('a.a_link');
 				var targetLinkLen = targetLink.length||0;
 				for (var i = 0; i < targetLinkLen; i++) {
@@ -1225,7 +1354,7 @@
 	// -------------------------------------------------------------------------
 	(function() {
 		if ((/%2Fquests(?:$|%3Fl_frm%3D|%3Frnd%3D|%2Fmission_list(?:%2F|%3F))/).test(_param)) {
-			if (!_settings.pointFilterAuto) {
+			if (!_settings.point_filter_auto) {
 				var targetLink = _content.querySelectorAll('a');
 				var targetLinkLen = targetLink.length||0;
 				for (var i = 0; i < targetLinkLen; i++) {
@@ -1269,7 +1398,7 @@
 					rankingLink1.push(baseLink1.replace('ranking_for_user%2F%3F', 'ranking_for_user%2F2%3F'));
 					rankingLink1.push('"><span class="bgArrow">プロダクション内個人順位</span></a></p>');
 
-					rankingLink1.push('<div class="cghp_center cghp_gray_area cghp_margin_t10">指定順位表示：');
+					rankingLink1.push('<div class="cghp_center cghp_add_area_gray cghp_margin_t10">指定順位表示：');
 					rankingLink1.push('<input id="kojinRankInput" type="text" size="8" maxlength="8" style="width:70px;" /> 位 ');
 					rankingLink1.push('<a id="kojinRankButton" class="a_link cghp_margin_t0 cghp_margin_b0">表示</a></div>');
 
@@ -1283,10 +1412,10 @@
 						$bind(kojinRankButton, 'click', function() {
 							var kojinRankInput =$id('kojinRankInput');
 							if (kojinRankInput) {
-								var targetRank = parseInt(kojinRankInput.value);
+								var targetRank = toNumber(kojinRankInput.value);
 								if (isNumeric(targetRank)) {
 									var link = baseLink1.replace('ranking_for_user%2F%3F', 'ranking_for_user%2F0%2F' + (targetRank - 3) + '%3F');
-									_location.href = link;
+									_location.assign(link);
 								}
 							}
 							return false;
@@ -1308,7 +1437,7 @@
 					rankingLink2.push(baseLink2.replace('ranking_for_production%2F', 'ranking_for_production%2F1%2F'));
 					rankingLink2.push('"><span class="bgArrow">所属プロダクション順位</span></a></p>');
 
-					rankingLink2.push('<div class="cghp_center cghp_gray_area cghp_margin_t10">指定順位表示：');
+					rankingLink2.push('<div class="cghp_center cghp_add_area_gray cghp_margin_t10">指定順位表示：');
 					rankingLink2.push('<input id="proRankInput" type="text" size="8" maxlength="8" style="width:70px;" /> 位 ');
 					rankingLink2.push('<a id="proRankButton" class="a_link cghp_margin_t0 cghp_margin_b0">表示</a></div>');
 
@@ -1322,10 +1451,10 @@
 						$bind(proRankButton, 'click', function() {
 							var proRankInput =$id('proRankInput');
 							if (proRankInput) {
-								var targetRank = parseInt(proRankInput.value);
+								var targetRank = toNumber(proRankInput.value);
 								if (isNumeric(targetRank)) {
 									var link = baseLink2.replace('ranking_for_production%2F%3F', 'ranking_for_production%2F0%2F' + (targetRank - 3) + '%3F');
-									_location.href = link;
+									_location.assign(link);
 								}
 							}
 							return false;
@@ -1337,22 +1466,30 @@
 	})();
 
 	// -------------------------------------------------------------------------
-	// メンバー編成＠アイドルLIVEツアー
+	// メンバー編成＠各種イベント
 	// -------------------------------------------------------------------------
 	(function() {
-		if ((/%2Fevent_assault%2Fevent_deck_edit%3F/).test(_param)) {
-			var unitNo = (_param.match(/(?:%3F|%26)type%3D(\d+)/)||[])[1]||null;
-			if (unitNo != null) {
-			var targetButton = _content.querySelectorAll('a.grayButton260');
-			var targetButtonLen = targetButton.length||0;
-				for (var i = 0; i < targetButtonLen; i++) {
-					var button = targetButton[i];
-					if ((/ﾕﾆｯﾄﾘｰﾀﾞｰ以外を解散/).test(button.textContent)) {
-						var link = $create('a');
-						link.className = 'grayButton260';
-						link.href = _baseURL + 'event_assault%2Fdeck_modify_card%3Fno%3D%26type%3D' + unitNo;
-						link.innerHTML = 'ﾒﾝﾊﾞｰを追加する';
-						button.parentElement.insertBefore(link, button.nextSibling);
+		if ((/%2Fevent_\w+%2Fevent_deck_edit%3F/).test(_param)) {
+			// メンバーを追加するボタンを取得
+			var addURL = null;
+			var addButton = _content.querySelectorAll('a.grayButton140')||[];
+			for (var i = 0, len = addButton.length, button; i < len; i++) {
+				button = addButton[i];
+				if ((/ﾒﾝﾊﾞｰを追加する/).test(button.textContent)) {
+					addURL = button.href;
+					break;
+				}
+			}
+			if (addURL) {
+				// 複製してリーダー以外解散ボタンの下に追加
+				var disButton = _content.querySelectorAll('a.grayButton260, a.grayButton300')||[];
+				for (var i = 0, len = disButton.length, button; i < len; i++) {
+					button = disButton[i];
+					if ((/ﾘｰﾀﾞｰ以外を解散/).test(button.textContent)) {
+						var addButton = button.cloneNode(false);
+						addButton.href = addURL;
+						addButton.innerHTML = 'ﾒﾝﾊﾞｰを追加する';
+						button.parentElement.insertBefore(addButton, button.nextSibling);
 						break;
 					}
 				}
@@ -1361,20 +1498,111 @@
 	})();
 
 	// -------------------------------------------------------------------------
-	// メンバー編成＠ドリームLIVEフェスティバル
+	// 発揮値チェック＠アイドルLIVEツアー系
 	// -------------------------------------------------------------------------
 	(function() {
-		if ((/%2Fevent_dream%2Fevent_deck_edit%3F/).test(_param)) {
-			var targetButton = _content.querySelectorAll('a.grayButton300');
-			var targetButtonLen = targetButton.length||0;
-			for (var i = 0; i < targetButtonLen; i++) {
-				var button = targetButton[i];
-				if ((/ﾘｰﾀﾞｰ以外を解散/).test(button.textContent)) {
-					var link = $create('a');
-					link.className = 'grayButton300';
-					link.href = _baseURL + 'event_dream%2Fdeck_modify_card%3Fdeck%3D1';
-					link.innerHTML = 'ﾒﾝﾊﾞｰを追加する';
-					button.parentElement.insertBefore(link, button.nextSibling);
+		if ((/%2Fevent_assault%2F(?:get_raid_boss|raid_lose)(?:%2F|%3F)/).test(_param)) {
+			// ユニットNoを取得
+			var unitNo = null;
+			var h3Title = _content.querySelectorAll('h3.event_assault')||[];
+			for (var i = 0, len = h3Title.length, h3; i < len; i++) {
+				h3 = h3Title[i];
+				var match = null;
+				if (match = h3.textContent.match(/ﾕﾆｯﾄ(\d)/)) {
+					unitNo = toNumber(match[1]);
+					break;
+				}
+			}
+			// 予想最大攻を取得
+			var attackPower = null;
+			var spanBlue = _content.querySelectorAll('span.blue')||[];
+			for (var i = 0, len = spanBlue.length, span; i < len; i++) {
+				span = spanBlue[i];
+				if ((/予想攻発揮値\(消費LP1\)\s*:/).test(span.textContent)) {
+					attackPower = (span.nextSibling.textContent.match(/(\d+)/)||[])[1]||null;
+					if (!attackPower) {
+						attackPower = (span.nextElementSibling.textContent.match(/(\d+)/)||[])[1]||null;
+						break;
+					}
+				}
+			}
+			if (!unitNo || !attackPower) return;
+			var powerCheckKey = 'event_assault_power_check' + unitNo;
+			// 設定した発揮値と予想最大攻が一致しない場合は、LIVE用のボタンを消す
+			if (attackPower) {
+				attackPower = toNumber(attackPower);
+				var compPower = _settings[powerCheckKey];
+				var attackButton = _content.querySelector('.assaultArea_02');
+				if (attackButton) {
+					var alertArea = $create('div');
+					var alertClass = ['cghp_margin_b10', 'cghp_margin_t10'];
+					var alertHtml = ['<h4>発揮値ﾁｪｯｸ (ﾕﾆｯﾄ' + unitNo + ')</h4>'];
+					//alertHtml.push('<span class="blue">設定値：</span>' + ((0 < compPower) ? compPower : '無効'));
+					alertHtml.push('<span class="blue">設定値：</span>' + compPower);
+					alertHtml.push('&nbsp;&nbsp;&nbsp;&nbsp;');
+					alertHtml.push('<span class="blue">発揮値：</span>' + attackPower);
+					alertHtml.push('&nbsp;&nbsp;&nbsp;&nbsp;');
+					if (compPower <= 0) {
+						// 無効
+						alertClass.push('cghp_add_area_gray');
+						alertHtml.push('<span class="yellow">無効</span>');
+					} else if (compPower === attackPower) {
+						// 無効 or 一致
+						alertClass.push('cghp_add_area_green');
+						alertHtml.push('<span class="yellow">一致</span>');
+					} else {
+						// 不一致
+						alertClass.push('cghp_add_area_red');
+						alertClass.push('cghp_link');
+						alertHtml.push('<span class="yellow">不一致</span>');
+						alertHtml.push('<br>');
+						alertHtml.push('<span class="yellow">ｸﾘｯｸすると一時的にLIVEボタンを表示</span>');
+						$bind(alertArea, 'click', function() {
+							$toggleClass(attackButton.querySelector('form'), 'cghp_hide');
+						});
+						// LIVEボタンを消す
+						$addClass(attackButton.querySelector('form'), 'cghp_hide');
+					}
+					alertArea.className = alertClass.join(' ');
+					alertArea.innerHTML = alertHtml.join('');
+					attackButton.parentElement.insertBefore(alertArea, attackButton);
+				}
+			}
+			// 発揮値設定フォームをページ下部に表示
+			var frequentsButton = _content.querySelectorAll('.frequentsButton')||[];
+			for (var i = 0, len = frequentsButton.length, button; i < len; i++) {
+				button = frequentsButton[i];
+				if ((/ﾕﾆｯﾄﾒﾝﾊﾞｰ編成/).test(button.textContent)) {
+					var settingArea = $create('div');
+					settingArea.className = 'cghp_add_area_gray cghp_center cghp_margin_t10';
+					var settingForm = ['<h4>発揮値ﾁｪｯｸ設定 (ﾕﾆｯﾄ' + unitNo + ')</h4>'];
+					settingForm.push('予想攻発揮値(消費LP1)：');
+					settingForm.push('<input id="cghpAssaultPowerCheck" type="text" size="8" maxlength="8" value="' + _settings[powerCheckKey] + '" />');
+					settingForm.push('<br>');
+					settingForm.push('<a id="cghpSetAssaultPowerCheckButton1" class="cghp_button cghp_margin_t10">入力値を設定</a>');
+					settingForm.push('<a id="cghpSetAssaultPowerCheckButton2" class="cghp_button cghp_margin_t10">現在の発揮値を設定</a>');
+					settingForm.push('<div class="yellow">ﾊﾟﾜｰ発揮後の発揮値を入力してください<br>0を設定すると機能が無効になります</div>');
+					settingArea.innerHTML = settingForm.join('');
+					button.parentElement.insertBefore(settingArea, button.nextSibling);
+
+					var setFunc = function(value) {
+						v = toNumber(value);
+						if (isNumeric(v) && (/\d+/).test(v)) {
+							_settings[powerCheckKey] = v;
+							saveSettings(powerCheckKey);
+							_location.replace(_location.href);
+						} else {
+							alert(unitNo + '整数を入力してください。');
+						}
+					};
+					var setButton1 = $id('cghpSetAssaultPowerCheckButton1');
+					$bind(setButton1, 'click', function() {
+						setFunc($id('cghpAssaultPowerCheck').value);
+					});
+					var setButton2 = $id('cghpSetAssaultPowerCheckButton2');
+					$bind(setButton2, 'click', function() {
+						setFunc(attackPower);
+					});
 					break;
 				}
 			}
@@ -1391,105 +1619,70 @@
 			settingMenu.push('<div id="cghpSettingArea">');
 			settingMenu.push('<h2>IM@S CG Helper(仮) 設定</h2>');
 
+			var hideBannerInMenuChecked = (_settings.hide_banner_in_menu) ? 'checked="checked"' : '';
 			settingMenu.push('<section>');
-			var hideBannerInMenuChecked = (_settings.hideBannerInMenu) ? 'checked="checked"' : '';
 			settingMenu.push('<h3><label>');
 			settingMenu.push('<input id="cghpSetHideBannerInMenu" type="checkbox" ' + hideBannerInMenuChecked + ' /> ');
 			settingMenu.push('メニュー内のバナーを消す');
 			settingMenu.push('</label></h3>');
 			settingMenu.push('</section>');
-
+			var customMenuIconChecked = (_settings.custom_menu_icon) ? 'checked="checked"' : '';
 			settingMenu.push('<section>');
-			var customMenuIconChecked = (_settings.customMenuIcon) ? 'checked="checked"' : '';
 			settingMenu.push('<h3><label>');
 			settingMenu.push('<input id="cghpSetCustomMenuIcon" type="checkbox" ' + customMenuIconChecked + ' /> ');
 			settingMenu.push('カスタムメニューにアイコンを表示');
 			settingMenu.push('</label></h3>');
 			settingMenu.push('</section>');
-
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>カスタムメニュー1（0～8個まで）');
-			settingMenu.push('<a id="cghpHelpCustomMenu1" class="a_link cghp_cm_help_link">...</a>：</h3>');
-			settingMenu.push('<p><input id="cghpSetCustomMenu1" type="text" value="' + _settings.customMenu1.join(',') + '" /></p>');
-			settingMenu.push('</section>');
-
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>カスタムメニュー2（0～8個まで）');
-			settingMenu.push('<a id="cghpHelpCustomMenu2" class="a_link cghp_cm_help_link">...</a>：</h3>');
-			settingMenu.push('<p><input id="cghpSetCustomMenu2" type="text" value="' + _settings.customMenu2.join(',') + '" /></p>');
-			settingMenu.push('</section>');
-
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>カスタムメニュー3（0～8個まで）');
-			settingMenu.push('<a id="cghpHelpCustomMenu3" class="a_link cghp_cm_help_link">...</a>：</h3>');
-			settingMenu.push('<p><input id="cghpSetCustomMenu3" type="text" value="' + _settings.customMenu3.join(',') + '" /></p>');
-			settingMenu.push('</section>');
-
+			for (var i = 1; i <= 3; i++) {
+				settingMenu.push('<section>');
+				settingMenu.push('<h3>カスタムメニュー' + i + '（0～8個まで）');
+				settingMenu.push('<a id="cghpHelpCustomMenu' + i + '" class="a_link cghp_cm_help_link">...</a>：</h3>');
+				settingMenu.push('<p><input id="cghpSetCustomMenu' + i + '" type="text" value="' + _settings['custom_menu' + i].join(',') + '" /></p>');
+				settingMenu.push('</section>');
+			}
 			settingMenu.push('<section>');
 			settingMenu.push('<h3>道場URL：</h3>');
-			settingMenu.push('<p><input id="cghpSetDojoURL" type="text" value="' + _settings.dojoURL + '" /></p>');
+			settingMenu.push('<p><input id="cghpSetDojoURL" type="text" value="' + _settings.dojo_url + '" /></p>');
 			settingMenu.push('</section>');
-
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>カスタムURL1：</h3>');
-			settingMenu.push('<p><input id="cghpSetCustomURL1" type="text" value="' + _settings.customURL1 + '" /></p>');
-			settingMenu.push('</section>');
-
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>カスタムURL2：</h3>');
-			settingMenu.push('<p><input id="cghpSetCustomURL2" type="text" value="' + _settings.customURL2 + '" /></p>');
-			settingMenu.push('</section>');
-
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>カスタムURL3：</h3>');
-			settingMenu.push('<p><input id="cghpSetCustomURL3" type="text" value="' + _settings.customURL3 + '" /></p>');
-			settingMenu.push('</section>');
-
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>カスタムURL4：</h3>');
-			settingMenu.push('<p><input id="cghpSetCustomURL4" type="text" value="' + _settings.customURL4 + '" /></p>');
-			settingMenu.push('</section>');
-
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>カスタムURL5：</h3>');
-			settingMenu.push('<p><input id="cghpSetCustomURL5" type="text" value="' + _settings.customURL5 + '" /></p>');
-			settingMenu.push('</section>');
-
+			for (var i = 1; i <= 5; i++) {
+				settingMenu.push('<section>');
+				settingMenu.push('<h3>カスタムURL' + i + '：</h3>');
+				settingMenu.push('<p><input id="cghpSetCustomURL' + i + '" type="text" value="' + _settings['custom_url' + i] + '" /></p>');
+				settingMenu.push('</section>');
+			}
 			settingMenu.push('<section>');
 			settingMenu.push('<h3>ポイント振り分けフィルタ：</h3>');
-			var pointFilterHPChecked = (_settings.pointFilterHP) ? 'checked="checked"' : '';
+			var pointFilterHPChecked = (_settings.point_filter_hp) ? 'checked="checked"' : '';
 			settingMenu.push('<label>');
 			settingMenu.push('<input id="cghpPointFilterHP" type="checkbox" ' + pointFilterHPChecked + ' /> ');
 			settingMenu.push('スタミナ');
 			settingMenu.push('</label><br />');
-			var pointFilterAtkChecked = (_settings.pointFilterAtk) ? 'checked="checked"' : '';
+			var pointFilterAtkChecked = (_settings.point_filter_atk) ? 'checked="checked"' : '';
 			settingMenu.push('<label>');
 			settingMenu.push('<input id="cghpPointFilterAtk" type="checkbox" ' + pointFilterAtkChecked + ' /> ');
 			settingMenu.push('攻コスト');
 			settingMenu.push('</label><br />');
-			var pointFilterDefChecked = (_settings.pointFilterDef) ? 'checked="checked"' : '';
+			var pointFilterDefChecked = (_settings.point_filter_def) ? 'checked="checked"' : '';
 			settingMenu.push('<label>');
 			settingMenu.push('<input id="cghpPointFilterDef" type="checkbox" ' + pointFilterDefChecked + ' /> ');
 			settingMenu.push('守コスト');
 			settingMenu.push('</label><br />');
-			var pointFilterAutoChecked = (_settings.pointFilterAuto) ? 'checked="checked"' : '';
+			var pointFilterAutoChecked = (_settings.point_filter_auto) ? 'checked="checked"' : '';
 			settingMenu.push('<label>');
 			settingMenu.push('<input id="cghpPointFilterAuto" type="checkbox" ' + pointFilterAutoChecked + ' /> ');
 			settingMenu.push('自動振り分け');
 			settingMenu.push('</label><br />');
 			settingMenu.push('</section>');
-
 			settingMenu.push('<section>');
 			settingMenu.push('<h3>');
 			settingMenu.push('LIVEバトル時の消費コスト上限値：');
-			settingMenu.push('<p><input id="cghpSetAttackCostLimit" type="text" maxlength="4" value="' + _settings.attackCostLimit + '" /></p>');
+			settingMenu.push('<p><input id="cghpSetAttackCostLimit" type="text" maxlength="4" value="' + _settings.atack_cost_limit + '" /></p>');
 			settingMenu.push('</h3>');
 			settingMenu.push('</section>');
-
 			/* 通常使用しないので隠しておく
 			settingMenu.push('<section>');
 			settingMenu.push('<h3>FLASHページのメニュー拡大率：</h3>');
-			settingMenu.push('<p><input id="cghpSetSwfZoom" type="text" value="' + _settings.swfZoom + '" /></p>');
+			settingMenu.push('<p><input id="cghpSetSwfZoom" type="text" value="' + _settings.swf_zoom + '" /></p>');
 			settingMenu.push('</section>');
 			*/
 
@@ -1510,10 +1703,9 @@
 			_body.insertBefore(overlay, _body.firstChild);
 
 			// カスタムメニューのヘルプを作成
-			var customMenus = ['1', '2', '3'];
-			for (var i = 0; i < 3; i++) {
-				var help = $id('cghpHelpCustomMenu' + customMenus[i]);
-				var text = $id('cghpSetCustomMenu' + customMenus[i]);
+			for (var i = 1; i <= 3; i++) {
+				var help = $id('cghpHelpCustomMenu' + i);
+				var text = $id('cghpSetCustomMenu' + i);
 				if (help && text) {
 					help.visible = false;
 					// ヘルプのトグル表示関数
@@ -1552,150 +1744,79 @@
 
 					var hideBannerInMenu = $id('cghpSetHideBannerInMenu');
 					if (hideBannerInMenu) {
-						_settings.hideBannerInMenu = hideBannerInMenu.checked;
+						_settings.hide_banner_in_menu = hideBannerInMenu.checked;
 					}
-
 					var customMenuIcon = $id('cghpSetCustomMenuIcon');
 					if (customMenuIcon) {
-						_settings.customMenuIcon = customMenuIcon.checked;
+						_settings.custom_menu_icon = customMenuIcon.checked;
 					}
-
-					var customMenu1 = $id('cghpSetCustomMenu1');
-					if (customMenu1) {
-						var customMenu1List = customMenu1.value.split(',');
-						var customMenu1ListLen = customMenu1List.length||0;
-						var menu1 = [];
-						for (var i = 0; i < customMenu1ListLen; i++) {
-							var value = parseInt(trim((customMenu1List[i]).toString()));
-							if (isNumeric(value) && (/^\d+/).test(value)) {
-								menu1.push(value);
+					for (var i = 1; i <= 3; i++) {
+						var customMenu = $id('cghpSetCustomMenu' + i);
+						if (customMenu) {
+							var menuItem = [];
+							var customMenuList = customMenu.value.split(',')||[];
+							for (var j = 0, len = customMenuList.length; j < len; j++) {
+								var value = toNumber(trim((customMenuList[j]).toString()));
+								if (isNumeric(value) && (/^\d+/).test(value)) {
+									menuItem.push(value);
+								}
+							}
+							if (menuItem.length <= 8) {
+								_settings['custom_menu' + i] = menuItem;
 							}
 						}
-						if (menu1.length <= 8) {
-							_settings.customMenu1 = menu1;
-						}
 					}
-
-					var customMenu2 = $id('cghpSetCustomMenu2');
-					if (customMenu2) {
-					var customMenu2List = customMenu2.value.split(',');
-					var customMenu2ListLen = customMenu2List.length||0;
-						var manu2 = [];
-						for (var i = 0; i < customMenu2ListLen; i++) {
-							var value = parseInt(trim((customMenu2List[i]).toString()));
-							if (isNumeric(value) && (/^\d+/).test(value)) {
-								manu2.push(value);
-							}
-						}
-						if (manu2.length <= 8) {
-							_settings.customMenu2 = manu2;
-						}
-					}
-
-					var customMenu3 = $id('cghpSetCustomMenu3');
-					if (customMenu3) {
-						var customMenu3List = customMenu3.value.split(',');
-						var customMenu3ListLen = customMenu3List.length||0;
-						var manu3 = [];
-						for (var i = 0; i < customMenu3ListLen; i++) {
-							var value = parseInt(trim((customMenu3List[i]).toString()));
-							if (isNumeric(value) && (/^\d+/).test(value)) {
-								manu3.push(value);
-							}
-						}
-						if (manu3.length <= 8) {
-							_settings.customMenu3 = manu3;
-						}
-					}
-
 					var dojoURL = $id('cghpSetDojoURL');
 					if (dojoURL) {
 						var value = trim(dojoURL.value);
 						if (urlPattern.test(value)) {
-							_settings.dojoURL = value;
+							_settings.dojo_url = value;
 						}
 					}
-
-					var customURL1 = $id('cghpSetCustomURL1');
-					if (customURL1) {
-						var value = trim(customURL1.value);
-						if (urlPattern.test(value)) {
-							_settings.customURL1 = value;
+					for (var i = 1; i <= 5; i++) {
+						var customURL = $id('cghpSetCustomURL' + i);
+						if (customURL) {
+							var value = trim(customURL.value);
+							if (urlPattern.test(value)) {
+								_settings['custom_url' + i] = value;
+							}
 						}
 					}
-
-					var customURL2 = $id('cghpSetCustomURL2');
-					if (customURL2) {
-						var value = trim(customURL2.value);
-						if (urlPattern.test(value)) {
-							_settings.customURL2 = value;
-						}
-					}
-
-					var customURL3 = $id('cghpSetCustomURL3');
-					if (customURL3) {
-						var value = trim(customURL3.value);
-						if (urlPattern.test(value)) {
-							_settings.customURL3 = value;
-						}
-					}
-
-					var customURL4 = $id('cghpSetCustomURL4');
-					if (customURL4) {
-						var value = trim(customURL4.value);
-						if (urlPattern.test(value)) {
-							_settings.customURL4 = value;
-						}
-					}
-
-					var customURL5 = $id('cghpSetCustomURL5');
-					if (customURL5) {
-						var value = trim(customURL5.value);
-						if (urlPattern.test(value)) {
-							_settings.customURL5 = value;
-						}
-					}
-
 					var pointFilterHP = $id('cghpPointFilterHP');
 					if (pointFilterHP) {
-						_settings.pointFilterHP = pointFilterHP.checked;
+						_settings.point_filter_hp = pointFilterHP.checked;
 					}
-
 					var pointFilterAtk = $id('cghpPointFilterAtk');
 					if (pointFilterAtk) {
-						_settings.pointFilterAtk = pointFilterAtk.checked;
+						_settings.point_filter_atk = pointFilterAtk.checked;
 					}
-
 					var pointFilterDef = $id('cghpPointFilterDef');
 					if (pointFilterDef) {
-						_settings.pointFilterDef = pointFilterDef.checked;
+						_settings.point_filter_def = pointFilterDef.checked;
 					}
-
 					var pointFilterAuto = $id('cghpPointFilterAuto');
 					if (pointFilterAuto) {
-						_settings.pointFilterAuto = pointFilterAuto.checked;
+						_settings.point_filter_auto = pointFilterAuto.checked;
 					}
-
 					var attackCostLimit = $id('cghpSetAttackCostLimit');
 					if (attackCostLimit) {
-						var value = parseInt(attackCostLimit.value);
+						var value = toNumber(attackCostLimit.value);
 						if (isNumeric(value) && (/\d+/).test(value)) {
-							_settings.attackCostLimit = value;
+							_settings.atack_cost_limit = value;
 						}
 					}
-
 					/* 通常使用しないので隠しておく
 					var swfZoom = $id('cghpSetSwfZoom');
 					if (swfZoom) {
-						var value = parseFloat(swfZoom.value);
+						var value = toNumber(swfZoom.value);
 						if (isNumeric(value) && 1 < value) {
-							_settings.swfZoom = value;
+							_settings.swf_zoom = value;
 						}
 					}
 					*/
 
 					saveSettings();
-					_location.reload();
+					_location.replace(_location.href);
 					return false;
 				});
 			}
@@ -1717,7 +1838,7 @@
 				$bind(resetButton, 'click', function() {
 					if (confirm('設定を初期化します。よろしいですか？')) {
 						deleteSettings();
-						_location.reload();
+						_location.replace(_location.href);
 					}
 				});
 			}
@@ -1727,7 +1848,13 @@
 			settingLink.innerHTML = '<div id="cghpSettingButton" class="nextLink">IM@S CG Helper(仮)設定</div>';
 			// リンクがクリックされたら設定画面を出して、閉じたときに有効な値だけを保存
 			$bind(settingLink, 'click', function() {
-				$removeClass($id('cghpSettingOverlay'), 'cghp_hide');
+				// オーバーレイ表示
+				var overlay = $id('cghpSettingOverlay');
+				if (overlay) {
+					var zoom = _root.style.zoom||1;
+					overlay.style.minHeight = (_body.scrollHeight / zoom) + 'px';
+					$removeClass(overlay, 'cghp_hide');
+				}
 				// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
 				var pageArea = $id('pageArea');
 				if (pageArea) {
@@ -1763,17 +1890,16 @@
 			var displaySet = getValue('DisplayPositionSet');
 
 			// 拡大表示設定
-			if (flashMenu) {
-				if (displaySet == 1 && navigator.userAgent.indexOf('Android') > 0) {
-					$bind(window, 'resize', function() {
-						flashMenu.style.zoom = innerWidth / 320 * _settings.swfZoom;
-					});
-					var event = _doc.createEvent('UIEvent');
-					event.initEvent('resize', false, true);
-					dispatchEvent(event);
-				} else {
-					flashMenu.style.zoom = _settings.swfZoom;
-				}
+			var ua = navigator.userAgent;
+			if (ua.indexOf('iPhone') > -1 || ua.indexOf('iPod') > -1 || ua.indexOf('iPad') > -1 || ua.indexOf('Android') > -1) {
+				$bind(window, 'resize', function() {
+					flashMenu.style.zoom = innerWidth / 320 * _settings.swf_zoom;
+				});
+				var event = _doc.createEvent('UIEvent');
+				event.initEvent('resize', false, true);
+				dispatchEvent(event);
+			} else {
+				flashMenu.style.zoom = _settings.swf_zoom;
 			}
 		}
 	})();
@@ -1789,21 +1915,24 @@
 		for (var i = 0; i < targetImageLen; i++) {
 			var image = targetImage[i];
 			var imageFile = (image.src.match(/%2Fimage_sp%2Fui%2Ftrophy%2Ftitle_charge_(\d+)/)||[])[1]||null;
+			// 肩書画像IDが3桁なら先頭に5を付与、それ以外はそのまま
+			imageFile = (imageFile.length == 3) ? '5' + imageFile : imageFile;
 			if (imageFile) {
 				// ローディングキャラ表示関数
 				var showImage = (function(imageFile) {
 					return function(e) {
+						$id('cghpLoadingCharImg').src = _baseURL + 'image_sp%2Fui%2Frich%2Fquest%2Floading%2F' + imageFile + '.gif';
 						// スクロール位置に画像を移動
 						// ページを拡大or縮小していると座標がずれるので計算にいれる
-						var scrollTop = (_root.scrollTop || _body.scrollTop || pageYOffset);
 						var zoom = _root.style.zoom||1;
+						var scrollTop = (_root.scrollTop || _body.scrollTop || pageYOffset);
 						$id('cghpLoadingCharArea').style.top = (scrollTop / zoom) + 'px';
-
-						// 肩書画像IDが3桁なら先頭に5を付与、それ以外はそのまま
-						imageFile = (imageFile.length == 3) ? '5' + imageFile : imageFile;
-						$id('cghpLoadingCharImg').src = _baseURL + 'image_sp%2Fui%2Frich%2Fquest%2Floading%2F' + imageFile + '.gif';
-						$removeClass($id('cghpLoadingCharOverlay'), 'cghp_hide');
-
+						// オーバーレイ表示
+						var overlay = $id('cghpLoadingCharOverlay');
+						if (overlay) {
+							overlay.style.minHeight = (_body.scrollHeight / zoom) + 'px';
+							$removeClass(overlay, 'cghp_hide');
+						}
 						// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
 						var pageArea = $id('pageArea');
 						if (pageArea) {
@@ -1842,6 +1971,7 @@
 
 			var loadingImage = imageArea.appendChild($create('img'));
 			loadingImage.id = 'cghpLoadingCharImg';
+			loadingImage.src = 'http://ava-a.mbga.jp/i/dot.gif';
 
 			_body.insertBefore(overlay, _body.firstChild);
 		}
@@ -1866,16 +1996,19 @@
 					// アイドル画像(大)表示関数
 					var showImage = (function(imageFile) {
 						return function(e) {
-							// スクロール位置に画像を移動
-							// ページを拡大or縮小していると座標がずれるので計算にいれる
-							var scrollTop = (_root.scrollTop || _body.scrollTop || pageYOffset);
-							var zoom = _root.style.zoom||1;
-							$id('cghpCharArea').style.top = (scrollTop / zoom) + 'px';
-
 							$id('cghpCharImg1').src = imageBaseURL + framePath + imageFile;
 							$id('cghpCharImg2').src = imageBaseURL + noFramePath + imageFile;
-							$removeClass($id('cghpCharOverlay'), 'cghp_hide');
-
+							// スクロール位置に画像を移動
+							// ページを拡大or縮小していると座標がずれるので計算にいれる
+							var zoom = _root.style.zoom||1;
+							var scrollTop = (_root.scrollTop || _body.scrollTop || pageYOffset);
+							$id('cghpCharArea').style.top = (scrollTop / zoom) + 'px';
+							// オーバーレイ表示
+							var overlay = $id('cghpCharOverlay');
+							if (overlay) {
+								overlay.style.minHeight = (_body.scrollHeight / zoom) + 'px';
+								$removeClass(overlay, 'cghp_hide');
+							}
 							// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
 							var pageArea = $id('pageArea');
 							if (pageArea) {
@@ -1920,16 +2053,18 @@
 				imageArea.id = 'cghpCharArea';
 
 				var switchImageLink = imageArea.appendChild($create('a'));
-				switchImageLink.className = 'cghp_gray_area';
+				switchImageLink.className = 'cghp_add_area_gray';
 				switchImageLink.innerHTML = '画像切り替え(Sﾚｱ, Sﾚｱ+のみ)';
 				$bind(switchImageLink, 'click', toggleImage);
 
 				var charImage1 = imageArea.appendChild($create('img'));
 				charImage1.id = 'cghpCharImg1';
+				charImage1.src = 'http://ava-a.mbga.jp/i/dot.gif';
 
 				var charImage2 = imageArea.appendChild($create('img'));
 				charImage2.id = 'cghpCharImg2';
 				charImage2.className = 'cghp_hide';
+				charImage2.src = 'http://ava-a.mbga.jp/i/dot.gif';
 
 				_body.insertBefore(overlay, _body.firstChild);
 			}
@@ -2017,14 +2152,10 @@
 		if (currentHP == null || maxHP == null || currentExp == null || maxExp == null) {
 			return null;
 		}
-		try {
-			currentHP = parseInt(currentHP);
-			maxHP = parseInt(maxHP);
-			currentExp = parseInt(currentExp);
-			maxExp = parseInt(maxExp);
-		} catch (e) {
-			return null;
-		}
+		currentHP = toNumber(currentHP);
+		maxHP = toNumber(maxHP);
+		currentExp = toNumber(currentExp);
+		maxExp = toNumber(maxExp);
 
 		// レベルアップに必要な経験値の算出
 		var restExp = maxExp - currentExp;
@@ -2033,22 +2164,25 @@
 		}
 
 		// 必要コストの算出とElementの作成
-		setValue('cghp_recovery100', maxHP);
-		setValue('cghp_recovery50', Math.ceil(maxHP / 2));
-		setValue('cghp_recovery20', Math.ceil(maxHP / 5));
+		_settings.recovery100 = maxHP;
+		_settings.recovery50 = Math.ceil(maxHP / 2);
+		_settings.recovery20 = Math.ceil(maxHP / 5);
+		saveSettings('recovery100');
+		saveSettings('recovery50');
+		saveSettings('recovery20');
 
 		var expInfoDiv = $create('div');
 		expInfoDiv.id = 'cghpExpInfo';
 
 		var div1 = expInfoDiv.appendChild($create('div'));
-		div1.innerHTML = '次のLvupまでに必要なEx：<span class="yellow">' + restExp + '</span>';
+		div1.innerHTML = '次のLvUPまでに必要なEx：<span class="yellow">' + restExp + '</span>';
 		var div2 = expInfoDiv.appendChild($create('div'));
 		div2.innerHTML = '現在のスタミナ：<span class="yellow">' + currentHP + '</span>';
 		expInfoDiv.appendChild($create('hr'));
 
 		if (restExp <= currentHP) {
 			var divError = expInfoDiv.appendChild($create('div'));
-			divError.innerHTML = '<span class="red">スタミナが溢れています。<br />至急Lvupしましょう！</span>';
+			divError.innerHTML = '<span class="red">スタミナが溢れています。<br />至急LvUPしましょう！</span>';
 		} else {
 			// 計算結果を時間(文字列)に変換
 			var minutesToString = function(minutes) {
@@ -2089,7 +2223,7 @@
 				result.recoveryNaturalOnlyTime = minutesToString(restExpTemp * 3);
 				result.recoveryNaturalOnlyCost = restExpTemp;
 				// 100%回復アイテム
-				if (_settings.expCalcRecovery100) {
+				if (_settings.exp_calc_recovery100) {
 					result.recovery100Count = Math.floor(restExpTemp / _settings.recovery100);
 					result.recovery100Cost = _settings.recovery100 * result.recovery100Count;
 					restExpTemp -= result.recovery100Cost;
@@ -2098,7 +2232,7 @@
 					result.recovery100Cost = 0;
 				}
 				// 50%回復アイテム
-				if (_settings.expCalcRecovery50) {
+				if (_settings.exp_calc_recovery50) {
 					result.recovery50Count = Math.floor(restExpTemp / _settings.recovery50);
 					result.recovery50Cost = _settings.recovery50 * result.recovery50Count;
 					restExpTemp -= result.recovery50Cost;
@@ -2107,7 +2241,7 @@
 					result.recovery50Cost = 0;
 				}
 				// 20%回復アイテム
-				if (_settings.expCalcRecovery20) {
+				if (_settings.exp_calc_recovery20) {
 					result.recovery20Count = Math.floor(restExpTemp / _settings.recovery20);
 					result.recovery20Cost = _settings.recovery20 * result.recovery20Count;
 					restExpTemp -= result.recovery20Cost;
@@ -2124,27 +2258,27 @@
 
 			var exp = expCalc(restExp);
 			var divRecovery100 = expInfoDiv.appendChild($create('div'));
-			divRecovery100.className = (_settings.expCalcRecovery100) ? 'cghp_link' : 'cghp_link cghp_strike';
+			divRecovery100.className = (_settings.exp_calc_recovery100) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery100.innerHTML = '100%回復アイテム (' + _settings.recovery100 + ')：<span class="yellow">' + exp.recovery100Count + '個 (' + exp.recovery100Cost + ')</span>';
 			$bind(divRecovery100, 'click', function() {
-				_settings.expCalcRecovery100 = !_settings.expCalcRecovery100;
-				setValue('cghp_exp_calc_recovery100', _settings.expCalcRecovery100);
+				_settings.exp_calc_recovery100 = !_settings.exp_calc_recovery100;
+				saveSettings('exp_calc_recovery100');
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
 			var divRecovery50 = expInfoDiv.appendChild($create('div'));
-			divRecovery50.className = (_settings.expCalcRecovery50) ? 'cghp_link' : 'cghp_link cghp_strike';
+			divRecovery50.className = (_settings.exp_calc_recovery50) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery50.innerHTML = '50%回復アイテム (' + _settings.recovery50 + ')：<span class="yellow">' + exp.recovery50Count + '個 (' + exp.recovery50Cost + ')</span>';
 			$bind(divRecovery50, 'click', function() {
-				_settings.expCalcRecovery50 = !_settings.expCalcRecovery50;
-				setValue('cghp_exp_calc_recovery50', _settings.expCalcRecovery50);
+				_settings.exp_calc_recovery50 = !_settings.exp_calc_recovery50;
+				saveSettings('exp_calc_recovery50');
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
 			var divRecovery20 = expInfoDiv.appendChild($create('div'));
-			divRecovery20.className = (_settings.expCalcRecovery20) ? 'cghp_link' : 'cghp_link cghp_strike';
+			divRecovery20.className = (_settings.exp_calc_recovery20) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery20.innerHTML = '20%回復アイテム (' + _settings.recovery20 + ')：<span class="yellow">' + exp.recovery20Count + '個 (' + exp.recovery20Cost + ')</span>';
 			$bind(divRecovery20, 'click', function() {
-				_settings.expCalcRecovery20 = !_settings.expCalcRecovery20;
-				setValue('cghp_exp_calc_recovery20', _settings.expCalcRecovery20);
+				_settings.exp_calc_recovery20 = !_settings.exp_calc_recovery20;
+				saveSettings('exp_calc_recovery20');
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
 			var divRecoveryNatural = expInfoDiv.appendChild($create('div'));
@@ -2250,142 +2384,43 @@
 	 */
 	function loadSettings() {
 		var settings = {};
+		var def = {
+			'mobage_id' : 0,
+			'event_url' : _baseURL + 'quests',
+			'hide_banner_in_menu' : true,
+			'custom_menu_icon' : true,
+			'custom_menu1' : [3, 2, 10, 14, 26, 16],
+			'custom_menu2' : [4, 6, 8, 25, 24],
+			'custom_menu3' : [],
+			'dojo_url' : 'http://saasan.github.io/mobamas-dojo/lv.html',
+			'custom_url1' : _topURL,
+			'custom_url2' : _topURL,
+			'custom_url3' : _topURL,
+			'custom_url4' : _topURL,
+			'custom_url5' : _topURL,
+			'point_filter_hp' : true,
+			'point_filter_atk' : true,
+			'point_filter_def' : false,
+			'point_filter_auto' : false,
+			'atack_cost_limit' : 5,
+			'recovery100' : 0,
+			'recovery50' : 0,
+			'recovery20' : 0,
+			'exp_calc_recovery100' : true,
+			'exp_calc_recovery50' : true,
+			'exp_calc_recovery20' : false,
+			'event_assault_power_check1' : 0,
+			'event_assault_power_check2' : 0,
+			'event_assault_power_check3' : 0,
+			'swf_zoom' : 1,
+		};
 
-		if (/%2Fmypage(?:%2F|%3F)?/.test(_param)) {
-			var headerAccordion = $id('headerAccordion');
-			if (headerAccordion) {
-				var eventLink = headerAccordion.querySelector('div.bannerArea2 a');
-				if (eventLink && eventLink.href != settings.eventURL) {
-					settings.eventURL = eventLink.href;
-					setValue('cghp_event_url', settings.eventURL);
-				}
+		for (var key in def) {
+			settings[key] = getValue('cghp_' + key);
+			if (settings[key] == null) {
+				settings[key] = def[key];
+				setValue('cghp_' + key, settings[key]);
 			}
-		} else {
-			settings.eventURL = getValue('cghp_event_url');
-		}
-		if (settings.eventURL == null) {
-			settings.eventURL = _baseURL + 'quests';
-			setValue('cghp_event_url', settings.eventURL);
-		}
-		settings.hideBannerInMenu = getValue('cghp_hide_banner_in_menu');
-		if (settings.hideBannerInMenu == null) {
-			settings.hideBannerInMenu = true;
-			setValue('cghp_hide_banner_in_menu', settings.hideBannerInMenu);
-		}
-		settings.customMenuIcon = getValue('cghp_custom_menu_icon');
-		if (settings.customMenuIcon == null) {
-			settings.customMenuIcon = true;
-			setValue('cghp_custom_menu_icon', settings.customMenuIcon);
-		}
-		settings.customMenu1 = getValue('cghp_custom_menu1');
-		if (settings.customMenu1 == null) {
-			settings.customMenu1 = [3, 2, 10, 14, 26, 16];
-			setValue('cghp_custom_menu1', settings.customMenu1);
-		}
-		settings.customMenu2 = getValue('cghp_custom_menu2');
-		if (settings.customMenu2 == null) {
-			settings.customMenu2 = [4, 6, 8, 25, 24];
-			setValue('cghp_custom_menu2', settings.customMenu2);
-		}
-		settings.customMenu3 = getValue('cghp_custom_menu3');
-		if (settings.customMenu3 == null) {
-			settings.customMenu3 = [];
-			setValue('cghp_custom_menu3', settings.customMenu3);
-		}
-		settings.dojoURL = getValue('cghp_dojo_url');
-		if (settings.dojoURL == null) {
-			settings.dojoURL = 'http://saasan.github.io/mobamas-dojo/lv.html';
-			setValue('cghp_dojo_url', settings.dojoURL);
-		}
-		settings.customURL1 = getValue('cghp_custom_url1');
-		if (settings.customURL1 == null) {
-			settings.customURL1 = _topURL;
-			setValue('cghp_custom_url1', settings.customURL1);
-		}
-		settings.customURL2 = getValue('cghp_custom_url2');
-		if (settings.customURL2 == null) {
-			settings.customURL2 = _topURL;
-			setValue('cghp_custom_url2', settings.customURL2);
-		}
-		settings.customURL3 = getValue('cghp_custom_url3');
-		if (settings.customURL3 == null) {
-			settings.customURL3 = _topURL;
-			setValue('cghp_custom_url3', settings.customURL3);
-		}
-		settings.customURL4 = getValue('cghp_custom_url4');
-		if (settings.customURL4 == null) {
-			settings.customURL4 = _topURL;
-			setValue('cghp_custom_url4', settings.customURL4);
-		}
-		settings.customURL5 = getValue('cghp_custom_url5');
-		if (settings.customURL5 == null) {
-			settings.customURL5 = _topURL;
-			setValue('cghp_custom_url5', settings.customURL5);
-		}
-		settings.uncheckedGift = getValue('cghp_unchecked_gift');
-		if (settings.uncheckedGift == null) {
-			settings.uncheckedGift = 1;
-			setValue('cghp_unchecked_gift', settings.uncheckedGift);
-		}
-		settings.pointFilterHP = getValue('cghp_point_filter_hp');
-		if (settings.pointFilterHP == null) {
-			settings.pointFilterHP = true;
-			setValue('cghp_point_filter_hp', settings.pointFilterHP);
-		}
-		settings.pointFilterAtk = getValue('cghp_point_filter_atk');
-		if (settings.pointFilterAtk == null) {
-			settings.pointFilterAtk = true;
-			setValue('cghp_point_filter_atk', settings.pointFilterAtk);
-		}
-		settings.pointFilterDef = getValue('cghp_point_filter_def');
-		if (settings.pointFilterDef == null) {
-			settings.pointFilterDef = false;
-			setValue('cghp_point_filter_def', settings.pointFilterDef);
-		}
-		settings.pointFilterAuto = getValue('cghp_point_filter_auto');
-		if (settings.pointFilterAuto == null) {
-			settings.pointFilterAuto = false;
-			setValue('cghp_point_filter_auto', settings.pointFilterAuto);
-		}
-		settings.attackCostLimit = getValue('cghp_atack_cost_limit');
-		if (settings.attackCostLimit == null) {
-			settings.attackCostLimit = 5;
-			setValue('cghp_atack_cost_limit', settings.attackCostLimit);
-		}
-		settings.recovery100 = getValue('cghp_recovery100');
-		if (settings.recovery100 == null) {
-			settings.recovery100 = 0;
-			setValue('cghp_recovery100', settings.recovery100);
-		}
-		settings.recovery50 = getValue('cghp_recovery50');
-		if (settings.recovery50 == null) {
-			settings.recovery50 = 0;
-			setValue('cghp_recovery50', settings.recovery50);
-		}
-		settings.recovery20 = getValue('cghp_recovery20');
-		if (settings.recovery20 == null) {
-			settings.recovery20 = 0;
-			setValue('cghp_recovery20', settings.recovery20);
-		}
-		settings.expCalcRecovery100 = getValue('cghp_exp_calc_recovery100');
-		if (settings.expCalcRecovery100 == null) {
-			settings.expCalcRecovery100 = true;
-			setValue('cghp_exp_calc_recovery100', settings.expCalcRecovery100);
-		}
-		settings.expCalcRecovery50 = getValue('cghp_exp_calc_recovery50');
-		if (settings.expCalcRecovery50 == null) {
-			settings.expCalcRecovery50 = true;
-			setValue('cghp_exp_calc_recovery50', settings.expCalcRecovery50);
-		}
-		settings.expCalcRecovery20 = getValue('cghp_exp_calc_recovery20');
-		if (settings.expCalcRecovery20 == null) {
-			settings.expCalcRecovery20 = false;
-			setValue('cghp_exp_calc_recovery20', settings.expCalcRecovery20);
-		}
-		settings.swfZoom = getValue('cghp_swf_zoom');
-		if (settings.swfZoom == null) {
-			settings.swfZoom = 1.0;
-			setValue('cghp_swf_zoom', settings.swfZoom);
 		}
 
 		return settings;
@@ -2395,32 +2430,14 @@
 	 * ユーザー設定を書き込む
 	 *
 	 */
-	function saveSettings() {
-		setValue('cghp_event_url', _settings.eventURL);
-		setValue('cghp_hide_banner_in_menu', _settings.hideBannerInMenu);
-		setValue('cghp_custom_menu_icon', _settings.customMenuIcon);
-		setValue('cghp_custom_menu1', _settings.customMenu1);
-		setValue('cghp_custom_menu2', _settings.customMenu2);
-		setValue('cghp_custom_menu3', _settings.customMenu3);
-		setValue('cghp_dojo_url', _settings.dojoURL);
-		setValue('cghp_custom_url1', _settings.customURL1);
-		setValue('cghp_custom_url2', _settings.customURL2);
-		setValue('cghp_custom_url3', _settings.customURL3);
-		setValue('cghp_custom_url4', _settings.customURL4);
-		setValue('cghp_custom_url5', _settings.customURL5);
-		setValue('cghp_unchecked_gift', _settings.uncheckedGift);
-		setValue('cghp_point_filter_hp', _settings.pointFilterHP);
-		setValue('cghp_point_filter_atk', _settings.pointFilterAtk);
-		setValue('cghp_point_filter_def', _settings.pointFilterDef);
-		setValue('cghp_point_filter_auto', _settings.pointFilterAuto);
-		setValue('cghp_atack_cost_limit', _settings.attackCostLimit);
-		setValue('cghp_recovery100', _settings.recovery100);
-		setValue('cghp_recovery50', _settings.recovery50);
-		setValue('cghp_recovery20', _settings.recovery20);
-		setValue('cghp_exp_calc_recovery100', _settings.expCalcRecovery100);
-		setValue('cghp_exp_calc_recovery50', _settings.expCalcRecovery50);
-		setValue('cghp_exp_calc_recovery20', _settings.expCalcRecovery20);
-		setValue('cghp_swf_zoom', _settings.swfZoom);
+	function saveSettings(key) {
+		if (key) {
+			setValue('cghp_' + key, _settings[key]);
+		} else {
+			for(var k in _settings) {
+				setValue('cghp_' + k, _settings[k]);
+			}
+		}
 	}
 
 	/**
@@ -2428,25 +2445,12 @@
 	 *
 	 */
 	function deleteSettings() {
-		deleteValue('cghp_event_url');
-		deleteValue('cghp_hide_banner_in_menu');
-		deleteValue('cghp_custom_menu_icon');
-		deleteValue('cghp_custom_menu1');
-		deleteValue('cghp_custom_menu2');
-		deleteValue('cghp_custom_menu3');
-		deleteValue('cghp_dojo_url');
-		deleteValue('cghp_custom_url1');
-		deleteValue('cghp_custom_url2');
-		deleteValue('cghp_custom_url3');
-		deleteValue('cghp_custom_url4');
-		deleteValue('cghp_custom_url5');
-		deleteValue('cghp_unchecked_gift');
-		deleteValue('cghp_point_filter_hp');
-		deleteValue('cghp_point_filter_atk');
-		deleteValue('cghp_point_filter_def');
-		deleteValue('cghp_point_filter_auto');
-		deleteValue('cghp_atack_cost_limit');
-		deleteValue('cghp_swf_zoom');
+		for(var i = localStorage.length - 1; 0 <= i; i--) {
+			var key = localStorage.key(i);
+			if ((/^cghp_/).test(key)) {
+				deleteValue(key);
+			}
+		}
 	}
 
 })();
