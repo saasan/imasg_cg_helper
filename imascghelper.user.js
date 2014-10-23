@@ -9,6 +9,7 @@
 // ==/UserScript==
 
 (function() {
+	'use strict';
 
 	// =========================================================================
 	// メイン処理
@@ -41,7 +42,9 @@
 			_body.appendChild(span);
 		}
 	})();
-	if (_isExecuted) return;
+	if (_isExecuted) {
+		return;
+	}
 
 	// -------------------------------------------------------------------------
 	// スタイルの設定
@@ -495,7 +498,7 @@
 			var headerAccordion = $id('headerAccordion');
 			if (headerAccordion) {
 				var eventLink = headerAccordion.querySelector('div.bannerArea2 a');
-				if (eventLink && eventLink.href != _settings.event_url) {
+				if (eventLink && eventLink.href !== _settings.event_url) {
 					_settings.event_url = eventLink.href;
 					saveSettings('event_url');
 				}
@@ -508,7 +511,7 @@
 				var talkId = chatDiv.getAttribute('data-talk-id');
 				if (talkId) {
 					var chatUrl = 'http://sp.mbga.jp/_chat_app?u=/talk&id=' + talkId;
-					if (chatUrl != _settings.chat_url) {
+					if (chatUrl !== _settings.chat_url) {
 						_settings.chat_url = chatUrl;
 						saveSettings('chat_url');
 					}
@@ -604,7 +607,7 @@
 					var div = valueDiv[i];
 					var matches = (div.textContent.match(/^(?:スタミナ|攻コスト)\s+(\d+)\s*\/\s*(\d+)$/)||[]);
 					var cost = { 'current': null, 'max': null };
-					if (matches.length == 3) {
+					if (matches.length === 3) {
 						cost.current = toNumber(matches[1]);
 						cost.max = toNumber(matches[2]);
 					} else {
@@ -612,13 +615,13 @@
 					}
 					var coeff = ((/^スタミナ/).test(div.textContent)) ? 3 : 1;
 					var restCost = cost.max - cost.current;
-					if (0 != restCost) {
+					if (0 !== restCost) {
 						var date = new Date();
 						date.setTime(date.getTime() + (coeff * restCost * 60 * 1000));
 						var recoveryTime = $create('div');
-						recoveryTime.innerHTML = '(<span class="yellow">'
-							+ ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2)
-							+ '</span>に全回復)';
+						recoveryTime.innerHTML = '(<span class="yellow">' +
+							('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) +
+							'</span>に全回復)';
 						recoveryTimeArea.appendChild(recoveryTime);
 					}
 					importantMenu.insertBefore(recoveryTimeArea, importantMenu.firstChild);
@@ -632,7 +635,7 @@
 				if (profileURL) {
 					mobageId = (profileURL.value.match(/%2Fprofile%2Fshow%2F(\d+)/)||[])[1]||null;
 					if (mobageId) {
-						if (_settings.mobage_id != mobageId) {
+						if (_settings.mobage_id !== mobageId) {
 							_settings.mobage_id = mobageId;
 							saveSettings('mobage_id');
 						}
@@ -666,7 +669,9 @@
 	// -------------------------------------------------------------------------
 	(function() {
 		if ((/%2Fdeck%2Fdeck_edit_top%3F/).test(_param)) {
-			// 編成リンク追加
+            var i;
+
+            // 編成リンク追加
 			var atkFormationLink = $create('a');
 			atkFormationLink.className = 'a_link';
 			atkFormationLink.href = _baseURL + 'deck%2Fdeck_modify_card%3Fno%3D1%26type%3D0';
@@ -682,7 +687,7 @@
 
 			var targetLink = _content.querySelectorAll('a.a_link');
 			var targetLinkLen = targetLink.length||0;
-			for (var i = 0; i < targetLinkLen; i++) {
+			for (i = 0; i < targetLinkLen; i++) {
 				var link = targetLink[i];
 				var linkHTML = link.innerHTML;
 				if ((/攻編成/).test(linkHTML)) {
@@ -696,7 +701,7 @@
 
 			var targetSpan = _content.querySelectorAll('span.a_link');
 			var targetSpanLen = targetSpan.length||0;
-			for (var i = 0; i < targetSpanLen; i++) {
+			for (i = 0; i < targetSpanLen; i++) {
 				var span = targetSpan[i];
 				var spanHTML = span.innerHTML;
 				if ((/攻編成/).test(spanHTML)) {
@@ -827,15 +832,17 @@
 					idolExtLinkSection.className = 'cghp_idol_ext_link';
 					var linkHTML = '';
 
+					var encName;
+
 					// ステータス
 					if (idol.name) {
-						var encName = encodeURIComponent(idol.name);
+						encName = encodeURIComponent(idol.name);
 						var statusURL = 'http://imas.cg.db.n-hokke.com/idols/' + encName;
 						linkHTML += '<a href="' + statusURL + '"><i class="fa-smile-o fa cghp_fg_yellow"></i></a>';
 					}
 					// トレード相場
 					if (idol.name && idol.type && idol.rarity && idol.cost) {
-						var encName = encodeURIComponent(idol.name);
+						encName = encodeURIComponent(idol.name);
 						var marketPriceURL = 'http://mobile-trade.jp/mobamasu/bazaar?' +
 							'lt=' + encName + '&' +
 							'la%5B%5D=' + idol.type + '&' +
@@ -870,14 +877,16 @@
 						var itemName = null;
 						var itemValue = null;
 
-						var item = (list.textContent.match(/^(ｽﾀﾐﾅﾄﾞﾘﾝｸ|ｴﾅｼﾞｰﾄﾞﾘﾝｸ|鍵付きｸﾛｰｾﾞｯﾄ) \((\d+)\)$/)||[]);
-						if (item.length == 3) {
+						var item;
+
+						item = (list.textContent.match(/^(ｽﾀﾐﾅﾄﾞﾘﾝｸ|ｴﾅｼﾞｰﾄﾞﾘﾝｸ|鍵付きｸﾛｰｾﾞｯﾄ) \((\d+)\)$/)||[]);
+						if (item.length === 3) {
 							// アイテム
 							itemName = item[1];
 							itemValue = item[2];
 						} else {
-							var item = (list.textContent.match(/^([\d,]+)(ﾏﾆｰ)$/)||[]);
-							if (item.length == 3) {
+							item = (list.textContent.match(/^([\d,]+)(ﾏﾆｰ)$/)||[]);
+							if (item.length === 3) {
 								// マニー
 								itemName = item[2];
 								itemValue = item[1];
@@ -945,7 +954,7 @@
 				var submitButton = targetForm.querySelector('input[type="submit"]');
 				var submitButton2 = submitButton.cloneNode(false);
 				submitButton2.className = 'cghp_margin_t10 cghp_margin_b15';
-				$bind(submitButton2, 'click', function(e) {
+				$bind(submitButton2, 'click', function() {
 					targetForm.submit();
 				});
 				targetForm.parentElement.insertBefore(submitButton2, targetForm);
@@ -965,9 +974,10 @@
 			];
 
 			var flashMenu = [];
+			var menu;
 
 			flashMenu.push('<ul class="cghp_menu_list">');
-			for (var i = 0, len = flashMenuList.length, menu; i < len; i++) {
+			for (var i = 0, len = flashMenuList.length; i < len; i++) {
 				menu = flashMenuList[i];
 				flashMenu.push('<li>');
 				if (_settings.custom_menu_icon) {
@@ -1004,7 +1014,7 @@
 			flashMenu.push('</div>');
 			flashMenu.push('</li></ul>');
 
-			var menu = $create('div');
+			menu = $create('div');
 			menu.id = 'cghpFlashMenu';
 			menu.innerHTML = flashMenu.join('');
 			_body.insertBefore(menu, _body.firstChild);
@@ -1023,11 +1033,12 @@
 			];
 
 			var flashMenu = [];
+			var menu;
 
 			flashMenu.push('<ul class="cghp_menu_list">');
 			var flashMenuListLen = flashMenuList.length||0;
 			for (var i = 0; i < flashMenuListLen; i++) {
-				var menu = flashMenuList[i];
+				menu = flashMenuList[i];
 				flashMenu.push('<li>');
 				if (_settings.custom_menu_icon) {
 					flashMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' fa fa-lg"></i></div><div class="cghp_name_area">' + menu.name + '</div></a>');
@@ -1038,7 +1049,7 @@
 			}
 			flashMenu.push('</ul>');
 
-			var menu = $create('div');
+			menu = $create('div');
 			menu.id = 'cghpFlashMenu';
 			menu.innerHTML = flashMenu.join('');
 			_body.insertBefore(menu, _body.firstChild);
@@ -1076,7 +1087,7 @@
 								saveSettings('atack_cost_limit');
 								_location.replace(_location.href);
 							} else {
-								alert('整数を入力してください。');
+								window.alert('整数を入力してください。');
 							}
 						}
 					});
@@ -1112,8 +1123,8 @@
 	// Liveバトル拡張＠Live中
 	// -------------------------------------------------------------------------
 	(function() {
-		if ((/%2Fbattles%2F(?:battle_processing|flash|win_or_lose)(?:%2F|%3F)/).test(_param)
-		 || (/%2FbattlesSsSs(flash|win_or_loseSsSs)(?:%2F|%3F)/).test(_param)) {
+		if ((/%2Fbattles%2F(?:battle_processing|flash|win_or_lose)(?:%2F|%3F)/).test(_param) ||
+			(/%2FbattlesSsSs(flash|win_or_loseSsSs)(?:%2F|%3F)/).test(_param)) {
 			var enemyId = (_param.match(/(?:%3F|%26)(?:rnd|enemy_id)%3D(\d+)/)||[])[1]||null;
 			if (enemyId != null) {
 
@@ -1125,11 +1136,12 @@
 				];
 
 				var flashMenu = [];
+				var menu;
 
 				flashMenu.push('<ul class="cghp_menu_list">');
 				var flashMenuListLen = flashMenuList.length||0;
 				for (var i = 0; i < flashMenuListLen; i++) {
-					var menu = flashMenuList[i];
+					menu = flashMenuList[i];
 					flashMenu.push('<li>');
 					if (_settings.custom_menu_icon) {
 						flashMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' fa fa-lg"></i></div><div class="cghp_name_area">' + menu.name + '</div></a>');
@@ -1140,7 +1152,7 @@
 				}
 				flashMenu.push('</ul>');
 
-				var menu = $create('div');
+				menu = $create('div');
 				menu.id = 'cghpFlashMenu';
 				menu.innerHTML = flashMenu.join('');
 				_body.insertBefore(menu, _body.firstChild);
@@ -1201,7 +1213,9 @@
 				var targetArea = $id('get_condition');
 				if (targetArea) {
 					$bind(targetArea, 'DOMSubtreeModified', function() {
-						if (timer) return;
+						if (timer) {
+							return;
+						}
 						timer = setTimeout(function() {
 							var status = getWorkStatus(1);
 							if (status) {
@@ -1276,7 +1290,9 @@
 		if ((/%2Fevent_ranking%2Franking_top%3F/).test(_param)) {
 			var targetLink =  _content.querySelectorAll('a');
 			var targetLinkLen = targetLink.length||0;
-			for (var i = 0; i < targetLinkLen; i++) {
+			var i, j, div, linkParent;
+
+			for (i = 0; i < targetLinkLen; i++) {
 				var link = targetLink[i];
 				var linkHTML = link.innerHTML;
 				if ((/個人順位確認/).test(linkHTML)) {
@@ -1284,7 +1300,7 @@
 					var rankingList1 = [200, 1000, 2000, 4000, 7000];
 					var rankingList1Len= rankingList1.length||0;
 					var rankingLink1 = [];
-					for (var j = 0; j < rankingList1Len; j++) {
+					for (j = 0; j < rankingList1Len; j++) {
 						var rank1 = rankingList1[j];
 						rankingLink1.push('<p class="frequentsButton eventFBColor_assault"><a href="');
 						rankingLink1.push(baseLink1.replace('ranking_for_user%2F%3F', 'ranking_for_user%2F0%2F' + (rank1 - 3) + '%3F'));
@@ -1298,9 +1314,9 @@
 					rankingLink1.push('<input id="kojinRankInput" type="tel" size="8" maxlength="8"> 位 ');
 					rankingLink1.push('<a id="kojinRankButton" class="cghp_button cghp_margin_t0 cghp_margin_b0">表示</a></div>');
 
-					var div = $create('div');
+					div = $create('div');
 					div.innerHTML = rankingLink1.join('');
-					var linkParent = link.parentElement;
+					linkParent = link.parentElement;
 					linkParent.parentElement.insertBefore(div, linkParent.nextSibling);
 
 					var kojinRankButton =$id('kojinRankButton');
@@ -1322,7 +1338,7 @@
 					var rankingList2 = [10, 50, 200, 500, 1000];
 					var rankingList2Len= rankingList2.length||0;
 					var rankingLink2 = [];
-					for (var j = 0; j < rankingList2Len; j++) {
+					for (j = 0; j < rankingList2Len; j++) {
 						var rank2 = rankingList2[j];
 						rankingLink2.push('<p class="frequentsButton eventFBColor_assault"><a href="');
 						rankingLink2.push(baseLink2.replace('ranking_for_production%2F%3F', 'ranking_for_production%2F0%2F' + (rank2 - 3) + '%3F'));
@@ -1336,9 +1352,9 @@
 					rankingLink2.push('<input id="proRankInput" type="tel" size="8" style="width:70px;"> 位 ');
 					rankingLink2.push('<a id="proRankButton" class="cghp_button cghp_margin_t0 cghp_margin_b0">表示</a></div>');
 
-					var div = $create('div');
+					div = $create('div');
 					div.innerHTML = rankingLink2.join('');
-					var linkParent = link.parentElement;
+					linkParent = link.parentElement;
 					linkParent.parentElement.insertBefore(div, linkParent.nextSibling);
 
 					var proRankButton =$id('proRankButton');
@@ -1363,11 +1379,13 @@
 	// 発揮値チェック＠アイドルLIVEツアー系
 	// -------------------------------------------------------------------------
 	(function() {
+		var i, len, h3, span, button;
+
 		if ((/%2Fevent_assault%2F(?:get_raid_boss|raid_lose)(?:%2F|%3F)/).test(_param)) {
 			// ユニットNoを取得
 			var unitNo = null;
 			var h3Title = _content.querySelectorAll('h3.event_assault')||[];
-			for (var i = 0, len = h3Title.length, h3; i < len; i++) {
+			for (i = 0, len = h3Title.length; i < len; i++) {
 				h3 = h3Title[i];
 				var match = null;
 				if (match = h3.textContent.match(/ﾕﾆｯﾄ(\d)/)) {
@@ -1378,7 +1396,7 @@
 			// 予想最大攻を取得
 			var attackPower = null;
 			var spanBlue = _content.querySelectorAll('span.blue')||[];
-			for (var i = 0, len = spanBlue.length, span; i < len; i++) {
+			for (i = 0, len = spanBlue.length; i < len; i++) {
 				span = spanBlue[i];
 				if ((/予想攻発揮値\(消費LP1\)\s*:/).test(span.textContent)) {
 					attackPower = (span.nextSibling.textContent.match(/(\d+)/)||[])[1]||null;
@@ -1388,7 +1406,9 @@
 					}
 				}
 			}
-			if (!unitNo || !attackPower) return;
+			if (!unitNo || !attackPower) {
+				return;
+			}
 			var powerCheckKey = 'event_assault_power_check' + unitNo;
 			// 設定した発揮値と予想最大攻が一致しない場合は、LIVE用のボタンを消す
 			if (attackPower) {
@@ -1431,7 +1451,7 @@
 			}
 			// 発揮値設定フォームをページ下部に表示
 			var frequentsButton = _content.querySelectorAll('.frequentsButton')||[];
-			for (var i = 0, len = frequentsButton.length, button; i < len; i++) {
+			for (i = 0, len = frequentsButton.length; i < len; i++) {
 				button = frequentsButton[i];
 				if ((/ﾕﾆｯﾄﾒﾝﾊﾞｰ編成/).test(button.textContent)) {
 					// ユニット編成リンクを現在選択中のユニット用のリンクにする
@@ -1452,13 +1472,13 @@
 					button.parentElement.insertBefore(settingArea, button.nextSibling);
 
 					var setFunc = function(value) {
-						v = toNumber(value);
+						var v = toNumber(value);
 						if (isNumeric(v) && (/\d+/).test(v)) {
 							_settings[powerCheckKey] = v;
 							saveSettings(powerCheckKey);
 							_location.replace(_location.href);
 						} else {
-							alert(unitNo + '整数を入力してください。');
+							window.alert(unitNo + '整数を入力してください。');
 						}
 					};
 					var setButton1 = $id('cghpSetAssaultPowerCheckButton1');
@@ -1490,12 +1510,12 @@
 					var searchURL = _baseURL + 'auction%2F2Fsearch_top%2F' + albumId + '%3Fl_frm%3Dauction_1';
 					var link = div.appendChild($create('a'));
 					link.innerHTML = '<a href="' + searchURL + '" class="grayButton300">' +
-						'このｱｲﾄﾞﾙのでﾄﾚｰﾄﾞ検索</a>'
+						'このｱｲﾄﾞﾙのでﾄﾚｰﾄﾞ検索</a>';
 
 					var historyURL = _baseURL + 'auction%2Fhistory%2F' + albumId + '%3Fl_frm%3Dauction_1';
-					var link = div.appendChild($create('a'));
+					link = div.appendChild($create('a'));
 					link.innerHTML = '<a href="' + historyURL + '" class="grayButton300">' +
-						'このｱｲﾄﾞﾙのﾄﾚｰﾄﾞ成立履歴</a>'
+						'このｱｲﾄﾞﾙのﾄﾚｰﾄﾞ成立履歴</a>';
 
 					idolStatus.parentElement.insertBefore(div, idolStatus.nextSibling);
 				}
@@ -1507,6 +1527,8 @@
 	// ユーザー設定画面
 	// -------------------------------------------------------------------------
 	(function() {
+		var i, value;
+
 		if ((/%2Fpersonal_option(?:%3F|&|$)/).test(_param)) {
 			// 設定画面準備
 			var settingMenu = [];
@@ -1527,7 +1549,7 @@
 			settingMenu.push('カスタムメニューにアイコンを表示');
 			settingMenu.push('</label></h3>');
 			settingMenu.push('</section>');
-			for (var i = 1; i <= 3; i++) {
+			for (i = 1; i <= 3; i++) {
 				settingMenu.push('<section>');
 				settingMenu.push('<h3>カスタムメニュー' + i + '（0～8個まで）');
 				settingMenu.push('<a id="cghpHelpCustomMenu' + i + '" class="a_link cghp_cm_help_link">...</a>：</h3>');
@@ -1538,7 +1560,7 @@
 			settingMenu.push('<h3>道場URL：</h3>');
 			settingMenu.push('<p><input id="cghpSetDojoURL" type="url" value="' + _settings.dojo_url + '"></p>');
 			settingMenu.push('</section>');
-			for (var i = 1; i <= 5; i++) {
+			for (i = 1; i <= 5; i++) {
 				settingMenu.push('<section>');
 				settingMenu.push('<h3>カスタムURL' + i + '：</h3>');
 				settingMenu.push('<p><input id="cghpSetCustomURL' + i + '" type="url" value="' + _settings['custom_url' + i] + '"></p>');
@@ -1595,7 +1617,7 @@
 			_body.insertBefore(overlay, _body.firstChild);
 
 			// カスタムメニューのヘルプを作成
-			for (var i = 1; i <= 3; i++) {
+			for (i = 1; i <= 3; i++) {
 				var help = $id('cghpHelpCustomMenu' + i);
 				var text = $id('cghpSetCustomMenu' + i);
 				if (help && text) {
@@ -1603,11 +1625,12 @@
 					// ヘルプのトグル表示関数
 					var toggleHelp = (function(element) {
 						return function() {
-							var helpArea = $id('cghpCustomMenuHelp');
+							var helpArea;
+							helpArea = $id('cghpCustomMenuHelp');
 							if (helpArea) {
 								helpArea.parentElement.removeChild(helpArea);
 							} else {
-								var helpArea = element.parentElement.insertBefore($create('div'), element.nextSibling);
+								helpArea = element.parentElement.insertBefore($create('div'), element.nextSibling);
 								helpArea.id = 'cghpCustomMenuHelp';
 								var helpList = helpArea.appendChild($create('ul'));
 								helpList.className = 'cghp_cm_help_list';
@@ -1615,7 +1638,7 @@
 									var helpItem = helpList.appendChild($create('li'));
 									var helpLink = helpItem.appendChild($create('a'));
 									helpLink.className = 'cghp_link';
-									helpLink.innerHTML = index + "：" + value.fullName;
+									helpLink.innerHTML = index + '：' + value.fullName;
 									$bind(helpLink, 'click', function() {
 										element.value += (element.value === '') ? index : ',' + index;
 									});
@@ -1626,7 +1649,7 @@
 					})(text);
 					$bind(help, 'click', toggleHelp);
 				}
-			};
+			}
 
 			// OKボタン クリックイベント
 			var okButton = $id('cghpOkButton');
@@ -1648,7 +1671,7 @@
 							var menuItem = [];
 							var customMenuList = customMenu.value.split(',')||[];
 							for (var j = 0, len = customMenuList.length; j < len; j++) {
-								var value = toNumber(trim((customMenuList[j]).toString()));
+								value = toNumber(trim((customMenuList[j]).toString()));
 								if (isNumeric(value) && (/^\d+/).test(value)) {
 									menuItem.push(value);
 								}
@@ -1660,15 +1683,15 @@
 					}
 					var dojoURL = $id('cghpSetDojoURL');
 					if (dojoURL) {
-						var value = trim(dojoURL.value);
+						value = trim(dojoURL.value);
 						if (urlPattern.test(value)) {
 							_settings.dojo_url = value;
 						}
 					}
-					for (var i = 1; i <= 5; i++) {
+					for (i = 1; i <= 5; i++) {
 						var customURL = $id('cghpSetCustomURL' + i);
 						if (customURL) {
-							var value = trim(customURL.value);
+							value = trim(customURL.value);
 							if (urlPattern.test(value)) {
 								_settings['custom_url' + i] = value;
 							}
@@ -1692,14 +1715,14 @@
 					}
 					var attackCostLimit = $id('cghpSetAttackCostLimit');
 					if (attackCostLimit) {
-						var value = toNumber(attackCostLimit.value);
+						value = toNumber(attackCostLimit.value);
 						if (isNumeric(value) && (/\d+/).test(value)) {
 							_settings.atack_cost_limit = value;
 						}
 					}
 					var swfZoom = $id('cghpSetSwfZoom');
 					if (swfZoom) {
-						var value = toNumber(swfZoom.value);
+						value = toNumber(swfZoom.value);
 						if (isNumeric(value) && 1 < value) {
 							_settings.swf_zoom = value;
 						}
@@ -1725,7 +1748,7 @@
 			var resetButton = $id('cghpResetButton');
 			if (resetButton) {
 				$bind(resetButton, 'click', function() {
-					if (confirm('設定を初期化します。よろしいですか？')) {
+					if (window.confirm('設定を初期化します。よろしいですか？')) {
 						deleteSettings();
 						_location.replace(_location.href);
 					}
@@ -1786,10 +1809,10 @@
 					if (targetId) {
 						var id = toNumber(targetId.value);
 						if (isNumeric(id) && (/\d+/).test(id)) {
-							var profileURL = _baseURL + 'profile%2Fshow%2F' + id + '%3Fl_frm%3DMypage_1'
+							var profileURL = _baseURL + 'profile%2Fshow%2F' + id + '%3Fl_frm%3DMypage_1';
 							_location.assign(profileURL);
 						} else {
-							alert('整数を入力してください。');
+							window.alert('整数を入力してください。');
 						}
 					}
 				});
@@ -1809,7 +1832,7 @@
 			var image = targetImage[i];
 			var imageFile = (image.src.match(/%2Fimage_sp%2Fui%2Ftrophy%2Ftitle_charge_(\d+)/)||[])[1]||null;
 			// 肩書画像IDが3桁なら先頭に5を付与、それ以外はそのまま
-			imageFile = (imageFile.length == 3) ? '5' + imageFile : imageFile;
+			imageFile = (imageFile.length === 3) ? '5' + imageFile : imageFile;
 			if (imageFile) {
 				// ローディングキャラ表示関数
 				var showImage = (function(imageFile) {
@@ -1818,7 +1841,7 @@
 						// スクロール位置に画像を移動
 						// ページを拡大or縮小していると座標がずれるので計算にいれる
 						var zoom = _root.style.zoom||1;
-						var scrollTop = (_root.scrollTop || _body.scrollTop || pageYOffset);
+						var scrollTop = (_root.scrollTop || _body.scrollTop || window.pageYOffset);
 						$id('cghpLoadingCharArea').style.top = (scrollTop / zoom) + 'px';
 						// オーバーレイ表示
 						var overlay = $id('cghpLoadingCharOverlay');
@@ -1885,7 +1908,7 @@
 		for (var i = 0; i < targetImageLen; i++) {
 			var image = targetImage[i];
 			var parent = image.parentElement;
-			if (parent.tagName == 'A' || parent.id == 'idol_view' || $hasClass(image, 'chk_img')) {
+			if (parent.tagName === 'A' || parent.id === 'idol_view' || $hasClass(image, 'chk_img')) {
 				continue;
 			}
 			var imageFile = (image.src.match(/%2Fimage_sp%2Fcard%2F(?:\w+)%2F(\w+\.jpg)/)||[])[1]||null;
@@ -1898,7 +1921,7 @@
 						// スクロール位置に画像を移動
 						// ページを拡大or縮小していると座標がずれるので計算にいれる
 						var zoom = _root.style.zoom||1;
-						var scrollTop = (_root.scrollTop || _body.scrollTop || pageYOffset);
+						var scrollTop = (_root.scrollTop || _body.scrollTop || window.pageYOffset);
 						$id('cghpCharArea').style.top = (scrollTop / zoom) + 'px';
 						// オーバーレイ表示
 						var overlay = $id('cghpCharOverlay');
@@ -1986,15 +2009,14 @@
 	(function() {
 		var flashMenu = $id('cghpFlashMenu');
 		if (flashMenu) {
-			var displaySet = getValue('DisplayPositionSet');
 			var ua = navigator.userAgent;
 			if (ua.indexOf('iPhone') > -1 || ua.indexOf('iPod') > -1 || ua.indexOf('iPad') > -1 || ua.indexOf('Android') > -1) {
 				$bind(window, 'resize', function() {
-					flashMenu.style.zoom = innerWidth / 320 * _settings.swf_zoom;
+					flashMenu.style.zoom = window.innerWidth / 320 * _settings.swf_zoom;
 				});
 				var event = _doc.createEvent('UIEvent');
 				event.initEvent('resize', false, true);
-				dispatchEvent(event);
+				window.dispatchEvent(event);
 			} else {
 				flashMenu.style.zoom = _settings.swf_zoom;
 			}
@@ -2011,11 +2033,11 @@
 			var key = e.keyIdentifier;
 
 			// テキスト入力欄の時は除外
-			if (node == 'INPUT' && (type == 'text' || type == 'tel' || type == 'number' || type == 'url')) {
+			if (node === 'INPUT' && (type === 'text' || type === 'tel' || type === 'number' || type === 'url')) {
 				return;
 			}
 			// F5キー押下時にデータの再送信をしない
-			if (key == 'F5') {
+			if (key === 'F5') {
 				_location.replace(_location.href);
 				e.preventDefault();
 				e.stopPropagation();
@@ -2036,27 +2058,29 @@
 	function getWorkStatus(workType) {
 		var hpText = null;
 		var expText = null;
-		if (workType == 0) {
+		var targetTd, targetArea;
+
+		if (workType === 0) {
 			// 演出OFF
-			var targetArea = _content.querySelectorAll('span.blue_st');
+			targetArea = _content.querySelectorAll('span.blue_st');
 			var targetAreaLen = targetArea.length||0;
 			for (var i = 0; i < targetAreaLen; i++) {
 				var span = targetArea[i];
 				if ((/ｽﾀﾐﾅ:/).test(span.textContent)) {
-					var targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
-					if (targetTd && targetTd.tagName == 'TD') {
+					targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
+					if (targetTd && targetTd.tagName === 'TD') {
 						hpText = targetTd.textContent;
 					}
 				} else if ((/Ex:/).test(span.textContent)) {
-					var targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
+					targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
 					if (targetTd) {
 						expText = targetTd.textContent;
 					}
 				}
 			}
-		} else if (workType == 1) {
+		} else if (workType === 1) {
 			// 演出ON
-			var targetArea = $id('get_condition');
+			targetArea = $id('get_condition');
 			if (targetArea) {
 				var hpDiv = $id('hp');
 				if (hpDiv) {
@@ -2074,14 +2098,14 @@
 		}
 		var status = {};
 		var hpTextArray = (hpText.match(/(\d+)\/(\d+)/)||[]);
-		if (hpTextArray.length == 3) {
+		if (hpTextArray.length === 3) {
 			status.currentHP = hpTextArray[1];
 			status.maxHP = hpTextArray[2];
 		} else {
 			return null;
 		}
 		var expTextArray = (expText.match(/(\d+)\/(\d+)/)||[]);
-		if (expTextArray.length == 3) {
+		if (expTextArray.length === 3) {
 			status.currentExp = expTextArray[1];
 			status.maxExp = expTextArray[2];
 		} else {
@@ -2230,10 +2254,11 @@
 				saveSettings('exp_calc_recovery20');
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
-			var divRecoveryNatural = expInfoDiv.appendChild($create('div'));
+			var divRecoveryNatural;
+			divRecoveryNatural = expInfoDiv.appendChild($create('div'));
 			divRecoveryNatural.innerHTML = '自然回復：<span class="yellow">' + exp.recoveryNaturalTime + ' (' + exp.recoveryNaturalCost + ')</span>';
 			expInfoDiv.appendChild($create('hr'));
-			var divRecoveryNatural = expInfoDiv.appendChild($create('div'));
+			divRecoveryNatural = expInfoDiv.appendChild($create('div'));
 			divRecoveryNatural.innerHTML = '自然回復のみ：<span class="yellow">' + exp.recoveryNaturalOnlyTime + ' (' + exp.recoveryNaturalOnlyCost + ')</span>';
 		}
 
@@ -2267,11 +2292,13 @@
 	 * @param element イベントを発生させる対象の要素
 	 */
 	function dispatchClick(element) {
-		if (window.start && window.start == 'touchstart') {
+		var event_click;
+
+		if (window.start && window.start === 'touchstart') {
 			// タップイベント (touchstart → touchend → click)
 			var event_start = _doc.createEvent('TouchEvent');
 			var event_end = _doc.createEvent('TouchEvent');
-			var event_click = _doc.createEvent('MouseEvent');
+			event_click = _doc.createEvent('MouseEvent');
 			var touch = _doc.createTouch(window, element, 0, 0, 0, 0, 0);
 			var touches = _doc.createTouchList(touch);
 
@@ -2293,7 +2320,7 @@
 			// クリックイベント (mousedown → mouseup → click)
 			var event_down = _doc.createEvent('MouseEvent');
 			var event_up = _doc.createEvent('MouseEvent');
-			var event_click = _doc.createEvent('MouseEvent');
+			event_click = _doc.createEvent('MouseEvent');
 
 			event_down.initMouseEvent('mousedown', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
 			event_up.initMouseEvent('mouseup', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
@@ -2399,20 +2426,19 @@
 	}
 
 	// その他関数
-	function $id(a){return _doc.getElementById(a)}
-	function $addClass(d,b){if(d&&b){var e=b.split(' ')||[];var f=d.className.split(' ')||[];for(var c=0,a=e.length;c<a;c++){if(f.indexOf(e[c])==-1){f.push(e[c])}}d.className=f.join(' ').trim()}}
-	function $removeClass(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g,j){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false}}return true});a.className=c.join(' ').trim()}}
-	function $hasClass(f,b){var h=false;if(f&&b){var a=b.split(' ')||[];var e=f.className.split(' ')||[];for(var d=0,c=e.length;d<c;d++){for(var q=0,r=a.length;q<r;q++){if(e[d]===a[q]){h=true;break}}}}return h}
-	function $toggleClass(a,c){var b=false;if(a&&c){if($hasClass(a,c)){$removeClass(a,c)}else{$addClass(a,c)}}}
-	function $create(a){return _doc.createElement(a)}
-	function $bind(a,b,c){if(!a){return}a.addEventListener(b,c,false)}
-	function $unbind(a,b,c){if(!a){return}a.removeEventListener(b,c,false)}
-	function getValue(a){var b=localStorage.getItem(a);return(b)?JSON.parse(b):null}
-	function setValue(a,b){localStorage.setItem(a,JSON.stringify(b))}
-	function deleteValue(a){localStorage.removeItem(a)}
-	function isNumeric(a){if(Number.isFinite){return Number.isFinite(a)}else{return(typeof a==='number')&&isFinite(a)}}
-	function toNumber(a){if(a){return a-0}}
-	function round(a,b){var c=Math.pow(10,b);return Math.round(a*c)/c}
-	function trim(a){return(a)?a.replace(/^[\s　]+|[\s　]+$/g,''):null}
+	function $id(a){return _doc.getElementById(a);}
+	function $addClass(d,b){if(d&&b){var e=b.split(' ')||[];var f=d.className.split(' ')||[];for(var c=0,a=e.length;c<a;c++){if(f.indexOf(e[c])===-1){f.push(e[c]);}}d.className=f.join(' ').trim();}}
+	function $removeClass(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g,j){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false;}}return true;});a.className=c.join(' ').trim();}}
+	function $hasClass(f,b){var h=false;if(f&&b){var a=b.split(' ')||[];var e=f.className.split(' ')||[];for(var d=0,c=e.length;d<c;d++){for(var q=0,r=a.length;q<r;q++){if(e[d]===a[q]){h=true;break;}}}}return h;}
+	function $toggleClass(a,c){/*var b=false;*/if(a&&c){if($hasClass(a,c)){$removeClass(a,c);}else{$addClass(a,c);}}}
+	function $create(a){return _doc.createElement(a);}
+	function $bind(a,b,c){if(!a){return;}a.addEventListener(b,c,false);}
+	function getValue(a){var b=localStorage.getItem(a);return(b)?JSON.parse(b):null;}
+	function setValue(a,b){localStorage.setItem(a,JSON.stringify(b));}
+	function deleteValue(a){localStorage.removeItem(a);}
+	function isNumeric(a){if(Number.isFinite){return Number.isFinite(a);}else{return(typeof a==='number')&&isFinite(a);}}
+	function toNumber(a){if(a){return a-0;}}
+	function round(a,b){var c=Math.pow(10,b);return Math.round(a*c)/c;}
+	function trim(a){return(a)?a.replace(/^[\s　]+|[\s　]+$/g,''):null;}
 
 })();
