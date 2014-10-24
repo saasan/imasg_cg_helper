@@ -156,6 +156,12 @@
 				default: _topURL,
 				type: 'url'
 			},
+			pointFilterTitle: {
+				order: order++,
+				displayName: 'ポイント振り分けフィルタ：',
+				default: '',
+				type: 'h3'
+			},
 			pointFilterHp: {
 				order: order++,
 				displayName: 'スタミナ',
@@ -2089,105 +2095,123 @@
 		}
 	})();
 
+	/**
+	 * 設定画面のHTMLを作成する
+	 *
+	 * @return 設定UIのHTML
+	 */
+	function generateSettingsUiHtml() {
+		var i, key, ui = [], html = '', attrs;
+
+		html +=
+			'<div id="cghpSettingArea">' +
+			'  <h2>IM@S CG Helper(仮) 設定</h2>';
+
+		// orderが1以上の物だけ追加する
+		for (key in _settingsSettings) {
+			if (_settingsSettings[key].order > 0) {
+				ui.push({ name: key, data: _settingsSettings[key] });
+			}
+		}
+
+		// order順でソート
+		ui.sort(function(a, b) {
+			return a.data.order - b.data.order;
+		});
+
+		for (i = 0; i < ui.length; i++) {
+			// 属性
+			attrs = '';
+			if (ui[i].data.attrs) {
+				for (key in ui[i].data.attrs) {
+					attrs += ' ' + key + '="' + ui[i].data.attrs[key] + '"';
+				}
+			}
+
+			// typeに応じたHTMLを追加
+			switch (ui[i].data.type) {
+				case 'checkbox':
+					html +=
+						'<section>\n' +
+						'  <h3>\n' +
+						'    <label><input id="' + 'cghp_' + ui[i].name + '" type="' + ui[i].data.type + '"' + attrs + '> ' + ui[i].data.displayName + '</label>\n' +
+						'  </h3>\n' +
+						'</section>\n';
+					break;
+
+				case 'text':
+				case 'url':
+				case 'number':
+					html +=
+						'<section>\n' +
+						'  <h3>' + ui[i].data.displayName + '：</h3>\n' +
+						'  <p><input id="' + 'cghp_' + ui[i].name + '" type="' + ui[i].data.type + '"' + attrs + '></p>\n' +
+						'</section>\n';
+					break;
+
+				case 'h3':
+					html += '<h3>' + ui[i].data.displayName + '</h3>\n';
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		html +=
+			'  <p class="cghp_center cghp_margin_t20">' +
+			'    <input id="cghpOkButton" class="home" type="button" value="OK">' +
+			'    &nbsp;&nbsp;&nbsp;&nbsp;' +
+			'    <input id="cghpCancelButton" class="double" type="button" value="キャンセル">' +
+			'  </p>' +
+			'  <p id="cghpResetArea">' +
+			'    <input id="cghpResetButton" class="home grayButton300" type="button" value="設定を初期化">' +
+			'  </p>' +
+			'</div>';
+
+		return html;
+	}
+
 	// -------------------------------------------------------------------------
 	// ユーザー設定画面
 	// -------------------------------------------------------------------------
 	(function() {
-		var i, value;
+		var i, key, value;
 
 		if ((/%2Fpersonal_option(?:%3F|&|$)/).test(_param)) {
-			// 設定画面準備
-			var settingMenu = [];
-			settingMenu.push('<div id="cghpSettingArea">');
-			settingMenu.push('<h2>IM@S CG Helper(仮) 設定</h2>');
+			// 設定画面のHTMLを作成
+			var html = generateSettingsUiHtml();
 
-			var hideBannerInMenuChecked = (_settings.hideBannerInMenu) ? 'checked="checked"' : '';
-			settingMenu.push('<section>');
-			settingMenu.push('<h3><label>');
-			settingMenu.push('<input id="cghpSetHideBannerInMenu" type="checkbox" ' + hideBannerInMenuChecked + '> ');
-			settingMenu.push('メニュー内のバナーを消す');
-			settingMenu.push('</label></h3>');
-			settingMenu.push('</section>');
-			var customMenuIconChecked = (_settings.customMenuIcon) ? 'checked="checked"' : '';
-			settingMenu.push('<section>');
-			settingMenu.push('<h3><label>');
-			settingMenu.push('<input id="cghpSetCustomMenuIcon" type="checkbox" ' + customMenuIconChecked + '> ');
-			settingMenu.push('カスタムメニューにアイコンを表示');
-			settingMenu.push('</label></h3>');
-			settingMenu.push('</section>');
-			for (i = 1; i <= 3; i++) {
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムメニュー' + i + '（0～8個まで）');
-				settingMenu.push('<a id="cghpHelpCustomMenu' + i + '" class="a_link cghp_cm_help_link">...</a>：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomMenu' + i + '" type="text" pattern="^(?:\\d+(?:,\\s*\\d+){0,7})?$" value="' + _settings['customMenu' + i].join(',') + '"></p>');
-				settingMenu.push('</section>');
-			}
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>道場URL：</h3>');
-			settingMenu.push('<p><input id="cghpSetDojoURL" type="url" value="' + _settings.dojoUrl + '"></p>');
-			settingMenu.push('</section>');
-			for (i = 1; i <= 5; i++) {
-				settingMenu.push('<section>');
-				settingMenu.push('<h3>カスタムURL' + i + '：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomURL' + i + '" type="url" value="' + _settings['customUrl' + i] + '"></p>');
-				settingMenu.push('</section>');
-			}
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>ポイント振り分けフィルタ：</h3>');
-			var pointFilterHPChecked = (_settings.pointFilterHp) ? 'checked="checked"' : '';
-			settingMenu.push('<label>');
-			settingMenu.push('<input id="cghpPointFilterHP" type="checkbox" ' + pointFilterHPChecked + '> ');
-			settingMenu.push('スタミナ');
-			settingMenu.push('</label><br>');
-			var pointFilterAtkChecked = (_settings.pointFilterAtk) ? 'checked="checked"' : '';
-			settingMenu.push('<label>');
-			settingMenu.push('<input id="cghpPointFilterAtk" type="checkbox" ' + pointFilterAtkChecked + '> ');
-			settingMenu.push('攻コスト');
-			settingMenu.push('</label><br>');
-			var pointFilterDefChecked = (_settings.pointFilterDef) ? 'checked="checked"' : '';
-			settingMenu.push('<label>');
-			settingMenu.push('<input id="cghpPointFilterDef" type="checkbox" ' + pointFilterDefChecked + '> ');
-			settingMenu.push('守コスト');
-			settingMenu.push('</label><br>');
-			var pointFilterAutoChecked = (_settings.pointFilterAuto) ? 'checked="checked"' : '';
-			settingMenu.push('<label>');
-			settingMenu.push('<input id="cghpPointFilterAuto" type="checkbox" ' + pointFilterAutoChecked + '> ');
-			settingMenu.push('自動振り分け');
-			settingMenu.push('</label><br>');
-			settingMenu.push('</section>');
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>');
-			settingMenu.push('LIVEバトル時の消費コスト上限値：');
-			settingMenu.push('<p><input id="cghpSetAttackCostLimit" type="tel" value="' + _settings.atackCostLimit + '"></p>');
-			settingMenu.push('</h3>');
-			settingMenu.push('</section>');
-			settingMenu.push('<section>');
-			settingMenu.push('<h3>Flash画面の追加メニュー表示倍率：</h3>');
-			settingMenu.push('<p><input id="cghpSetSwfZoom" type="number" min="0.05" step="0.05" value="' + _settings.swfZoom + '"></p>');
-			settingMenu.push('</section>');
-			var uncheckPresentChecked = (_settings.uncheckPresent) ? 'checked="checked"' : '';
-			settingMenu.push('<section>');
-			settingMenu.push('<h3><label>');
-			settingMenu.push('<input id="cghpSetUncheckPresent" type="checkbox" ' + uncheckPresentChecked + '> ');
-			settingMenu.push('贈り物のチェックをはずす');
-			settingMenu.push('</label></h3>');
-			settingMenu.push('</section>');
-
-			settingMenu.push('<p class="cghp_center cghp_margin_t20">');
-			settingMenu.push('<input id="cghpOkButton" class="home" type="button" value="OK">');
-			settingMenu.push('&nbsp;&nbsp;&nbsp;&nbsp;');
-			settingMenu.push('<input id="cghpCancelButton" class="double" type="button" value="キャンセル">');
-			settingMenu.push('</p>');
-			settingMenu.push('<p id="cghpResetArea">');
-			settingMenu.push('<input id="cghpResetButton" class="home grayButton300" type="button" value="設定を初期化">');
-			settingMenu.push('</p>');
-			settingMenu.push('</div>');
-
+			// 設定画面のHTMLを追加
 			var overlay = $create('div');
 			overlay.id = 'cghpSettingOverlay';
 			overlay.className = 'cghp_hide';
-			overlay.innerHTML = settingMenu.join('');
+			overlay.innerHTML = html;
 			_body.insertBefore(overlay, _body.firstChild);
+
+			// 設定を画面に反映
+			for (key in _settingsSettings) {
+				// orderが0以下は設定画面に表示していない
+				if (_settingsSettings[key].order <= 0) {
+					continue;
+				}
+
+				// typeに応じて設定を反映
+				switch (_settingsSettings[key].type) {
+					case 'checkbox':
+						$id('cghp_' + key).checked = _settings[key];
+						break;
+
+					case 'text':
+					case 'url':
+					case 'number':
+						$id('cghp_' + key).value = _settings[key];
+						break;
+
+					default:
+						break;
+				}
+			}
 
 			// カスタムメニューのヘルプを作成
 			var generateToggleHelp = function(element) {
@@ -2216,7 +2240,7 @@
 			};
 			for (i = 1; i <= 3; i++) {
 				var help = $id('cghpHelpCustomMenu' + i);
-				var text = $id('cghpSetCustomMenu' + i);
+				var text = $id('cghp_customMenu' + i);
 				if (help && text) {
 					help.visible = false;
 					// ヘルプのトグル表示関数
@@ -2231,16 +2255,16 @@
 				$bind(okButton, 'click', function() {
 					var urlPattern = /^s?https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:@&=+$,%#]+$/;
 
-					var hideBannerInMenu = $id('cghpSetHideBannerInMenu');
+					var hideBannerInMenu = $id('cghp_hideBannerInMenu');
 					if (hideBannerInMenu) {
 						_settings.hideBannerInMenu = hideBannerInMenu.checked;
 					}
-					var customMenuIcon = $id('cghpSetCustomMenuIcon');
+					var customMenuIcon = $id('cghp_customMenuIcon');
 					if (customMenuIcon) {
 						_settings.customMenuIcon = customMenuIcon.checked;
 					}
 					for (var i = 1; i <= 3; i++) {
-						var customMenu = $id('cghpSetCustomMenu' + i);
+						var customMenu = $id('cghp_customMenu' + i);
 						if (customMenu) {
 							var menuItem = [];
 							var customMenuList = customMenu.value.split(',')||[];
@@ -2255,53 +2279,53 @@
 							}
 						}
 					}
-					var dojoURL = $id('cghpSetDojoURL');
-					if (dojoURL) {
-						value = trim(dojoURL.value);
+					var dojoUrl = $id('cghp_dojoUrl');
+					if (dojoUrl) {
+						value = trim(dojoUrl.value);
 						if (urlPattern.test(value)) {
 							_settings.dojoUrl = value;
 						}
 					}
 					for (i = 1; i <= 5; i++) {
-						var customURL = $id('cghpSetCustomURL' + i);
-						if (customURL) {
-							value = trim(customURL.value);
+						var customUrl = $id('cghp_customUrl' + i);
+						if (customUrl) {
+							value = trim(customUrl.value);
 							if (urlPattern.test(value)) {
 								_settings['customUrl' + i] = value;
 							}
 						}
 					}
-					var pointFilterHP = $id('cghpPointFilterHP');
-					if (pointFilterHP) {
-						_settings.pointFilterHp = pointFilterHP.checked;
+					var pointFilterHp = $id('cghp_pointFilterHp');
+					if (pointFilterHp) {
+						_settings.pointFilterHp = pointFilterHp.checked;
 					}
-					var pointFilterAtk = $id('cghpPointFilterAtk');
+					var pointFilterAtk = $id('cghp_pointFilterAtk');
 					if (pointFilterAtk) {
 						_settings.pointFilterAtk = pointFilterAtk.checked;
 					}
-					var pointFilterDef = $id('cghpPointFilterDef');
+					var pointFilterDef = $id('cghp_pointFilterDef');
 					if (pointFilterDef) {
 						_settings.pointFilterDef = pointFilterDef.checked;
 					}
-					var pointFilterAuto = $id('cghpPointFilterAuto');
+					var pointFilterAuto = $id('cghp_pointFilterAuto');
 					if (pointFilterAuto) {
 						_settings.pointFilterAuto = pointFilterAuto.checked;
 					}
-					var attackCostLimit = $id('cghpSetAttackCostLimit');
+					var attackCostLimit = $id('cghp_attackCostLimit');
 					if (attackCostLimit) {
 						value = toNumber(attackCostLimit.value);
 						if (isNumeric(value) && (/\d+/).test(value)) {
 							_settings.atackCostLimit = value;
 						}
 					}
-					var swfZoom = $id('cghpSetSwfZoom');
+					var swfZoom = $id('cghp_swfZoom');
 					if (swfZoom) {
 						value = toNumber(swfZoom.value);
 						if (isNumeric(value) && 1 < value) {
 							_settings.swfZoom = value;
 						}
 					}
-					var uncheckPresent = $id('cghpSetUncheckPresent');
+					var uncheckPresent = $id('cghp_uncheckPresent');
 					if (uncheckPresent) {
 						_settings.uncheckPresent = uncheckPresent.checked;
 					}
