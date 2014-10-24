@@ -937,7 +937,7 @@
 	var _customMenu = [];
 	_customMenu[1] = { 'fullName': 'ショップ', 'shortName': 'ｼｮｯﾌﾟ', 'icon': 'fa-shopping-cart', 'url': _baseURL + 'shop%2Findex' };
 	_customMenu[2] = { 'fullName': 'アイテム', 'shortName': 'ｱｲﾃﾑ', 'icon': 'fa-archive', 'url': _baseURL + 'item%2Findex' };
-	_customMenu[3] = { 'fullName': '贈り物', 'shortName': '贈り物', 'icon': 'fa-gift', 'url': _baseURL + 'present%2Frecieve%2F%3Fview_auth_type%3D1' };
+	_customMenu[3] = { 'fullName': '贈り物', 'shortName': '贈り物', 'icon': 'fa-gift', 'url': _baseURL + 'present%2Frecieve%2F%3Fview_auth_type%3D1%26cache%3D1' };
 	_customMenu[4] = { 'fullName': 'ｱｲﾄﾞﾙ一覧', 'shortName': '一　覧', 'icon': 'fa-list-alt', 'url': _baseURL + 'card_list%2Findex' };
 	_customMenu[5] = { 'fullName': 'トレード', 'shortName': 'ﾄﾚｰﾄﾞ', 'icon': 'fa-refresh', 'url': _baseURL + 'trade_response%2Ftrade_list_advance' };
 	_customMenu[6] = { 'fullName': '編　成', 'shortName': '編　成', 'icon': 'fa-group', 'url': _baseURL + 'deck%2Findex' };
