@@ -1679,7 +1679,14 @@
 		}
 	})();
 
-	// 指定順位表示ボタンクリック時のイベント
+
+	/**
+	 * 指定順位表示ボタンクリック時のイベント
+	 *
+	 * @param id ボタンのid
+	 * @param baseUrl 元々あるランキングのURL
+	 * @param replaceUrl URLの置換する部分
+	 */
 	function onclickRankButton(id, baseUrl, replaceUrl) {
 		var rankInput =$id(id);
 		if (rankInput) {
@@ -1691,6 +1698,12 @@
 		}
 	}
 
+	/**
+	 * ランキングのボタンを作成する
+	 *
+	 * @param baseLink 元々あるランキングのリンク
+	 * @param options 作成するボタンの情報
+	 */
 	function generateRankingButtons(baseLink, options) {
 		var i, rankingHtml = '', div, parent;
 		var baseUrl = baseLink.href;
