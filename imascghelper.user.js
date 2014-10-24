@@ -1728,7 +1728,7 @@
 
 					var kojinRankButton =$id('kojinRankButton');
 					if (kojinRankButton) {
-						$bind(kojinRankButton, 'click', onclickRankButton.bind(null, 'kojinRankInput', baseLink1.href, 'ranking_for_user'));
+						$bind(kojinRankButton, 'click', onclickRankButton.bind(null, 'kojinRankInput', baseLink1, 'ranking_for_user'));
 					}
 				}
 				if ((/ﾌﾟﾛﾀﾞｸｼｮﾝ順位確認/).test(linkHTML)) {
@@ -1757,7 +1757,7 @@
 
 					var proRankButton =$id('proRankButton');
 					if (proRankButton) {
-						$bind(proRankButton, 'click', onclickRankButton.bind(null, 'proRankInput', baseLink2.href, 'ranking_for_production'));
+						$bind(proRankButton, 'click', onclickRankButton.bind(null, 'proRankInput', baseLink2, 'ranking_for_production'));
 					}
 				}
 			}
