@@ -1160,20 +1160,24 @@
 		}
 	})();
 
+	function insertExpInfo(status, insertTarget, className) {
+		if (status) {
+			var expInfoDiv = getExpInfo(status.currentHP, status.maxHP, status.currentExp, status.maxExp);
+			if (expInfoDiv && insertTarget) {
+				expInfoDiv.className = className;
+				insertTarget.parentElement.insertBefore(expInfoDiv, insertTarget);
+			}
+		}
+	}
+
 	// -------------------------------------------------------------------------
 	// レベルアップ計算＠通常お仕事(演出OFF)
 	// -------------------------------------------------------------------------
 	(function() {
 		if ((/%2Fquests%2Fget_\w+(?:%2F|%3F)/).test(_param)) {
 			var status = getWorkStatus(0);
-			if (status) {
-				var insertTarget = _content.querySelector('form[name="quest_form"]').nextSibling;
-				var expInfoDiv = getExpInfo(status.currentHP, status.maxHP, status.currentExp, status.maxExp);
-				if (expInfoDiv != null && insertTarget != null) {
-					expInfoDiv.className = 'cghp_margin_t10 cghp_add_area_gray';
-					insertTarget.parentElement.insertBefore(expInfoDiv, insertTarget);
-				}
-			}
+			var insertTarget = _content.querySelector('form[name="quest_form"]').nextSibling;
+			insertExpInfo(status, insertTarget, 'cghp_margin_t10 cghp_add_area_gray');
 		}
 	})();
 
@@ -1183,15 +1187,9 @@
 	(function() {
 		if ((/%2Fevent_\w+%2F(?:mission_list|get_\w+)(?:%2F|%3F)/).test(_param)) {
 			var status = getWorkStatus(0);
-			if (status) {
-				// 後方一致だとファイル名の後にゴミが付いていて拾えないからここだけ部分一致
-				var insertTarget = _content.querySelector('img[src*="%2Fline_hoshi.jpg"]');
-				var expInfoDiv = getExpInfo(status.currentHP, status.maxHP, status.currentExp, status.maxExp);
-				if (expInfoDiv != null && insertTarget != null) {
-					expInfoDiv.className = 'cghp_margin_t10 cghp_margin_b10 cghp_add_area_gray';
-					insertTarget.parentElement.insertBefore(expInfoDiv, insertTarget);
-				}
-			}
+			// 後方一致だとファイル名の後にゴミが付いていて拾えないからここだけ部分一致
+			var insertTarget = _content.querySelector('img[src*="%2Fline_hoshi.jpg"]');
+			insertExpInfo(status, insertTarget, 'cghp_margin_t10 cghp_margin_b10 cghp_add_area_gray');
 		}
 	})();
 
@@ -1201,13 +1199,10 @@
 	(function() {
 		if ((/%2F(?:quests|event_\w+)%2Fwork(?:%2F|%3F)/).test(_param)) {
 			var status = getWorkStatus(1);
+			var insertTarget = $id('play_area').nextSibling;
+			insertExpInfo(status, insertTarget, 'cghp_margin_b10 cghp_add_area_gray');
+
 			if (status) {
-				var insertTarget = $id('play_area').nextSibling;
-				var expInfoDiv = getExpInfo(status.currentHP, status.maxHP, status.currentExp, status.maxExp);
-				if (expInfoDiv != null && insertTarget != null) {
-					expInfoDiv.className = 'cghp_margin_b10 cghp_add_area_gray';
-					insertTarget.parentElement.insertBefore(expInfoDiv, insertTarget);
-				}
 				// ステータス変化時に表示を更新
 				var timer = 0;
 				var targetArea = $id('get_condition');
