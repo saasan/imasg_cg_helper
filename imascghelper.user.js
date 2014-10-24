@@ -206,6 +206,41 @@
 				displayName: '贈り物のチェックをはずす',
 				default: true,
 				type: 'checkbox'
+			},
+			showLoadingCharacter: {
+				order: order++,
+				displayName: '肩書画像をクリックでローディングキャラを表示',
+				default: true,
+				type: 'checkbox'
+			},
+			zoomIdolImage: {
+				order: order++,
+				displayName: 'アイドル画像をクリックでズーム表示',
+				default: true,
+				type: 'checkbox'
+			},
+			extendIdolList: {
+				order: order++,
+				displayName: '各種アイドル一覧拡張：',
+				type: 'h3'
+			},
+			showExternalStatusLink: {
+				order: order++,
+				displayName: 'ステータス確認サイトへのリンクを表示',
+				default: true,
+				type: 'checkbox'
+			},
+			showMarketPriceLink: {
+				order: order++,
+				displayName: 'トレード相場サイトへのリンクを表示',
+				default: true,
+				type: 'checkbox'
+			},
+			showAuctionHistoryLink: {
+				order: order++,
+				displayName: 'トレード履歴へのリンクを表示',
+				default: true,
+				type: 'checkbox'
 			}
 		};
 
@@ -1395,13 +1430,13 @@
 					var encName;
 
 					// ステータス
-					if (idol.name) {
+					if (_settings.showExternalStatusLink && idol.name) {
 						encName = encodeURIComponent(idol.name);
 						var statusURL = 'http://imas.cg.db.n-hokke.com/idols/' + encName;
 						linkHTML += '<a href="' + statusURL + '"><i class="fa-smile-o fa cghp_fg_yellow"></i></a>';
 					}
 					// トレード相場
-					if (idol.name && idol.type && idol.rarity && idol.cost) {
+					if (_settings.showMarketPriceLink && idol.name && idol.type && idol.rarity && idol.cost) {
 						encName = encodeURIComponent(idol.name);
 						var marketPriceURL = 'http://mobile-trade.jp/mobamasu/bazaar?' +
 							'lt=' + encName + '&' +
@@ -1413,7 +1448,7 @@
 						linkHTML += '<a href="' + marketPriceURL + '"><i class="fa-jpy fa cghp_fg_red"></i></a>';
 					}
 					// トレード履歴＠フリートレード画面
-					if ((/%2Fauction(?:%2F|%3F)/).test(_param)) {
+					if (_settings.showAuctionHistoryLink && (/%2Fauction(?:%2F|%3F)/).test(_param)) {
 						var idolSearchLink = idolStatusDiv.querySelector('div.grayButton80 > a');
 						if (idolSearchLink) {
 							var albumId = (idolSearchLink.href.match(/%2Fsearch_top%2F0%2F(\d+)/)||[])[1]||null;
@@ -2414,6 +2449,10 @@
 	// 肩書画像をクリックでローディングキャラを表示
 	// -------------------------------------------------------------------------
 	(function() {
+		if (!_settings.showLoadingCharacter) {
+			return;
+		}
+
 		// 肩書画像を取得
 		var exists = false;
 		var targetImage = _content.querySelectorAll('img[src*="%2Fimage_sp%2Fui%2Ftrophy%2Ftitle_charge_"]');
@@ -2490,6 +2529,10 @@
 	// アイドル画像をクリックでズーム表示
 	// -------------------------------------------------------------------------
 	(function() {
+		if (!_settings.zoomIdolImage) {
+			return;
+		}
+
 		// アイドル画像を取得
 		var exists = false;
 		var imageBaseURL = 'http://sp.pf-img-a.mbga.jp/12008305?url=http%3A%2F%2F125.6.169.35%2Fidolmaster%2F';
