@@ -1292,6 +1292,17 @@
 			var targetLinkLen = targetLink.length||0;
 			var i, j, div, linkParent;
 
+			var onclickRankButton = function(id, baseUrl, replaceUrl) {
+				var rankInput =$id(id);
+				if (rankInput) {
+					var targetRank = toNumber(rankInput.value);
+					if (isNumeric(targetRank)) {
+						var url = baseUrl.replace(replaceUrl + '%2F%3F', replaceUrl + '%2F0%2F' + (targetRank - 3) + '%3F');
+						_location.assign(url);
+					}
+				}
+			};
+
 			for (i = 0; i < targetLinkLen; i++) {
 				var link = targetLink[i];
 				var linkHTML = link.innerHTML;
@@ -1321,16 +1332,7 @@
 
 					var kojinRankButton =$id('kojinRankButton');
 					if (kojinRankButton) {
-						$bind(kojinRankButton, 'click', function() {
-							var kojinRankInput =$id('kojinRankInput');
-							if (kojinRankInput) {
-								var targetRank = toNumber(kojinRankInput.value);
-								if (isNumeric(targetRank)) {
-									var link = baseLink1.replace('ranking_for_user%2F%3F', 'ranking_for_user%2F0%2F' + (targetRank - 3) + '%3F');
-									_location.assign(link);
-								}
-							}
-						});
+						$bind(kojinRankButton, 'click', onclickRankButton.bind(null, 'kojinRankInput', baseLink1.href, 'ranking_for_user'));
 					}
 				}
 				if ((/ﾌﾟﾛﾀﾞｸｼｮﾝ順位確認/).test(linkHTML)) {
@@ -1359,16 +1361,7 @@
 
 					var proRankButton =$id('proRankButton');
 					if (proRankButton) {
-						$bind(proRankButton, 'click', function() {
-							var proRankInput =$id('proRankInput');
-							if (proRankInput) {
-								var targetRank = toNumber(proRankInput.value);
-								if (isNumeric(targetRank)) {
-									var link = baseLink2.replace('ranking_for_production%2F%3F', 'ranking_for_production%2F0%2F' + (targetRank - 3) + '%3F');
-									_location.assign(link);
-								}
-							}
-						});
+						$bind(proRankButton, 'click', onclickRankButton.bind(null, 'proRankInput', baseLink2.href, 'ranking_for_production'));
 					}
 				}
 			}
@@ -1450,6 +1443,16 @@
 				}
 			}
 			// 発揮値設定フォームをページ下部に表示
+			var setFunc = function(value) {
+				var v = toNumber(value);
+				if (isNumeric(v) && (/\d+/).test(v)) {
+					_settings[powerCheckKey] = v;
+					saveSettings(powerCheckKey);
+					_location.replace(_location.href);
+				} else {
+					window.alert(unitNo + '整数を入力してください。');
+				}
+			};
 			var frequentsButton = _content.querySelectorAll('.frequentsButton')||[];
 			for (i = 0, len = frequentsButton.length; i < len; i++) {
 				button = frequentsButton[i];
@@ -1471,24 +1474,10 @@
 					settingArea.innerHTML = settingForm.join('');
 					button.parentElement.insertBefore(settingArea, button.nextSibling);
 
-					var setFunc = function(value) {
-						var v = toNumber(value);
-						if (isNumeric(v) && (/\d+/).test(v)) {
-							_settings[powerCheckKey] = v;
-							saveSettings(powerCheckKey);
-							_location.replace(_location.href);
-						} else {
-							window.alert(unitNo + '整数を入力してください。');
-						}
-					};
 					var setButton1 = $id('cghpSetAssaultPowerCheckButton1');
-					$bind(setButton1, 'click', function() {
-						setFunc($id('cghpAssaultPowerCheck').value);
-					});
+					$bind(setButton1, 'click', setFunc.bind(null, $id('cghpAssaultPowerCheck').value));
 					var setButton2 = $id('cghpSetAssaultPowerCheckButton2');
-					$bind(setButton2, 'click', function() {
-						setFunc(attackPower);
-					});
+					$bind(setButton2, 'click', setFunc.bind(null, attackPower));
 					break;
 				}
 			}
@@ -1617,36 +1606,37 @@
 			_body.insertBefore(overlay, _body.firstChild);
 
 			// カスタムメニューのヘルプを作成
+			var generateToggleHelp = function(element) {
+				return function() {
+					var helpArea;
+					helpArea = $id('cghpCustomMenuHelp');
+					if (helpArea) {
+						helpArea.parentElement.removeChild(helpArea);
+					} else {
+						helpArea = element.parentElement.insertBefore($create('div'), element.nextSibling);
+						helpArea.id = 'cghpCustomMenuHelp';
+						var helpList = helpArea.appendChild($create('ul'));
+						helpList.className = 'cghp_cm_help_list';
+						_customMenu.forEach(function(value, index, array) {
+							var helpItem = helpList.appendChild($create('li'));
+							var helpLink = helpItem.appendChild($create('a'));
+							helpLink.className = 'cghp_link';
+							helpLink.innerHTML = index + '：' + value.fullName;
+							$bind(helpLink, 'click', function() {
+								element.value += (element.value === '') ? index : ',' + index;
+							});
+						});
+					}
+					help.visible = !help.visible;
+				};
+			};
 			for (i = 1; i <= 3; i++) {
 				var help = $id('cghpHelpCustomMenu' + i);
 				var text = $id('cghpSetCustomMenu' + i);
 				if (help && text) {
 					help.visible = false;
 					// ヘルプのトグル表示関数
-					var toggleHelp = (function(element) {
-						return function() {
-							var helpArea;
-							helpArea = $id('cghpCustomMenuHelp');
-							if (helpArea) {
-								helpArea.parentElement.removeChild(helpArea);
-							} else {
-								helpArea = element.parentElement.insertBefore($create('div'), element.nextSibling);
-								helpArea.id = 'cghpCustomMenuHelp';
-								var helpList = helpArea.appendChild($create('ul'));
-								helpList.className = 'cghp_cm_help_list';
-								_customMenu.forEach(function(value, index, array) {
-									var helpItem = helpList.appendChild($create('li'));
-									var helpLink = helpItem.appendChild($create('a'));
-									helpLink.className = 'cghp_link';
-									helpLink.innerHTML = index + '：' + value.fullName;
-									$bind(helpLink, 'click', function() {
-										element.value += (element.value === '') ? index : ',' + index;
-									});
-								});
-							}
-							help.visible = !help.visible;
-						};
-					})(text);
+					var toggleHelp = generateToggleHelp(text);
 					$bind(help, 'click', toggleHelp);
 				}
 			}
@@ -1828,6 +1818,30 @@
 		var exists = false;
 		var targetImage = _content.querySelectorAll('img[src*="%2Fimage_sp%2Fui%2Ftrophy%2Ftitle_charge_"]');
 		var targetImageLen = targetImage.length||0;
+		var generateShowImage = function(imageFile) {
+			return function(e) {
+				$id('cghpLoadingCharImg').src = _baseURL + 'image_sp%2Fui%2Frich%2Fquest%2Floading%2F' + imageFile + '.gif';
+				// スクロール位置に画像を移動
+				// ページを拡大or縮小していると座標がずれるので計算にいれる
+				var zoom = _root.style.zoom||1;
+				var scrollTop = (_root.scrollTop || _body.scrollTop || window.pageYOffset);
+				$id('cghpLoadingCharArea').style.top = (scrollTop / zoom) + 'px';
+				// オーバーレイ表示
+				var overlay = $id('cghpLoadingCharOverlay');
+				if (overlay) {
+					overlay.style.minHeight = (_body.scrollHeight / zoom) + 'px';
+					$removeClass(overlay, 'cghp_hide');
+				}
+				// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
+				var pageArea = $id('pageArea');
+				if (pageArea) {
+					$addClass(pageArea, 'cghp_overlay');
+				}
+				e.preventDefault();
+				e.stopPropagation();
+			};
+		};
+
 		for (var i = 0; i < targetImageLen; i++) {
 			var image = targetImage[i];
 			var imageFile = (image.src.match(/%2Fimage_sp%2Fui%2Ftrophy%2Ftitle_charge_(\d+)/)||[])[1]||null;
@@ -1835,29 +1849,7 @@
 			imageFile = (imageFile.length === 3) ? '5' + imageFile : imageFile;
 			if (imageFile) {
 				// ローディングキャラ表示関数
-				var showImage = (function(imageFile) {
-					return function(e) {
-						$id('cghpLoadingCharImg').src = _baseURL + 'image_sp%2Fui%2Frich%2Fquest%2Floading%2F' + imageFile + '.gif';
-						// スクロール位置に画像を移動
-						// ページを拡大or縮小していると座標がずれるので計算にいれる
-						var zoom = _root.style.zoom||1;
-						var scrollTop = (_root.scrollTop || _body.scrollTop || window.pageYOffset);
-						$id('cghpLoadingCharArea').style.top = (scrollTop / zoom) + 'px';
-						// オーバーレイ表示
-						var overlay = $id('cghpLoadingCharOverlay');
-						if (overlay) {
-							overlay.style.minHeight = (_body.scrollHeight / zoom) + 'px';
-							$removeClass(overlay, 'cghp_hide');
-						}
-						// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
-						var pageArea = $id('pageArea');
-						if (pageArea) {
-							$addClass(pageArea, 'cghp_overlay');
-						}
-						e.preventDefault();
-						e.stopPropagation();
-					};
-				})(imageFile);
+				var showImage = generateShowImage(imageFile);
 				$addClass(image, 'cghp_link');
 				$bind(image, 'click', showImage);
 				exists = true;
@@ -1905,6 +1897,31 @@
 		var noFramePath = 'image_sp%2Fcard%2Fl_noframe%2F';
 		var targetImage = _content.querySelectorAll('img[src*="%2Fimage_sp%2Fcard%2F"]');
 		var targetImageLen = targetImage.length||0;
+		var generateShowImage =  function(imageFile) {
+			return function(e) {
+				$id('cghpCharImg1').src = imageBaseURL + framePath + imageFile;
+				$id('cghpCharImg2').src = imageBaseURL + noFramePath + imageFile;
+				// スクロール位置に画像を移動
+				// ページを拡大or縮小していると座標がずれるので計算にいれる
+				var zoom = _root.style.zoom||1;
+				var scrollTop = (_root.scrollTop || _body.scrollTop || window.pageYOffset);
+				$id('cghpCharArea').style.top = (scrollTop / zoom) + 'px';
+				// オーバーレイ表示
+				var overlay = $id('cghpCharOverlay');
+				if (overlay) {
+					overlay.style.minHeight = (_body.scrollHeight / zoom) + 'px';
+					$removeClass(overlay, 'cghp_hide');
+				}
+				// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
+				var pageArea = $id('pageArea');
+				if (pageArea) {
+					$addClass(pageArea, 'cghp_overlay');
+				}
+				e.preventDefault();
+				e.stopPropagation();
+			};
+		};
+
 		for (var i = 0; i < targetImageLen; i++) {
 			var image = targetImage[i];
 			var parent = image.parentElement;
@@ -1914,30 +1931,7 @@
 			var imageFile = (image.src.match(/%2Fimage_sp%2Fcard%2F(?:\w+)%2F(\w+\.jpg)/)||[])[1]||null;
 			if (imageFile) {
 				// アイドル画像(大)表示関数
-				var showImage = (function(imageFile) {
-					return function(e) {
-						$id('cghpCharImg1').src = imageBaseURL + framePath + imageFile;
-						$id('cghpCharImg2').src = imageBaseURL + noFramePath + imageFile;
-						// スクロール位置に画像を移動
-						// ページを拡大or縮小していると座標がずれるので計算にいれる
-						var zoom = _root.style.zoom||1;
-						var scrollTop = (_root.scrollTop || _body.scrollTop || window.pageYOffset);
-						$id('cghpCharArea').style.top = (scrollTop / zoom) + 'px';
-						// オーバーレイ表示
-						var overlay = $id('cghpCharOverlay');
-						if (overlay) {
-							overlay.style.minHeight = (_body.scrollHeight / zoom) + 'px';
-							$removeClass(overlay, 'cghp_hide');
-						}
-						// オーバーレイ表示中は下位レイヤーの邪魔な要素を非表示にする
-						var pageArea = $id('pageArea');
-						if (pageArea) {
-							$addClass(pageArea, 'cghp_overlay');
-						}
-						e.preventDefault();
-						e.stopPropagation();
-					};
-				})(imageFile);
+				var showImage = generateShowImage(imageFile);
 				$addClass(image, 'cghp_link');
 				$bind(image, 'click', showImage);
 				exists = true;
