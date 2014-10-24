@@ -11,6 +11,415 @@
 (function() {
 	'use strict';
 
+	/**
+	 * レベルアップ計算を挿入する
+	 *
+	 * @param status getWorkStatusの戻り値
+	 * @param insertTarget 挿入先のElement
+	 * @param className HTMLのクラス名
+	 */
+	function insertExpInfo(status, insertTarget, className) {
+		if (status) {
+			var expInfoDiv = getExpInfo(status.currentHP, status.maxHP, status.currentExp, status.maxExp);
+			if (expInfoDiv && insertTarget) {
+				expInfoDiv.className = className;
+				insertTarget.parentElement.insertBefore(expInfoDiv, insertTarget);
+			}
+		}
+	}
+
+	/**
+	 * お仕事ページのスタミナと経験値情報を取得する
+	 *
+	 * @param workType 0:演出OFF、1:演出ON
+	 * @return ステータスを格納した連想配列。
+	 */
+	function getWorkStatus(workType) {
+		var hpText = null;
+		var expText = null;
+		var targetTd, targetArea;
+
+		if (workType === 0) {
+			// 演出OFF
+			targetArea = _content.querySelectorAll('span.blue_st');
+			var targetAreaLen = targetArea.length||0;
+			for (var i = 0; i < targetAreaLen; i++) {
+				var span = targetArea[i];
+				if ((/ｽﾀﾐﾅ:/).test(span.textContent)) {
+					targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
+					if (targetTd && targetTd.tagName === 'TD') {
+						hpText = targetTd.textContent;
+					}
+				} else if ((/Ex:/).test(span.textContent)) {
+					targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
+					if (targetTd) {
+						expText = targetTd.textContent;
+					}
+				}
+			}
+		} else if (workType === 1) {
+			// 演出ON
+			targetArea = $id('get_condition');
+			if (targetArea) {
+				var hpDiv = $id('hp');
+				if (hpDiv) {
+					hpText = hpDiv.textContent;
+				}
+				var expDiv = $id('exp');
+				if (expDiv) {
+					expText = expDiv.textContent;
+				}
+			}
+		}
+
+		if (hpText == null || expText == null) {
+			return null;
+		}
+		var status = {};
+		var hpTextArray = (hpText.match(/(\d+)\/(\d+)/)||[]);
+		if (hpTextArray.length === 3) {
+			status.currentHP = hpTextArray[1];
+			status.maxHP = hpTextArray[2];
+		} else {
+			return null;
+		}
+		var expTextArray = (expText.match(/(\d+)\/(\d+)/)||[]);
+		if (expTextArray.length === 3) {
+			status.currentExp = expTextArray[1];
+			status.maxExp = expTextArray[2];
+		} else {
+			return null;
+		}
+		return status;
+	}
+
+	/**
+	 * 次のレベルアップまでの必要コストを取得する
+	 *
+	 * @param currentHP スタミナの現在値
+	 * @param maxHP スタミナの最大値
+	 * @param currentExp 経験値の現在値
+	 * @param maxExp 経験値の最大値
+	 * @return 経験値の計算結果を格納したElement。
+	 */
+	function getExpInfo(currentHP, maxHP, currentExp, maxExp) {
+		// 引数チェック
+		if (currentHP == null || maxHP == null || currentExp == null || maxExp == null) {
+			return null;
+		}
+		currentHP = toNumber(currentHP);
+		maxHP = toNumber(maxHP);
+		currentExp = toNumber(currentExp);
+		maxExp = toNumber(maxExp);
+
+		// レベルアップに必要な経験値の算出
+		var restExp = maxExp - currentExp;
+		if (restExp < 1) {
+			return null;
+		}
+
+		// 必要コストの算出とElementの作成
+		var recovery100 = maxHP;
+		var recovery50 = Math.ceil(maxHP / 2);
+		var recovery20 = Math.ceil(maxHP / 5);
+
+		var expInfoDiv = $create('div');
+		expInfoDiv.id = 'cghpExpInfo';
+
+		var div1 = expInfoDiv.appendChild($create('div'));
+		div1.innerHTML = '次のLvUPまでに必要なEx：<span class="yellow">' + restExp + '</span>';
+		var div2 = expInfoDiv.appendChild($create('div'));
+		div2.innerHTML = '現在のスタミナ：<span class="yellow">' + currentHP + '</span>';
+		expInfoDiv.appendChild($create('hr'));
+
+		if (restExp <= currentHP) {
+			var divError = expInfoDiv.appendChild($create('div'));
+			divError.innerHTML = '<span class="red">スタミナが溢れています。<br>至急LvUPしましょう！</span>';
+		} else {
+			// 計算結果を時間(文字列)に変換
+			var minutesToString = function(minutes) {
+				var d = 0;
+				var h = 0;
+				var m = minutes;
+				var result = '';
+				if (60 <= m) {
+					h = Math.floor(m / 60);
+					m = m % 60;
+				}
+				if (24 <= h) {
+					d = Math.floor(h / 24);
+					h = h % 24;
+				}
+				if (0 < d) {
+					result += d + '日';
+					if (0 < h || 0 < m) {
+						result += 'と';
+					}
+				}
+				if (0 < h) {
+					result += h + '時間';
+				}
+				if (0 < m) {
+					result += m + '分';
+				}
+				return result;
+			};
+
+			// 計算処理
+			var expCalc = function(restExp) {
+				var result = {};
+
+				var restExpTemp = restExp;
+				restExpTemp -= currentHP;
+				// 自然回復のみ
+				result.recoveryNaturalOnlyTime = minutesToString(restExpTemp * 3);
+				result.recoveryNaturalOnlyCost = restExpTemp;
+				// 100%回復アイテム
+				if (_settings.exp_calc_recovery100) {
+					result.recovery100Count = Math.floor(restExpTemp / recovery100);
+					result.recovery100Cost = recovery100 * result.recovery100Count;
+					restExpTemp -= result.recovery100Cost;
+				} else {
+					result.recovery100Count = 0;
+					result.recovery100Cost = 0;
+				}
+				// 50%回復アイテム
+				if (_settings.exp_calc_recovery50) {
+					result.recovery50Count = Math.floor(restExpTemp / recovery50);
+					result.recovery50Cost = recovery50 * result.recovery50Count;
+					restExpTemp -= result.recovery50Cost;
+				} else {
+					result.recovery50Count = 0;
+					result.recovery50Cost = 0;
+				}
+				// 20%回復アイテム
+				if (_settings.exp_calc_recovery20) {
+					result.recovery20Count = Math.floor(restExpTemp / recovery20);
+					result.recovery20Cost = recovery20 * result.recovery20Count;
+					restExpTemp -= result.recovery20Cost;
+				} else {
+					result.recovery20Count = 0;
+					result.recovery20Cost = 0;
+				}
+				// 自然回復
+				result.recoveryNaturalTime = minutesToString(restExpTemp * 3);
+				result.recoveryNaturalCost = restExpTemp;
+
+				return result;
+			};
+
+			var exp = expCalc(restExp);
+			var divRecovery100 = expInfoDiv.appendChild($create('div'));
+			divRecovery100.className = (_settings.exp_calc_recovery100) ? 'cghp_link' : 'cghp_link cghp_strike';
+			divRecovery100.innerHTML = '100%回復アイテム (' + recovery100 + ')：<span class="yellow">' + exp.recovery100Count + '個 (' + exp.recovery100Cost + ')</span>';
+			$bind(divRecovery100, 'click', function() {
+				_settings.exp_calc_recovery100 = !_settings.exp_calc_recovery100;
+				saveSettings('exp_calc_recovery100');
+				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
+			});
+			var divRecovery50 = expInfoDiv.appendChild($create('div'));
+			divRecovery50.className = (_settings.exp_calc_recovery50) ? 'cghp_link' : 'cghp_link cghp_strike';
+			divRecovery50.innerHTML = '50%回復アイテム (' + recovery50 + ')：<span class="yellow">' + exp.recovery50Count + '個 (' + exp.recovery50Cost + ')</span>';
+			$bind(divRecovery50, 'click', function() {
+				_settings.exp_calc_recovery50 = !_settings.exp_calc_recovery50;
+				saveSettings('exp_calc_recovery50');
+				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
+			});
+			var divRecovery20 = expInfoDiv.appendChild($create('div'));
+			divRecovery20.className = (_settings.exp_calc_recovery20) ? 'cghp_link' : 'cghp_link cghp_strike';
+			divRecovery20.innerHTML = '20%回復アイテム (' + recovery20 + ')：<span class="yellow">' + exp.recovery20Count + '個 (' + exp.recovery20Cost + ')</span>';
+			$bind(divRecovery20, 'click', function() {
+				_settings.exp_calc_recovery20 = !_settings.exp_calc_recovery20;
+				saveSettings('exp_calc_recovery20');
+				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
+			});
+			var divRecoveryNatural;
+			divRecoveryNatural = expInfoDiv.appendChild($create('div'));
+			divRecoveryNatural.innerHTML = '自然回復：<span class="yellow">' + exp.recoveryNaturalTime + ' (' + exp.recoveryNaturalCost + ')</span>';
+			expInfoDiv.appendChild($create('hr'));
+			divRecoveryNatural = expInfoDiv.appendChild($create('div'));
+			divRecoveryNatural.innerHTML = '自然回復のみ：<span class="yellow">' + exp.recoveryNaturalOnlyTime + ' (' + exp.recoveryNaturalOnlyCost + ')</span>';
+		}
+
+		return expInfoDiv;
+	}
+
+	/**
+	 * 次のレベルアップまでの必要コストを更新する
+	 *
+	 * @param currentHP スタミナの現在値
+	 * @param maxHP スタミナの最大値
+	 * @param currentExp 経験値の現在値
+	 * @param maxExp 経験値の最大値
+	 * @return 経験値の計算結果を格納したDOM。
+	 */
+	function updateExpInfo(currentHP, maxHP, currentExp, maxExp) {
+		var cghpExpInfo = $id('cghpExpInfo');
+		if (cghpExpInfo) {
+			var expInfoDiv = getExpInfo(currentHP, maxHP, currentExp, maxExp);
+			if (expInfoDiv) {
+				var parentElement = cghpExpInfo.parentElement;
+				expInfoDiv.className = cghpExpInfo.className;
+				parentElement.replaceChild(expInfoDiv, cghpExpInfo);
+			}
+		}
+	}
+
+	/**
+	 * クリック(タップ)イベントを発生させる
+	 *
+	 * @param element イベントを発生させる対象の要素
+	 */
+	function dispatchClick(element) {
+		var event_click;
+
+		if (window.start && window.start === 'touchstart') {
+			// タップイベント (touchstart → touchend → click)
+			var event_start = _doc.createEvent('TouchEvent');
+			var event_end = _doc.createEvent('TouchEvent');
+			event_click = _doc.createEvent('MouseEvent');
+			var touch = _doc.createTouch(window, element, 0, 0, 0, 0, 0);
+			var touches = _doc.createTouchList(touch);
+
+			if (navigator.userAgent.indexOf('Android') > 0) {
+				// Android
+				event_start.initTouchEvent(touches, touches, touches, 'touchstart', window, 0, 0, 0, 0, false, false, false, false);
+				event_end.initTouchEvent(touches, touches, touches, 'touchend', window, 0, 0, 0, 0, false, false, false, false);
+			} else {
+				// iOS
+				event_start.initTouchEvent('touchstart', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, touches, touches, touches,1, 0);
+				event_end.initTouchEvent('touchend', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, touches, touches, touches,1, 0);
+			}
+			event_click.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
+
+			element.dispatchEvent(event_start);
+			element.dispatchEvent(event_end);
+			element.dispatchEvent(event_click);
+		} else {
+			// クリックイベント (mousedown → mouseup → click)
+			var event_down = _doc.createEvent('MouseEvent');
+			var event_up = _doc.createEvent('MouseEvent');
+			event_click = _doc.createEvent('MouseEvent');
+
+			event_down.initMouseEvent('mousedown', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
+			event_up.initMouseEvent('mouseup', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
+			event_click.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
+
+			element.dispatchEvent(event_down);
+			element.dispatchEvent(event_up);
+			element.dispatchEvent(event_click);
+		}
+	}
+
+	/**
+	 * headタグの先頭に要素を挿入する
+	 *
+	 * @param element 挿入する要素
+	 * @note headタグがない場合は、headタグを作成して要素を追加する。
+	 */
+	function insertToHead(element) {
+		if (element instanceof Node || element instanceof Element) {
+			var head = _doc.querySelector('head');
+			if (head) {
+				head.appendChild(element);
+			} else {
+				head = $create('head');
+				head.appendChild(element);
+				_root.insertBefore(element, _root.firstChild);
+			}
+		}
+	}
+
+	/**
+	 * ユーザー設定を読み込む
+	 *
+	 * @note 初期値の設定もここで行う。
+	 *       (現状はイベントURLはマイスタジオ表示時に取得。失敗時は仕事のURLが設定される。)
+	 * @return 設定の連想配列。
+	 */
+	function loadSettings() {
+		var defaults = {
+			'mobage_id': 0,
+			'chat_url': _baseURL + 'knights%2Fknights_top_for_member',
+			'event_url': _baseURL + 'quests',
+			'hide_banner_in_menu': true,
+			'custom_menu_icon': true,
+			'custom_menu1': [3, 2, 10, 14, 26, 16],
+			'custom_menu2': [4, 6, 8, 25, 24],
+			'custom_menu3': [],
+			'dojo_url': 'http://saasan.github.io/mobamas-dojo/lv.html',
+			'custom_url1': _topURL,
+			'custom_url2': _topURL,
+			'custom_url3': _topURL,
+			'custom_url4': _topURL,
+			'custom_url5': _topURL,
+			'point_filter_hp': true,
+			'point_filter_atk': true,
+			'point_filter_def': false,
+			'point_filter_auto': false,
+			'atack_cost_limit': 5,
+			'exp_calc_recovery100': true,
+			'exp_calc_recovery50': true,
+			'exp_calc_recovery20': false,
+			'event_assault_power_check1': 0,
+			'event_assault_power_check2': 0,
+			'event_assault_power_check3': 0,
+			'swf_zoom': 1,
+		};
+		var settings = {};
+		for (var key in defaults) {
+			settings[key] = getValue('cghp_' + key);
+			if (settings[key] == null) {
+				settings[key] = defaults[key];
+				setValue('cghp_' + key, settings[key]);
+			}
+		}
+		return settings;
+	}
+
+	/**
+	 * ユーザー設定を書き込む
+	 *
+	 */
+	function saveSettings(key) {
+		if (key) {
+			setValue('cghp_' + key, _settings[key]);
+		} else {
+			for (var k in _settings) {
+				setValue('cghp_' + k, _settings[k]);
+			}
+		}
+	}
+
+	/**
+	 * ユーザー設定を削除する
+	 *
+	 */
+	function deleteSettings() {
+		for (var i = localStorage.length - 1; 0 <= i; i--) {
+			var key = localStorage.key(i);
+			if ((/^cghp_/).test(key)) {
+				deleteValue(key);
+			}
+		}
+	}
+
+	// その他関数
+	function $id(a){return _doc.getElementById(a);}
+	function $addClass(d,b){if(d&&b){var e=b.split(' ')||[];var f=d.className.split(' ')||[];for(var c=0,a=e.length;c<a;c++){if(f.indexOf(e[c])===-1){f.push(e[c]);}}d.className=f.join(' ').trim();}}
+	function $removeClass(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false;}}return true;});a.className=c.join(' ').trim();}}
+	function $hasClass(f,b){var h=false;if(f&&b){var a=b.split(' ')||[];var e=f.className.split(' ')||[];for(var d=0,c=e.length;d<c;d++){for(var q=0,r=a.length;q<r;q++){if(e[d]===a[q]){h=true;break;}}}}return h;}
+	function $toggleClass(a,c){/*var b=false;*/if(a&&c){if($hasClass(a,c)){$removeClass(a,c);}else{$addClass(a,c);}}}
+	function $create(a){return _doc.createElement(a);}
+	function $bind(a,b,c){if(!a){return;}a.addEventListener(b,c,false);}
+	function getValue(a){var b=localStorage.getItem(a);return(b)?JSON.parse(b):null;}
+	function setValue(a,b){localStorage.setItem(a,JSON.stringify(b));}
+	function deleteValue(a){localStorage.removeItem(a);}
+	function isNumeric(a){if(Number.isFinite){return Number.isFinite(a);}else{return(typeof a==='number')&&isFinite(a);}}
+	function toNumber(a){if(a){return a-0;}}
+	function round(a,b){var c=Math.pow(10,b);return Math.round(a*c)/c;}
+	function trim(a){return(a)?a.replace(/^[\s　]+|[\s　]+$/g,''):null;}
+
 	// =========================================================================
 	// メイン処理
 	// =========================================================================
@@ -1160,15 +1569,6 @@
 		}
 	})();
 
-	function insertExpInfo(status, insertTarget, className) {
-		if (status) {
-			var expInfoDiv = getExpInfo(status.currentHP, status.maxHP, status.currentExp, status.maxExp);
-			if (expInfoDiv && insertTarget) {
-				expInfoDiv.className = className;
-				insertTarget.parentElement.insertBefore(expInfoDiv, insertTarget);
-			}
-		}
-	}
 
 	// -------------------------------------------------------------------------
 	// レベルアップ計算＠通常お仕事(演出OFF)
@@ -2037,397 +2437,5 @@
 	// =========================================================================
 	// メイン処理 ここまで
 	// =========================================================================
-
-	/**
-	 * お仕事ページのスタミナと経験値情報を取得する
-	 *
-	 * @param workType 0:演出OFF、1:演出ON
-	 * @return ステータスを格納した連想配列。
-	 */
-	function getWorkStatus(workType) {
-		var hpText = null;
-		var expText = null;
-		var targetTd, targetArea;
-
-		if (workType === 0) {
-			// 演出OFF
-			targetArea = _content.querySelectorAll('span.blue_st');
-			var targetAreaLen = targetArea.length||0;
-			for (var i = 0; i < targetAreaLen; i++) {
-				var span = targetArea[i];
-				if ((/ｽﾀﾐﾅ:/).test(span.textContent)) {
-					targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
-					if (targetTd && targetTd.tagName === 'TD') {
-						hpText = targetTd.textContent;
-					}
-				} else if ((/Ex:/).test(span.textContent)) {
-					targetTd = span.parentElement.nextSibling.nextSibling; // #parent -> td
-					if (targetTd) {
-						expText = targetTd.textContent;
-					}
-				}
-			}
-		} else if (workType === 1) {
-			// 演出ON
-			targetArea = $id('get_condition');
-			if (targetArea) {
-				var hpDiv = $id('hp');
-				if (hpDiv) {
-					hpText = hpDiv.textContent;
-				}
-				var expDiv = $id('exp');
-				if (expDiv) {
-					expText = expDiv.textContent;
-				}
-			}
-		}
-
-		if (hpText == null || expText == null) {
-			return null;
-		}
-		var status = {};
-		var hpTextArray = (hpText.match(/(\d+)\/(\d+)/)||[]);
-		if (hpTextArray.length === 3) {
-			status.currentHP = hpTextArray[1];
-			status.maxHP = hpTextArray[2];
-		} else {
-			return null;
-		}
-		var expTextArray = (expText.match(/(\d+)\/(\d+)/)||[]);
-		if (expTextArray.length === 3) {
-			status.currentExp = expTextArray[1];
-			status.maxExp = expTextArray[2];
-		} else {
-			return null;
-		}
-		return status;
-	}
-
-	/**
-	 * 次のレベルアップまでの必要コストを取得する
-	 *
-	 * @param currentHP スタミナの現在値
-	 * @param maxHP スタミナの最大値
-	 * @param currentExp 経験値の現在値
-	 * @param maxExp 経験値の最大値
-	 * @return 経験値の計算結果を格納したElement。
-	 */
-	function getExpInfo(currentHP, maxHP, currentExp, maxExp) {
-		// 引数チェック
-		if (currentHP == null || maxHP == null || currentExp == null || maxExp == null) {
-			return null;
-		}
-		currentHP = toNumber(currentHP);
-		maxHP = toNumber(maxHP);
-		currentExp = toNumber(currentExp);
-		maxExp = toNumber(maxExp);
-
-		// レベルアップに必要な経験値の算出
-		var restExp = maxExp - currentExp;
-		if (restExp < 1) {
-			return null;
-		}
-
-		// 必要コストの算出とElementの作成
-		var recovery100 = maxHP;
-		var recovery50 = Math.ceil(maxHP / 2);
-		var recovery20 = Math.ceil(maxHP / 5);
-
-		var expInfoDiv = $create('div');
-		expInfoDiv.id = 'cghpExpInfo';
-
-		var div1 = expInfoDiv.appendChild($create('div'));
-		div1.innerHTML = '次のLvUPまでに必要なEx：<span class="yellow">' + restExp + '</span>';
-		var div2 = expInfoDiv.appendChild($create('div'));
-		div2.innerHTML = '現在のスタミナ：<span class="yellow">' + currentHP + '</span>';
-		expInfoDiv.appendChild($create('hr'));
-
-		if (restExp <= currentHP) {
-			var divError = expInfoDiv.appendChild($create('div'));
-			divError.innerHTML = '<span class="red">スタミナが溢れています。<br>至急LvUPしましょう！</span>';
-		} else {
-			// 計算結果を時間(文字列)に変換
-			var minutesToString = function(minutes) {
-				var d = 0;
-				var h = 0;
-				var m = minutes;
-				var result = '';
-				if (60 <= m) {
-					h = Math.floor(m / 60);
-					m = m % 60;
-				}
-				if (24 <= h) {
-					d = Math.floor(h / 24);
-					h = h % 24;
-				}
-				if (0 < d) {
-					result += d + '日';
-					if (0 < h || 0 < m) {
-						result += 'と';
-					}
-				}
-				if (0 < h) {
-					result += h + '時間';
-				}
-				if (0 < m) {
-					result += m + '分';
-				}
-				return result;
-			};
-
-			// 計算処理
-			var expCalc = function(restExp) {
-				var result = {};
-
-				var restExpTemp = restExp;
-				restExpTemp -= currentHP;
-				// 自然回復のみ
-				result.recoveryNaturalOnlyTime = minutesToString(restExpTemp * 3);
-				result.recoveryNaturalOnlyCost = restExpTemp;
-				// 100%回復アイテム
-				if (_settings.exp_calc_recovery100) {
-					result.recovery100Count = Math.floor(restExpTemp / recovery100);
-					result.recovery100Cost = recovery100 * result.recovery100Count;
-					restExpTemp -= result.recovery100Cost;
-				} else {
-					result.recovery100Count = 0;
-					result.recovery100Cost = 0;
-				}
-				// 50%回復アイテム
-				if (_settings.exp_calc_recovery50) {
-					result.recovery50Count = Math.floor(restExpTemp / recovery50);
-					result.recovery50Cost = recovery50 * result.recovery50Count;
-					restExpTemp -= result.recovery50Cost;
-				} else {
-					result.recovery50Count = 0;
-					result.recovery50Cost = 0;
-				}
-				// 20%回復アイテム
-				if (_settings.exp_calc_recovery20) {
-					result.recovery20Count = Math.floor(restExpTemp / recovery20);
-					result.recovery20Cost = recovery20 * result.recovery20Count;
-					restExpTemp -= result.recovery20Cost;
-				} else {
-					result.recovery20Count = 0;
-					result.recovery20Cost = 0;
-				}
-				// 自然回復
-				result.recoveryNaturalTime = minutesToString(restExpTemp * 3);
-				result.recoveryNaturalCost = restExpTemp;
-
-				return result;
-			};
-
-			var exp = expCalc(restExp);
-			var divRecovery100 = expInfoDiv.appendChild($create('div'));
-			divRecovery100.className = (_settings.exp_calc_recovery100) ? 'cghp_link' : 'cghp_link cghp_strike';
-			divRecovery100.innerHTML = '100%回復アイテム (' + recovery100 + ')：<span class="yellow">' + exp.recovery100Count + '個 (' + exp.recovery100Cost + ')</span>';
-			$bind(divRecovery100, 'click', function() {
-				_settings.exp_calc_recovery100 = !_settings.exp_calc_recovery100;
-				saveSettings('exp_calc_recovery100');
-				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
-			});
-			var divRecovery50 = expInfoDiv.appendChild($create('div'));
-			divRecovery50.className = (_settings.exp_calc_recovery50) ? 'cghp_link' : 'cghp_link cghp_strike';
-			divRecovery50.innerHTML = '50%回復アイテム (' + recovery50 + ')：<span class="yellow">' + exp.recovery50Count + '個 (' + exp.recovery50Cost + ')</span>';
-			$bind(divRecovery50, 'click', function() {
-				_settings.exp_calc_recovery50 = !_settings.exp_calc_recovery50;
-				saveSettings('exp_calc_recovery50');
-				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
-			});
-			var divRecovery20 = expInfoDiv.appendChild($create('div'));
-			divRecovery20.className = (_settings.exp_calc_recovery20) ? 'cghp_link' : 'cghp_link cghp_strike';
-			divRecovery20.innerHTML = '20%回復アイテム (' + recovery20 + ')：<span class="yellow">' + exp.recovery20Count + '個 (' + exp.recovery20Cost + ')</span>';
-			$bind(divRecovery20, 'click', function() {
-				_settings.exp_calc_recovery20 = !_settings.exp_calc_recovery20;
-				saveSettings('exp_calc_recovery20');
-				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
-			});
-			var divRecoveryNatural;
-			divRecoveryNatural = expInfoDiv.appendChild($create('div'));
-			divRecoveryNatural.innerHTML = '自然回復：<span class="yellow">' + exp.recoveryNaturalTime + ' (' + exp.recoveryNaturalCost + ')</span>';
-			expInfoDiv.appendChild($create('hr'));
-			divRecoveryNatural = expInfoDiv.appendChild($create('div'));
-			divRecoveryNatural.innerHTML = '自然回復のみ：<span class="yellow">' + exp.recoveryNaturalOnlyTime + ' (' + exp.recoveryNaturalOnlyCost + ')</span>';
-		}
-
-		return expInfoDiv;
-	}
-
-	/**
-	 * 次のレベルアップまでの必要コストを更新する
-	 *
-	 * @param currentHP スタミナの現在値
-	 * @param maxHP スタミナの最大値
-	 * @param currentExp 経験値の現在値
-	 * @param maxExp 経験値の最大値
-	 * @return 経験値の計算結果を格納したDOM。
-	 */
-	function updateExpInfo(currentHP, maxHP, currentExp, maxExp) {
-		var cghpExpInfo = $id('cghpExpInfo');
-		if (cghpExpInfo) {
-			var expInfoDiv = getExpInfo(currentHP, maxHP, currentExp, maxExp);
-			if (expInfoDiv) {
-				var parentElement = cghpExpInfo.parentElement;
-				expInfoDiv.className = cghpExpInfo.className;
-				parentElement.replaceChild(expInfoDiv, cghpExpInfo);
-			}
-		}
-	}
-
-	/**
-	 * クリック(タップ)イベントを発生させる
-	 *
-	 * @param element イベントを発生させる対象の要素
-	 */
-	function dispatchClick(element) {
-		var event_click;
-
-		if (window.start && window.start === 'touchstart') {
-			// タップイベント (touchstart → touchend → click)
-			var event_start = _doc.createEvent('TouchEvent');
-			var event_end = _doc.createEvent('TouchEvent');
-			event_click = _doc.createEvent('MouseEvent');
-			var touch = _doc.createTouch(window, element, 0, 0, 0, 0, 0);
-			var touches = _doc.createTouchList(touch);
-
-			if (navigator.userAgent.indexOf('Android') > 0) {
-				// Android
-				event_start.initTouchEvent(touches, touches, touches, 'touchstart', window, 0, 0, 0, 0, false, false, false, false);
-				event_end.initTouchEvent(touches, touches, touches, 'touchend', window, 0, 0, 0, 0, false, false, false, false);
-			} else {
-				// iOS
-				event_start.initTouchEvent('touchstart', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, touches, touches, touches,1, 0);
-				event_end.initTouchEvent('touchend', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, touches, touches, touches,1, 0);
-			}
-			event_click.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
-
-			element.dispatchEvent(event_start);
-			element.dispatchEvent(event_end);
-			element.dispatchEvent(event_click);
-		} else {
-			// クリックイベント (mousedown → mouseup → click)
-			var event_down = _doc.createEvent('MouseEvent');
-			var event_up = _doc.createEvent('MouseEvent');
-			event_click = _doc.createEvent('MouseEvent');
-
-			event_down.initMouseEvent('mousedown', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
-			event_up.initMouseEvent('mouseup', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
-			event_click.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, 0, false, false, false, false, null);
-
-			element.dispatchEvent(event_down);
-			element.dispatchEvent(event_up);
-			element.dispatchEvent(event_click);
-		}
-	}
-
-	/**
-	 * headタグの先頭に要素を挿入する
-	 *
-	 * @param element 挿入する要素
-	 * @note headタグがない場合は、headタグを作成して要素を追加する。
-	 */
-	function insertToHead(element) {
-		if (element instanceof Node || element instanceof Element) {
-			var head = _doc.querySelector('head');
-			if (head) {
-				head.appendChild(element);
-			} else {
-				head = $create('head');
-				head.appendChild(element);
-				_root.insertBefore(element, _root.firstChild);
-			}
-		}
-	}
-
-	/**
-	 * ユーザー設定を読み込む
-	 *
-	 * @note 初期値の設定もここで行う。
-	 *       (現状はイベントURLはマイスタジオ表示時に取得。失敗時は仕事のURLが設定される。)
-	 * @return 設定の連想配列。
-	 */
-	function loadSettings() {
-		var defaults = {
-			'mobage_id': 0,
-			'chat_url': _baseURL + 'knights%2Fknights_top_for_member',
-			'event_url': _baseURL + 'quests',
-			'hide_banner_in_menu': true,
-			'custom_menu_icon': true,
-			'custom_menu1': [3, 2, 10, 14, 26, 16],
-			'custom_menu2': [4, 6, 8, 25, 24],
-			'custom_menu3': [],
-			'dojo_url': 'http://saasan.github.io/mobamas-dojo/lv.html',
-			'custom_url1': _topURL,
-			'custom_url2': _topURL,
-			'custom_url3': _topURL,
-			'custom_url4': _topURL,
-			'custom_url5': _topURL,
-			'point_filter_hp': true,
-			'point_filter_atk': true,
-			'point_filter_def': false,
-			'point_filter_auto': false,
-			'atack_cost_limit': 5,
-			'exp_calc_recovery100': true,
-			'exp_calc_recovery50': true,
-			'exp_calc_recovery20': false,
-			'event_assault_power_check1': 0,
-			'event_assault_power_check2': 0,
-			'event_assault_power_check3': 0,
-			'swf_zoom': 1,
-		};
-		var settings = {};
-		for (var key in defaults) {
-			settings[key] = getValue('cghp_' + key);
-			if (settings[key] == null) {
-				settings[key] = defaults[key];
-				setValue('cghp_' + key, settings[key]);
-			}
-		}
-		return settings;
-	}
-
-	/**
-	 * ユーザー設定を書き込む
-	 *
-	 */
-	function saveSettings(key) {
-		if (key) {
-			setValue('cghp_' + key, _settings[key]);
-		} else {
-			for (var k in _settings) {
-				setValue('cghp_' + k, _settings[k]);
-			}
-		}
-	}
-
-	/**
-	 * ユーザー設定を削除する
-	 *
-	 */
-	function deleteSettings() {
-		for (var i = localStorage.length - 1; 0 <= i; i--) {
-			var key = localStorage.key(i);
-			if ((/^cghp_/).test(key)) {
-				deleteValue(key);
-			}
-		}
-	}
-
-	// その他関数
-	function $id(a){return _doc.getElementById(a);}
-	function $addClass(d,b){if(d&&b){var e=b.split(' ')||[];var f=d.className.split(' ')||[];for(var c=0,a=e.length;c<a;c++){if(f.indexOf(e[c])===-1){f.push(e[c]);}}d.className=f.join(' ').trim();}}
-	function $removeClass(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false;}}return true;});a.className=c.join(' ').trim();}}
-	function $hasClass(f,b){var h=false;if(f&&b){var a=b.split(' ')||[];var e=f.className.split(' ')||[];for(var d=0,c=e.length;d<c;d++){for(var q=0,r=a.length;q<r;q++){if(e[d]===a[q]){h=true;break;}}}}return h;}
-	function $toggleClass(a,c){/*var b=false;*/if(a&&c){if($hasClass(a,c)){$removeClass(a,c);}else{$addClass(a,c);}}}
-	function $create(a){return _doc.createElement(a);}
-	function $bind(a,b,c){if(!a){return;}a.addEventListener(b,c,false);}
-	function getValue(a){var b=localStorage.getItem(a);return(b)?JSON.parse(b):null;}
-	function setValue(a,b){localStorage.setItem(a,JSON.stringify(b));}
-	function deleteValue(a){localStorage.removeItem(a);}
-	function isNumeric(a){if(Number.isFinite){return Number.isFinite(a);}else{return(typeof a==='number')&&isFinite(a);}}
-	function toNumber(a){if(a){return a-0;}}
-	function round(a,b){var c=Math.pow(10,b);return Math.round(a*c)/c;}
-	function trim(a){return(a)?a.replace(/^[\s　]+|[\s　]+$/g,''):null;}
 
 })();
