@@ -365,6 +365,7 @@
 			'event_assault_power_check2': 0,
 			'event_assault_power_check3': 0,
 			'swf_zoom': 1,
+			'uncheckPresent': true
 		};
 		var settings = {};
 		for (var key in defaults) {
@@ -1064,7 +1065,7 @@
 	// 贈り物拡張
 	// -------------------------------------------------------------------------
 	(function() {
-		if ((/%2Fpresent%2Frecieve%2F/).test(_param)) {
+		if (_settings.uncheckPresent && (/%2Fpresent%2Frecieve%2F/).test(_param)) {
 			// 贈り物のチェックを外す
 			var checkLink = _content.querySelector('.chks_change');
 			if (checkLink) {
@@ -1983,6 +1984,13 @@
 			settingMenu.push('<h3>Flash画面の追加メニュー表示倍率：</h3>');
 			settingMenu.push('<p><input id="cghpSetSwfZoom" type="number" min="0.05" step="0.05" value="' + _settings.swf_zoom + '"></p>');
 			settingMenu.push('</section>');
+			var uncheckPresentChecked = (_settings.uncheckPresent) ? 'checked="checked"' : '';
+			settingMenu.push('<section>');
+			settingMenu.push('<h3><label>');
+			settingMenu.push('<input id="cghpSetUncheckPresent" type="checkbox" ' + uncheckPresentChecked + '> ');
+			settingMenu.push('贈り物のチェックをはずす');
+			settingMenu.push('</label></h3>');
+			settingMenu.push('</section>');
 
 			settingMenu.push('<p class="cghp_center cghp_margin_t20">');
 			settingMenu.push('<input id="cghpOkButton" class="home" type="button" value="OK">');
@@ -2111,6 +2119,10 @@
 						if (isNumeric(value) && 1 < value) {
 							_settings.swf_zoom = value;
 						}
+					}
+					var uncheckPresent = $id('cghpSetUncheckPresent');
+					if (uncheckPresent) {
+						_settings.uncheckPresent = uncheckPresent.checked;
 					}
 
 					saveSettings();
