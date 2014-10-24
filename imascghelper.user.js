@@ -201,7 +201,7 @@
 				result.recoveryNaturalOnlyTime = minutesToString(restExpTemp * 3);
 				result.recoveryNaturalOnlyCost = restExpTemp;
 				// 100%回復アイテム
-				if (_settings.exp_calc_recovery100) {
+				if (_settings.expCalcRecovery100) {
 					result.recovery100Count = Math.floor(restExpTemp / recovery100);
 					result.recovery100Cost = recovery100 * result.recovery100Count;
 					restExpTemp -= result.recovery100Cost;
@@ -210,7 +210,7 @@
 					result.recovery100Cost = 0;
 				}
 				// 50%回復アイテム
-				if (_settings.exp_calc_recovery50) {
+				if (_settings.expCalcRecovery50) {
 					result.recovery50Count = Math.floor(restExpTemp / recovery50);
 					result.recovery50Cost = recovery50 * result.recovery50Count;
 					restExpTemp -= result.recovery50Cost;
@@ -219,7 +219,7 @@
 					result.recovery50Cost = 0;
 				}
 				// 20%回復アイテム
-				if (_settings.exp_calc_recovery20) {
+				if (_settings.expCalcRecovery20) {
 					result.recovery20Count = Math.floor(restExpTemp / recovery20);
 					result.recovery20Cost = recovery20 * result.recovery20Count;
 					restExpTemp -= result.recovery20Cost;
@@ -236,27 +236,27 @@
 
 			var exp = expCalc(restExp);
 			var divRecovery100 = expInfoDiv.appendChild($create('div'));
-			divRecovery100.className = (_settings.exp_calc_recovery100) ? 'cghp_link' : 'cghp_link cghp_strike';
+			divRecovery100.className = (_settings.expCalcRecovery100) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery100.innerHTML = '100%回復アイテム (' + recovery100 + ')：<span class="yellow">' + exp.recovery100Count + '個 (' + exp.recovery100Cost + ')</span>';
 			$bind(divRecovery100, 'click', function() {
-				_settings.exp_calc_recovery100 = !_settings.exp_calc_recovery100;
-				saveSettings('exp_calc_recovery100');
+				_settings.expCalcRecovery100 = !_settings.expCalcRecovery100;
+				saveSettings('expCalcRecovery100');
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
 			var divRecovery50 = expInfoDiv.appendChild($create('div'));
-			divRecovery50.className = (_settings.exp_calc_recovery50) ? 'cghp_link' : 'cghp_link cghp_strike';
+			divRecovery50.className = (_settings.expCalcRecovery50) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery50.innerHTML = '50%回復アイテム (' + recovery50 + ')：<span class="yellow">' + exp.recovery50Count + '個 (' + exp.recovery50Cost + ')</span>';
 			$bind(divRecovery50, 'click', function() {
-				_settings.exp_calc_recovery50 = !_settings.exp_calc_recovery50;
-				saveSettings('exp_calc_recovery50');
+				_settings.expCalcRecovery50 = !_settings.expCalcRecovery50;
+				saveSettings('expCalcRecovery50');
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
 			var divRecovery20 = expInfoDiv.appendChild($create('div'));
-			divRecovery20.className = (_settings.exp_calc_recovery20) ? 'cghp_link' : 'cghp_link cghp_strike';
+			divRecovery20.className = (_settings.expCalcRecovery20) ? 'cghp_link' : 'cghp_link cghp_strike';
 			divRecovery20.innerHTML = '20%回復アイテム (' + recovery20 + ')：<span class="yellow">' + exp.recovery20Count + '個 (' + exp.recovery20Cost + ')</span>';
 			$bind(divRecovery20, 'click', function() {
-				_settings.exp_calc_recovery20 = !_settings.exp_calc_recovery20;
-				saveSettings('exp_calc_recovery20');
+				_settings.expCalcRecovery20 = !_settings.expCalcRecovery20;
+				saveSettings('expCalcRecovery20');
 				updateExpInfo(currentHP, maxHP, currentExp, maxExp);
 			});
 			var divRecoveryNatural;
@@ -365,32 +365,32 @@
 	 */
 	function loadSettings() {
 		var defaults = {
-			'mobage_id': 0,
-			'chat_url': _baseURL + 'knights%2Fknights_top_for_member',
-			'event_url': _baseURL + 'quests',
-			'hide_banner_in_menu': true,
-			'custom_menu_icon': true,
-			'custom_menu1': [3, 2, 10, 14, 26, 16],
-			'custom_menu2': [4, 6, 8, 25, 24],
-			'custom_menu3': [],
-			'dojo_url': 'http://saasan.github.io/mobamas-dojo/lv.html',
-			'custom_url1': _topURL,
-			'custom_url2': _topURL,
-			'custom_url3': _topURL,
-			'custom_url4': _topURL,
-			'custom_url5': _topURL,
-			'point_filter_hp': true,
-			'point_filter_atk': true,
-			'point_filter_def': false,
-			'point_filter_auto': false,
-			'atack_cost_limit': 5,
-			'exp_calc_recovery100': true,
-			'exp_calc_recovery50': true,
-			'exp_calc_recovery20': false,
-			'event_assault_power_check1': 0,
-			'event_assault_power_check2': 0,
-			'event_assault_power_check3': 0,
-			'swf_zoom': 1,
+			'mobageId': 0,
+			'chatUrl': _baseURL + 'knights%2Fknights_top_for_member',
+			'eventUrl': _baseURL + 'quests',
+			'hideBannerInMenu': true,
+			'customMenuIcon': true,
+			'customMenu1': [3, 2, 10, 14, 26, 16],
+			'customMenu2': [4, 6, 8, 25, 24],
+			'customMenu3': [],
+			'dojoUrl': 'http://saasan.github.io/mobamas-dojo/lv.html',
+			'customUrl1': _topURL,
+			'customUrl2': _topURL,
+			'customUrl3': _topURL,
+			'customUrl4': _topURL,
+			'customUrl5': _topURL,
+			'pointFilterHp': true,
+			'pointFilterAtk': true,
+			'pointFilterDef': false,
+			'pointFilterAuto': false,
+			'atackCostLimit': 5,
+			'expCalcRecovery100': true,
+			'expCalcRecovery50': true,
+			'expCalcRecovery20': false,
+			'eventAssaultPowerCheck1': 0,
+			'eventAssaultPowerCheck2': 0,
+			'eventAssaultPowerCheck3': 0,
+			'swfZoom': 1,
 			'uncheckPresent': true
 		};
 		var settings = {};
@@ -909,9 +909,9 @@
 			var headerAccordion = $id('headerAccordion');
 			if (headerAccordion) {
 				var eventLink = headerAccordion.querySelector('div.bannerArea2 a');
-				if (eventLink && eventLink.href !== _settings.event_url) {
-					_settings.event_url = eventLink.href;
-					saveSettings('event_url');
+				if (eventLink && eventLink.href !== _settings.eventUrl) {
+					_settings.eventUrl = eventLink.href;
+					saveSettings('eventUrl');
 				}
 			}
 		}
@@ -922,9 +922,9 @@
 				var talkId = chatDiv.getAttribute('data-talk-id');
 				if (talkId) {
 					var chatUrl = 'http://sp.mbga.jp/_chat_app?u=/talk&id=' + talkId;
-					if (chatUrl !== _settings.chat_url) {
-						_settings.chat_url = chatUrl;
-						saveSettings('chat_url');
+					if (chatUrl !== _settings.chatUrl) {
+						_settings.chatUrl = chatUrl;
+						saveSettings('chatUrl');
 					}
 				}
 			}
@@ -958,21 +958,21 @@
 	_customMenu[21] = { 'fullName': 'お仕事', 'shortName': 'お仕事', 'icon': 'fa-calendar-o', 'url': _baseURL + 'quests' };
 	_customMenu[22] = { 'fullName': 'LIVEバトル', 'shortName': 'LIVE', 'icon': 'fa-bolt', 'url': _baseURL + 'battle' };
 	_customMenu[23] = { 'fullName': 'ﾌﾟﾛﾀﾞｸｼｮﾝ', 'shortName': 'プ　ロ', 'icon': 'fa-building-o', 'url': _baseURL + 'knights%2Fknights_top_for_member' };
-	_customMenu[24] = { 'fullName': 'チャット', 'shortName': 'ﾁｬｯﾄ', 'icon': 'fa-comments', 'url': _settings.chat_url };
-	_customMenu[25] = { 'fullName': 'イベント', 'shortName': 'ｲﾍﾞﾝﾄ', 'icon': 'fa-flag', 'url': _settings.event_url };
-	_customMenu[26] = { 'fullName': '道　場', 'shortName': '道　場', 'icon': 'fa-list-ol', 'url': _settings.dojo_url };
-	_customMenu[101] = { 'fullName': 'カスタム1', 'shortName': 'ｶｽﾀﾑ1', 'icon': 'fa-cogs', 'url': _settings.custom_url1 };
-	_customMenu[102] = { 'fullName': 'カスタム2', 'shortName': 'ｶｽﾀﾑ2', 'icon': 'fa-cogs', 'url': _settings.custom_url2 };
-	_customMenu[103] = { 'fullName': 'カスタム3', 'shortName': 'ｶｽﾀﾑ3', 'icon': 'fa-cogs', 'url': _settings.custom_url3 };
-	_customMenu[104] = { 'fullName': 'カスタム4', 'shortName': 'ｶｽﾀﾑ4', 'icon': 'fa-cogs', 'url': _settings.custom_url4 };
-	_customMenu[105] = { 'fullName': 'カスタム5', 'shortName': 'ｶｽﾀﾑ5', 'icon': 'fa-cogs', 'url': _settings.custom_url5 };
+	_customMenu[24] = { 'fullName': 'チャット', 'shortName': 'ﾁｬｯﾄ', 'icon': 'fa-comments', 'url': _settings.chatUrl };
+	_customMenu[25] = { 'fullName': 'イベント', 'shortName': 'ｲﾍﾞﾝﾄ', 'icon': 'fa-flag', 'url': _settings.eventUrl };
+	_customMenu[26] = { 'fullName': '道　場', 'shortName': '道　場', 'icon': 'fa-list-ol', 'url': _settings.dojoUrl };
+	_customMenu[101] = { 'fullName': 'カスタム1', 'shortName': 'ｶｽﾀﾑ1', 'icon': 'fa-cogs', 'url': _settings.customUrl1 };
+	_customMenu[102] = { 'fullName': 'カスタム2', 'shortName': 'ｶｽﾀﾑ2', 'icon': 'fa-cogs', 'url': _settings.customUrl2 };
+	_customMenu[103] = { 'fullName': 'カスタム3', 'shortName': 'ｶｽﾀﾑ3', 'icon': 'fa-cogs', 'url': _settings.customUrl3 };
+	_customMenu[104] = { 'fullName': 'カスタム4', 'shortName': 'ｶｽﾀﾑ4', 'icon': 'fa-cogs', 'url': _settings.customUrl4 };
+	_customMenu[105] = { 'fullName': 'カスタム5', 'shortName': 'ｶｽﾀﾑ5', 'icon': 'fa-cogs', 'url': _settings.customUrl5 };
 
 	(function() {
 		var headerNavi = $id('headerNavi');
 		if (headerNavi) {
 			var customMenu = [];
 			for (var i = 1; i <= 3; i++) {
-				var key = 'custom_menu' + i;
+				var key = 'customMenu' + i;
 				var menuItemLen = _settings[key].length||0;
 				if (0 < menuItemLen) {
 					customMenu.push('<ul id="cghpCustomMenuList' + i + '" class="cghp_menu_list">');
@@ -982,7 +982,7 @@
 						if (_customMenu[menuIndex]) {
 							var menu = _customMenu[menuIndex];
 							var name = (menuItemLen < 6) ? menu.fullName : menu.shortName;
-							if (_settings.custom_menu_icon) {
+							if (_settings.customMenuIcon) {
 								customMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' fa fa-lg"></i></div><div class="cghp_name_area">' + name + '</div></a>');
 							} else {
 								customMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + name + '</a>');
@@ -1046,9 +1046,9 @@
 				if (profileURL) {
 					mobageId = (profileURL.value.match(/%2Fprofile%2Fshow%2F(\d+)/)||[])[1]||null;
 					if (mobageId) {
-						if (_settings.mobage_id !== mobageId) {
-							_settings.mobage_id = mobageId;
-							saveSettings('mobage_id');
+						if (_settings.mobageId !== mobageId) {
+							_settings.mobageId = mobageId;
+							saveSettings('mobageId');
 						}
 						// 画面にIDを表示
 						var myIdArea = $create('div');
@@ -1391,7 +1391,7 @@
 			for (var i = 0, len = flashMenuList.length; i < len; i++) {
 				menu = flashMenuList[i];
 				flashMenu.push('<li>');
-				if (_settings.custom_menu_icon) {
+				if (_settings.customMenuIcon) {
 					flashMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' fa fa-lg"></i></div><div class="cghp_name_area">' + menu.name + '</div></a>');
 				} else {
 					flashMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + menu.name + '</a>');
@@ -1451,7 +1451,7 @@
 			for (var i = 0; i < flashMenuListLen; i++) {
 				menu = flashMenuList[i];
 				flashMenu.push('<li>');
-				if (_settings.custom_menu_icon) {
+				if (_settings.customMenuIcon) {
 					flashMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' fa fa-lg"></i></div><div class="cghp_name_area">' + menu.name + '</div></a>');
 				} else {
 					flashMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + menu.name + '</a>');
@@ -1482,7 +1482,7 @@
 					setAttackCostLimitArea.className = 'cghp_center cghp_add_area_gray cghp_margin_t10 cghp_margin_b10';
 					var setAttackCostLimit = [];
 					setAttackCostLimit.push('消費攻ｺｽﾄ上限値：');
-					setAttackCostLimit.push('<input id="cghpAttackCostLimit" type="tel" size="4" value="' + _settings.atack_cost_limit + '">');
+					setAttackCostLimit.push('<input id="cghpAttackCostLimit" type="tel" size="4" value="' + _settings.atackCostLimit + '">');
 					setAttackCostLimit.push('<a id="cghpSetAttackCostLimit" class="cghp_button cghp_margin_t0">O K</a>');
 					setAttackCostLimit.push('<div class="yellow">0を設定すると機能が無効になります</div>');
 					setAttackCostLimitArea.innerHTML = setAttackCostLimit.join('');
@@ -1494,8 +1494,8 @@
 						if (limit) {
 							var value = toNumber(limit.value);
 							if (isNumeric(value) && (/\d+/).test(value)) {
-								_settings.atack_cost_limit = value;
-								saveSettings('atack_cost_limit');
+								_settings.atackCostLimit = value;
+								saveSettings('atackCostLimit');
 								_location.replace(_location.href);
 							} else {
 								window.alert('整数を入力してください。');
@@ -1503,12 +1503,12 @@
 						}
 					});
 
-					if (0 < _settings.atack_cost_limit) {
+					if (0 < _settings.atackCostLimit) {
 						var beforeCost = toNumber(matches[1]);
 						var afterCost = toNumber(matches[2]);
 						if (isNumeric(beforeCost) && isNumeric(afterCost)) {
 							var cost = beforeCost - afterCost;
-							if (_settings.atack_cost_limit < cost) {
+							if (_settings.atackCostLimit < cost) {
 								var targetButton = _content.querySelectorAll('input[type="submit"]');
 								var targetButtonLen = targetButton.length||0;
 								for (var i = 0; i < targetButtonLen; i++) {
@@ -1542,7 +1542,7 @@
 				var flashMenuList = [
 					{ 'name': 'ﾏｲｽﾀｼﾞｵ', 'icon': 'fa-headphones', 'url': _baseURL + 'mypage' },
 					{ 'name': '応　援', 'icon': 'fa-user', 'url': _baseURL + 'cheer%2Findex%2F' + enemyId + '%2F1' },
-					{ 'name': '道　場', 'icon': 'fa-list-ol', 'url': _settings.dojo_url },
+					{ 'name': '道　場', 'icon': 'fa-list-ol', 'url': _settings.dojoUrl },
 					{ 'name': '戻　る', 'icon': 'fa-undo', 'url': _baseURL + 'battles%2Fbattle_check%2F' + enemyId }
 				];
 
@@ -1554,7 +1554,7 @@
 				for (var i = 0; i < flashMenuListLen; i++) {
 					menu = flashMenuList[i];
 					flashMenu.push('<li>');
-					if (_settings.custom_menu_icon) {
+					if (_settings.customMenuIcon) {
 						flashMenu.push('<a href="' + menu.url + '"><div class="cghp_icon_area"><i class="' + menu.icon + ' fa fa-lg"></i></div><div class="cghp_name_area">' + menu.name + '</div></a>');
 					} else {
 						flashMenu.push('<a href="' + menu.url + '" class="cghp_no_icon">' + menu.name + '</a>');
@@ -1633,16 +1633,16 @@
 		if ((/%2Fbonus_point/).test(_param)) {
 			var disabledMessage = '<div class="gray">振り分け無効</div>';
 
-			if (!_settings.point_filter_hp) {
+			if (!_settings.pointFilterHp) {
 				$id('add_hp').parentNode.innerHTML = disabledMessage;
 			}
-			if (!_settings.point_filter_atk) {
+			if (!_settings.pointFilterAtk) {
 				$id('add_atk').parentNode.innerHTML = disabledMessage;
 			}
-			if (!_settings.point_filter_def) {
+			if (!_settings.pointFilterDef) {
 				$id('add_def').parentNode.innerHTML = disabledMessage;
 			}
-			if (!_settings.point_filter_auto) {
+			if (!_settings.pointFilterAuto) {
 				var targetLink = _content.querySelectorAll('a.a_link');
 				var targetLinkLen = targetLink.length||0;
 				for (var i = 0; i < targetLinkLen; i++) {
@@ -1661,7 +1661,7 @@
 	// -------------------------------------------------------------------------
 	(function() {
 		if ((/%2Fquests(?:$|%3Fl_frm%3D|%3Frnd%3D|%2Fmission_list(?:%2F|%3F))/).test(_param)) {
-			if (!_settings.point_filter_auto) {
+			if (!_settings.pointFilterAuto) {
 				var targetLink = _content.querySelectorAll('a');
 				var targetLinkLen = targetLink.length||0;
 				for (var i = 0; i < targetLinkLen; i++) {
@@ -1835,7 +1835,7 @@
 			if (!unitNo || !attackPower) {
 				return;
 			}
-			var powerCheckKey = 'event_assault_power_check' + unitNo;
+			var powerCheckKey = 'eventAssaultPowerCheck' + unitNo;
 			// 設定した発揮値と予想最大攻が一致しない場合は、LIVE用のボタンを消す
 			if (attackPower) {
 				attackPower = toNumber(attackPower);
@@ -1957,14 +1957,14 @@
 			settingMenu.push('<div id="cghpSettingArea">');
 			settingMenu.push('<h2>IM@S CG Helper(仮) 設定</h2>');
 
-			var hideBannerInMenuChecked = (_settings.hide_banner_in_menu) ? 'checked="checked"' : '';
+			var hideBannerInMenuChecked = (_settings.hideBannerInMenu) ? 'checked="checked"' : '';
 			settingMenu.push('<section>');
 			settingMenu.push('<h3><label>');
 			settingMenu.push('<input id="cghpSetHideBannerInMenu" type="checkbox" ' + hideBannerInMenuChecked + '> ');
 			settingMenu.push('メニュー内のバナーを消す');
 			settingMenu.push('</label></h3>');
 			settingMenu.push('</section>');
-			var customMenuIconChecked = (_settings.custom_menu_icon) ? 'checked="checked"' : '';
+			var customMenuIconChecked = (_settings.customMenuIcon) ? 'checked="checked"' : '';
 			settingMenu.push('<section>');
 			settingMenu.push('<h3><label>');
 			settingMenu.push('<input id="cghpSetCustomMenuIcon" type="checkbox" ' + customMenuIconChecked + '> ');
@@ -1975,37 +1975,37 @@
 				settingMenu.push('<section>');
 				settingMenu.push('<h3>カスタムメニュー' + i + '（0～8個まで）');
 				settingMenu.push('<a id="cghpHelpCustomMenu' + i + '" class="a_link cghp_cm_help_link">...</a>：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomMenu' + i + '" type="text" pattern="^(?:\\d+(?:,\\s*\\d+){0,7})?$" value="' + _settings['custom_menu' + i].join(',') + '"></p>');
+				settingMenu.push('<p><input id="cghpSetCustomMenu' + i + '" type="text" pattern="^(?:\\d+(?:,\\s*\\d+){0,7})?$" value="' + _settings['customMenu' + i].join(',') + '"></p>');
 				settingMenu.push('</section>');
 			}
 			settingMenu.push('<section>');
 			settingMenu.push('<h3>道場URL：</h3>');
-			settingMenu.push('<p><input id="cghpSetDojoURL" type="url" value="' + _settings.dojo_url + '"></p>');
+			settingMenu.push('<p><input id="cghpSetDojoURL" type="url" value="' + _settings.dojoUrl + '"></p>');
 			settingMenu.push('</section>');
 			for (i = 1; i <= 5; i++) {
 				settingMenu.push('<section>');
 				settingMenu.push('<h3>カスタムURL' + i + '：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomURL' + i + '" type="url" value="' + _settings['custom_url' + i] + '"></p>');
+				settingMenu.push('<p><input id="cghpSetCustomURL' + i + '" type="url" value="' + _settings['customUrl' + i] + '"></p>');
 				settingMenu.push('</section>');
 			}
 			settingMenu.push('<section>');
 			settingMenu.push('<h3>ポイント振り分けフィルタ：</h3>');
-			var pointFilterHPChecked = (_settings.point_filter_hp) ? 'checked="checked"' : '';
+			var pointFilterHPChecked = (_settings.pointFilterHp) ? 'checked="checked"' : '';
 			settingMenu.push('<label>');
 			settingMenu.push('<input id="cghpPointFilterHP" type="checkbox" ' + pointFilterHPChecked + '> ');
 			settingMenu.push('スタミナ');
 			settingMenu.push('</label><br>');
-			var pointFilterAtkChecked = (_settings.point_filter_atk) ? 'checked="checked"' : '';
+			var pointFilterAtkChecked = (_settings.pointFilterAtk) ? 'checked="checked"' : '';
 			settingMenu.push('<label>');
 			settingMenu.push('<input id="cghpPointFilterAtk" type="checkbox" ' + pointFilterAtkChecked + '> ');
 			settingMenu.push('攻コスト');
 			settingMenu.push('</label><br>');
-			var pointFilterDefChecked = (_settings.point_filter_def) ? 'checked="checked"' : '';
+			var pointFilterDefChecked = (_settings.pointFilterDef) ? 'checked="checked"' : '';
 			settingMenu.push('<label>');
 			settingMenu.push('<input id="cghpPointFilterDef" type="checkbox" ' + pointFilterDefChecked + '> ');
 			settingMenu.push('守コスト');
 			settingMenu.push('</label><br>');
-			var pointFilterAutoChecked = (_settings.point_filter_auto) ? 'checked="checked"' : '';
+			var pointFilterAutoChecked = (_settings.pointFilterAuto) ? 'checked="checked"' : '';
 			settingMenu.push('<label>');
 			settingMenu.push('<input id="cghpPointFilterAuto" type="checkbox" ' + pointFilterAutoChecked + '> ');
 			settingMenu.push('自動振り分け');
@@ -2014,12 +2014,12 @@
 			settingMenu.push('<section>');
 			settingMenu.push('<h3>');
 			settingMenu.push('LIVEバトル時の消費コスト上限値：');
-			settingMenu.push('<p><input id="cghpSetAttackCostLimit" type="tel" value="' + _settings.atack_cost_limit + '"></p>');
+			settingMenu.push('<p><input id="cghpSetAttackCostLimit" type="tel" value="' + _settings.atackCostLimit + '"></p>');
 			settingMenu.push('</h3>');
 			settingMenu.push('</section>');
 			settingMenu.push('<section>');
 			settingMenu.push('<h3>Flash画面の追加メニュー表示倍率：</h3>');
-			settingMenu.push('<p><input id="cghpSetSwfZoom" type="number" min="0.05" step="0.05" value="' + _settings.swf_zoom + '"></p>');
+			settingMenu.push('<p><input id="cghpSetSwfZoom" type="number" min="0.05" step="0.05" value="' + _settings.swfZoom + '"></p>');
 			settingMenu.push('</section>');
 			var uncheckPresentChecked = (_settings.uncheckPresent) ? 'checked="checked"' : '';
 			settingMenu.push('<section>');
@@ -2089,11 +2089,11 @@
 
 					var hideBannerInMenu = $id('cghpSetHideBannerInMenu');
 					if (hideBannerInMenu) {
-						_settings.hide_banner_in_menu = hideBannerInMenu.checked;
+						_settings.hideBannerInMenu = hideBannerInMenu.checked;
 					}
 					var customMenuIcon = $id('cghpSetCustomMenuIcon');
 					if (customMenuIcon) {
-						_settings.custom_menu_icon = customMenuIcon.checked;
+						_settings.customMenuIcon = customMenuIcon.checked;
 					}
 					for (var i = 1; i <= 3; i++) {
 						var customMenu = $id('cghpSetCustomMenu' + i);
@@ -2107,7 +2107,7 @@
 								}
 							}
 							if (menuItem.length <= 8) {
-								_settings['custom_menu' + i] = menuItem;
+								_settings['customMenu' + i] = menuItem;
 							}
 						}
 					}
@@ -2115,7 +2115,7 @@
 					if (dojoURL) {
 						value = trim(dojoURL.value);
 						if (urlPattern.test(value)) {
-							_settings.dojo_url = value;
+							_settings.dojoUrl = value;
 						}
 					}
 					for (i = 1; i <= 5; i++) {
@@ -2123,38 +2123,38 @@
 						if (customURL) {
 							value = trim(customURL.value);
 							if (urlPattern.test(value)) {
-								_settings['custom_url' + i] = value;
+								_settings['customUrl' + i] = value;
 							}
 						}
 					}
 					var pointFilterHP = $id('cghpPointFilterHP');
 					if (pointFilterHP) {
-						_settings.point_filter_hp = pointFilterHP.checked;
+						_settings.pointFilterHp = pointFilterHP.checked;
 					}
 					var pointFilterAtk = $id('cghpPointFilterAtk');
 					if (pointFilterAtk) {
-						_settings.point_filter_atk = pointFilterAtk.checked;
+						_settings.pointFilterAtk = pointFilterAtk.checked;
 					}
 					var pointFilterDef = $id('cghpPointFilterDef');
 					if (pointFilterDef) {
-						_settings.point_filter_def = pointFilterDef.checked;
+						_settings.pointFilterDef = pointFilterDef.checked;
 					}
 					var pointFilterAuto = $id('cghpPointFilterAuto');
 					if (pointFilterAuto) {
-						_settings.point_filter_auto = pointFilterAuto.checked;
+						_settings.pointFilterAuto = pointFilterAuto.checked;
 					}
 					var attackCostLimit = $id('cghpSetAttackCostLimit');
 					if (attackCostLimit) {
 						value = toNumber(attackCostLimit.value);
 						if (isNumeric(value) && (/\d+/).test(value)) {
-							_settings.atack_cost_limit = value;
+							_settings.atackCostLimit = value;
 						}
 					}
 					var swfZoom = $id('cghpSetSwfZoom');
 					if (swfZoom) {
 						value = toNumber(swfZoom.value);
 						if (isNumeric(value) && 1 < value) {
-							_settings.swf_zoom = value;
+							_settings.swfZoom = value;
 						}
 					}
 					var uncheckPresent = $id('cghpSetUncheckPresent');
@@ -2222,7 +2222,7 @@
 		var headerAccordion = $id('headerAccordion');
 		if (headerAccordion) {
 			// イベントバナーを非表示にする
-			if (_settings.hide_banner_in_menu) {
+			if (_settings.hideBannerInMenu) {
 				var bannerArea2 = headerAccordion.querySelector('div.bannerArea2');
 				$addClass(bannerArea2, 'cghp_hide');
 			}
@@ -2450,13 +2450,13 @@
 			var ua = navigator.userAgent;
 			if (ua.indexOf('iPhone') > -1 || ua.indexOf('iPod') > -1 || ua.indexOf('iPad') > -1 || ua.indexOf('Android') > -1) {
 				$bind(window, 'resize', function() {
-					flashMenu.style.zoom = window.innerWidth / 320 * _settings.swf_zoom;
+					flashMenu.style.zoom = window.innerWidth / 320 * _settings.swfZoom;
 				});
 				var event = _doc.createEvent('UIEvent');
 				event.initEvent('resize', false, true);
 				window.dispatchEvent(event);
 			} else {
-				flashMenu.style.zoom = _settings.swf_zoom;
+				flashMenu.style.zoom = _settings.swfZoom;
 			}
 		}
 	})();
