@@ -1679,85 +1679,108 @@
 		}
 	})();
 
+	// 指定順位表示ボタンクリック時のイベント
+	function onclickRankButton(id, baseUrl, replaceUrl) {
+		var rankInput =$id(id);
+		if (rankInput) {
+			var targetRank = toNumber(rankInput.value);
+			if (isNumeric(targetRank)) {
+				var url = baseUrl.replace(replaceUrl + '%2F%3F', replaceUrl + '%2F0%2F' + (targetRank - 3) + '%3F');
+				_location.assign(url);
+			}
+		}
+	}
+
+	function generateRankingButtons(baseLink, options) {
+		var i, rankingHtml = '', div, parent;
+		var baseUrl = baseLink.href;
+
+		// ボーダー
+		for (i = 0; i < options.rankList.length; i++) {
+			var rank = options.rankList[i];
+			rankingHtml +=
+				'<p class="frequentsButton eventFBColor_assault"><a href="' +
+				baseUrl.replace(options.rankingType + options.borderUrl.src, options.rankingType + options.borderUrl.dest + (rank - 3) + '%3F') +
+				'"><span class="bgArrow">' + rank + '位ボーダー</span></a></p>';
+		}
+
+		// プロダクション内個人順位/所属プロダクション順位
+		rankingHtml +=
+			'<p class="frequentsButton eventFBColor_assault"><a href="' +
+			baseUrl.replace(options.rankingType + options.specialRanking.src, options.rankingType + options.specialRanking.dest) +
+			'"><span class="bgArrow">' + options.specialRanking.name + '</span></a></p>';
+
+		// 指定順位表示
+		rankingHtml +=
+			'<div class="cghp_center cghp_add_area_gray cghp_margin_t10">指定順位表示：' +
+			'<input id="' + options.inputId + '" type="tel" size="8" maxlength="8"> 位 ' +
+			'<a id="' + options.buttonId + '" class="cghp_button cghp_margin_t0 cghp_margin_b0">表示</a></div>';
+
+		div = $create('div');
+		div.innerHTML = rankingHtml;
+		parent = baseLink.parentElement;
+		parent.parentElement.insertBefore(div, parent.nextSibling);
+
+		var rankButton = $id(options.buttonId);
+		if (rankButton) {
+			$bind(rankButton, 'click', onclickRankButton.bind(null, options.inputId, baseUrl, options.rankingType));
+		}
+	}
+
 	// -------------------------------------------------------------------------
 	// ランキング閲覧リンク生成＠各種イベント
 	// -------------------------------------------------------------------------
 	(function() {
 		if ((/%2Fevent_ranking%2Franking_top%3F/).test(_param)) {
 			var targetLink =  _content.querySelectorAll('a');
-			var targetLinkLen = targetLink.length||0;
-			var i, j, div, linkParent;
+			var i, j;
 
-			var onclickRankButton = function(id, baseUrl, replaceUrl) {
-				var rankInput =$id(id);
-				if (rankInput) {
-					var targetRank = toNumber(rankInput.value);
-					if (isNumeric(targetRank)) {
-						var url = baseUrl.replace(replaceUrl + '%2F%3F', replaceUrl + '%2F0%2F' + (targetRank - 3) + '%3F');
-						_location.assign(url);
+			var rankingOptions = [
+				{
+					regExp: /個人順位確認/,
+					generateOptions: {
+						rankingType: 'ranking_for_user',
+						rankList: [200, 1000, 2000, 4000, 7000],
+						borderUrl: {
+							src: '%2F%3F',
+							dest: '%2F0%2F'
+						},
+						specialRanking: {
+							name: 'プロダクション内個人順位',
+							src: '%2F%3F',
+							dest: '%2F2%3F'
+						},
+						inputId: 'kojinRankInput',
+						buttonId: 'kojinRankButton'
+					}
+				},
+				{
+					regExp: /ﾌﾟﾛﾀﾞｸｼｮﾝ順位確認/,
+					generateOptions: {
+						rankingType: 'ranking_for_production',
+						rankList: [10, 50, 200, 500, 1000],
+						borderUrl: {
+							src: '%2F%3F',
+							dest: '%2F0%2F'
+						},
+						specialRanking: {
+							name: '所属プロダクション順位',
+							src: '%2F',
+							dest: '%2F1%2F'
+						},
+						inputId: 'proRankInput',
+						buttonId: 'proRankButton'
 					}
 				}
-			};
+			];
 
-			for (i = 0; i < targetLinkLen; i++) {
+			for (i = 0; i < targetLink.length; i++) {
 				var link = targetLink[i];
 				var linkHTML = link.innerHTML;
-				if ((/個人順位確認/).test(linkHTML)) {
-					var baseLink1 = link.href;
-					var rankingList1 = [200, 1000, 2000, 4000, 7000];
-					var rankingList1Len= rankingList1.length||0;
-					var rankingLink1 = [];
-					for (j = 0; j < rankingList1Len; j++) {
-						var rank1 = rankingList1[j];
-						rankingLink1.push('<p class="frequentsButton eventFBColor_assault"><a href="');
-						rankingLink1.push(baseLink1.replace('ranking_for_user%2F%3F', 'ranking_for_user%2F0%2F' + (rank1 - 3) + '%3F'));
-						rankingLink1.push('"><span class="bgArrow">' + rank1 + '位ボーダー</span></a></p>');
-					}
-					rankingLink1.push('<p class="frequentsButton eventFBColor_assault"><a href="');
-					rankingLink1.push(baseLink1.replace('ranking_for_user%2F%3F', 'ranking_for_user%2F2%3F'));
-					rankingLink1.push('"><span class="bgArrow">プロダクション内個人順位</span></a></p>');
 
-					rankingLink1.push('<div class="cghp_center cghp_add_area_gray cghp_margin_t10">指定順位表示：');
-					rankingLink1.push('<input id="kojinRankInput" type="tel" size="8" maxlength="8"> 位 ');
-					rankingLink1.push('<a id="kojinRankButton" class="cghp_button cghp_margin_t0 cghp_margin_b0">表示</a></div>');
-
-					div = $create('div');
-					div.innerHTML = rankingLink1.join('');
-					linkParent = link.parentElement;
-					linkParent.parentElement.insertBefore(div, linkParent.nextSibling);
-
-					var kojinRankButton =$id('kojinRankButton');
-					if (kojinRankButton) {
-						$bind(kojinRankButton, 'click', onclickRankButton.bind(null, 'kojinRankInput', baseLink1, 'ranking_for_user'));
-					}
-				}
-				if ((/ﾌﾟﾛﾀﾞｸｼｮﾝ順位確認/).test(linkHTML)) {
-					var baseLink2 = link.href;
-					var rankingList2 = [10, 50, 200, 500, 1000];
-					var rankingList2Len= rankingList2.length||0;
-					var rankingLink2 = [];
-					for (j = 0; j < rankingList2Len; j++) {
-						var rank2 = rankingList2[j];
-						rankingLink2.push('<p class="frequentsButton eventFBColor_assault"><a href="');
-						rankingLink2.push(baseLink2.replace('ranking_for_production%2F%3F', 'ranking_for_production%2F0%2F' + (rank2 - 3) + '%3F'));
-						rankingLink2.push('"><span class="bgArrow">' + rank2 + '位ボーダー</span></a></p>');
-					}
-					rankingLink2.push('<p class="frequentsButton eventFBColor_assault"><a href="');
-					rankingLink2.push(baseLink2.replace('ranking_for_production%2F', 'ranking_for_production%2F1%2F'));
-					rankingLink2.push('"><span class="bgArrow">所属プロダクション順位</span></a></p>');
-
-					rankingLink2.push('<div class="cghp_center cghp_add_area_gray cghp_margin_t10">指定順位表示：');
-					rankingLink2.push('<input id="proRankInput" type="tel" size="8" style="width:70px;"> 位 ');
-					rankingLink2.push('<a id="proRankButton" class="cghp_button cghp_margin_t0 cghp_margin_b0">表示</a></div>');
-
-					div = $create('div');
-					div.innerHTML = rankingLink2.join('');
-					linkParent = link.parentElement;
-					linkParent.parentElement.insertBefore(div, linkParent.nextSibling);
-
-					var proRankButton =$id('proRankButton');
-					if (proRankButton) {
-						$bind(proRankButton, 'click', onclickRankButton.bind(null, 'proRankInput', baseLink2, 'ranking_for_production'));
+				for (j = 0; j < rankingOptions.length; j++) {
+					if (rankingOptions[j].regExp.test(linkHTML)) {
+						generateRankingButtons(link, rankingOptions[j].generateOptions);
 					}
 				}
 			}
