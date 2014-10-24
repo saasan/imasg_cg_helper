@@ -38,6 +38,179 @@
 	var _content = $id('headerAcdPanel') || _body;
 
 	/**
+	 * 設定の設定を作成する
+	 *
+	 * @return 設定の設定
+	 */
+	function generateSettingsSettings() {
+		var order = 1;
+		var settingsSettings = {
+			mobageId: {
+				order: 0,
+				default: 0
+			},
+			chatUrl: {
+				order: 0,
+				default: _baseURL + 'knights%2Fknights_top_for_member'
+			},
+			eventUrl: {
+				order: 0,
+				default: _baseURL + 'quests'
+			},
+			expCalcRecovery100: {
+				order: 0,
+				default: true
+			},
+			expCalcRecovery50: {
+				order: 0,
+				default: true
+			},
+			expCalcRecovery20: {
+				order: 0,
+				default: false
+			},
+			eventAssaultPowerCheck1: {
+				order: 0,
+				default: 0
+			},
+			eventAssaultPowerCheck2: {
+				order: 0,
+				default: 0
+			},
+			eventAssaultPowerCheck3: {
+				order: 0,
+				default: 0
+			},
+			hideBannerInMenu: {
+				order: order++,
+				displayName: 'メニュー内のバナーを消す',
+				default: true,
+				type: 'checkbox'
+			},
+			customMenuIcon: {
+				order: order++,
+				displayName: 'カスタムメニューにアイコンを表示',
+				default: true,
+				type: 'checkbox'
+			},
+			customMenu1: {
+				order: order++,
+				displayName: 'カスタムメニュー1 (0～8個まで)',
+				default: [3, 2, 10, 14, 26, 16],
+				type: 'text',
+				attrs: {
+					pattern: '^(?:\\d+(?:,\\s*\\d+){0,7})?$'
+				}
+			},
+			customMenu2: {
+				order: order++,
+				displayName: 'カスタムメニュー2 (0～8個まで)',
+				default: [4, 6, 8, 25, 24],
+				type: 'text',
+				attrs: {
+					pattern: '^(?:\\d+(?:,\\s*\\d+){0,7})?$'
+				}
+			},
+			customMenu3: {
+				order: order++,
+				displayName: 'カスタムメニュー3 (0～8個まで)',
+				default: [],
+				type: 'text',
+				attrs: {
+					pattern: '^(?:\\d+(?:,\\s*\\d+){0,7})?$'
+				}
+			},
+			dojoUrl: {
+				order: order++,
+				displayName: '道場URL',
+				default: 'http://saasan.github.io/mobamas-dojo/lv.html',
+				type: 'url'
+			},
+			customUrl1: {
+				order: order++,
+				displayName: 'カスタムURL1',
+				default: _topURL,
+				type: 'url'
+			},
+			customUrl2: {
+				order: order++,
+				displayName: 'カスタムURL2',
+				default: _topURL,
+				type: 'url'
+			},
+			customUrl3: {
+				order: order++,
+				displayName: 'カスタムURL3',
+				default: _topURL,
+				type: 'url'
+			},
+			customUrl4: {
+				order: order++,
+				displayName: 'カスタムURL4',
+				default: _topURL,
+				type: 'url'
+			},
+			customUrl5: {
+				order: order++,
+				displayName: 'カスタムURL5',
+				default: _topURL,
+				type: 'url'
+			},
+			pointFilterHp: {
+				order: order++,
+				displayName: 'スタミナ',
+				default: true,
+				type: 'checkbox'
+			},
+			pointFilterAtk: {
+				order: order++,
+				displayName: '攻コスト',
+				default: true,
+				type: 'checkbox'
+			},
+			pointFilterDef: {
+				order: order++,
+				displayName: '守コスト',
+				default: false,
+				type: 'checkbox'
+			},
+			pointFilterAuto: {
+				order: order++,
+				displayName: '自動振り分け',
+				default: false,
+				type: 'checkbox'
+			},
+			atackCostLimit: {
+				order: order++,
+				displayName: 'LIVEバトル時の消費コスト上限値',
+				default: 5,
+				type: 'number'
+			},
+			swfZoom: {
+				order: order++,
+				displayName: 'Flash画面の追加メニュー表示倍率',
+				default: 1,
+				type: 'number',
+				attrs: {
+					min: 0.05,
+					step: 0.05
+				}
+			},
+			uncheckPresent: {
+				order: order++,
+				displayName: '贈り物のチェックをはずす',
+				default: true,
+				type: 'checkbox'
+			}
+		};
+
+		return settingsSettings;
+	}
+
+	// 設定の設定
+	var _settingsSettings = generateSettingsSettings();
+
+	/**
 	 * レベルアップ計算を挿入する
 	 *
 	 * @param status getWorkStatusの戻り値
@@ -364,40 +537,11 @@
 	 * @return 設定の連想配列。
 	 */
 	function loadSettings() {
-		var defaults = {
-			'mobageId': 0,
-			'chatUrl': _baseURL + 'knights%2Fknights_top_for_member',
-			'eventUrl': _baseURL + 'quests',
-			'hideBannerInMenu': true,
-			'customMenuIcon': true,
-			'customMenu1': [3, 2, 10, 14, 26, 16],
-			'customMenu2': [4, 6, 8, 25, 24],
-			'customMenu3': [],
-			'dojoUrl': 'http://saasan.github.io/mobamas-dojo/lv.html',
-			'customUrl1': _topURL,
-			'customUrl2': _topURL,
-			'customUrl3': _topURL,
-			'customUrl4': _topURL,
-			'customUrl5': _topURL,
-			'pointFilterHp': true,
-			'pointFilterAtk': true,
-			'pointFilterDef': false,
-			'pointFilterAuto': false,
-			'atackCostLimit': 5,
-			'expCalcRecovery100': true,
-			'expCalcRecovery50': true,
-			'expCalcRecovery20': false,
-			'eventAssaultPowerCheck1': 0,
-			'eventAssaultPowerCheck2': 0,
-			'eventAssaultPowerCheck3': 0,
-			'swfZoom': 1,
-			'uncheckPresent': true
-		};
 		var settings = {};
-		for (var key in defaults) {
+		for (var key in _settingsSettings) {
 			settings[key] = getValue('cghp_' + key);
 			if (settings[key] == null) {
-				settings[key] = defaults[key];
+				settings[key] = _settingsSettings[key].default;
 				setValue('cghp_' + key, settings[key]);
 			}
 		}
