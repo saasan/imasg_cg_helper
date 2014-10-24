@@ -6,6 +6,7 @@
 // @include http://sp.pf.mbga.jp/12008305
 // @include http://sp.pf.mbga.jp/12008305?*
 // @include http://sp.pf.mbga.jp/12008305/*
+// @grant none
 // ==/UserScript==
 
 (function() {
