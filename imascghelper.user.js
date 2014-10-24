@@ -159,7 +159,6 @@
 			pointFilterTitle: {
 				order: order++,
 				displayName: 'ポイント振り分けフィルタ：',
-				default: '',
 				type: 'h3'
 			},
 			pointFilterHp: {
@@ -546,7 +545,7 @@
 		var settings = {};
 		for (var key in _settingsSettings) {
 			settings[key] = getValue('cghp_' + key);
-			if (settings[key] == null) {
+			if (settings[key] == null && _settingsSettings[key].default != null) {
 				settings[key] = _settingsSettings[key].default;
 				setValue('cghp_' + key, settings[key]);
 			}
@@ -1829,7 +1828,6 @@
 			}
 		}
 	})();
-
 
 	/**
 	 * 指定順位表示ボタンクリック時のイベント
