@@ -12,6 +12,31 @@
 (function() {
 	'use strict';
 
+	// その他関数
+	function $id(a){return _doc.getElementById(a);}
+	function $addClass(d,b){if(d&&b){var e=b.split(' ')||[];var f=d.className.split(' ')||[];for(var c=0,a=e.length;c<a;c++){if(f.indexOf(e[c])===-1){f.push(e[c]);}}d.className=f.join(' ').trim();}}
+	function $removeClass(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false;}}return true;});a.className=c.join(' ').trim();}}
+	function $hasClass(f,b){var h=false;if(f&&b){var a=b.split(' ')||[];var e=f.className.split(' ')||[];for(var d=0,c=e.length;d<c;d++){for(var q=0,r=a.length;q<r;q++){if(e[d]===a[q]){h=true;break;}}}}return h;}
+	function $toggleClass(a,c){/*var b=false;*/if(a&&c){if($hasClass(a,c)){$removeClass(a,c);}else{$addClass(a,c);}}}
+	function $create(a){return _doc.createElement(a);}
+	function $bind(a,b,c){if(!a){return;}a.addEventListener(b,c,false);}
+	function getValue(a){var b=localStorage.getItem(a);return(b)?JSON.parse(b):null;}
+	function setValue(a,b){localStorage.setItem(a,JSON.stringify(b));}
+	function deleteValue(a){localStorage.removeItem(a);}
+	function isNumeric(a){if(Number.isFinite){return Number.isFinite(a);}else{return(typeof a==='number')&&isFinite(a);}}
+	function toNumber(a){if(a){return a-0;}}
+	function round(a,b){var c=Math.pow(10,b);return Math.round(a*c)/c;}
+	function trim(a){return(a)?a.replace(/^[\s　]+|[\s　]+$/g,''):null;}
+
+	var _doc = document;
+	var _root = _doc.documentElement;
+	var _body = _doc.body;
+	var _location = location;
+	var _param = _location.search.substring(1);
+	var _topURL = 'http://sp.pf.mbga.jp/12008305/?guid=ON';
+	var _baseURL = _topURL + '&url=http%3A%2F%2F125.6.169.35%2Fidolmaster%2F';
+	var _content = $id('headerAcdPanel') || _body;
+
 	/**
 	 * レベルアップ計算を挿入する
 	 *
@@ -406,34 +431,9 @@
 		}
 	}
 
-	// その他関数
-	function $id(a){return _doc.getElementById(a);}
-	function $addClass(d,b){if(d&&b){var e=b.split(' ')||[];var f=d.className.split(' ')||[];for(var c=0,a=e.length;c<a;c++){if(f.indexOf(e[c])===-1){f.push(e[c]);}}d.className=f.join(' ').trim();}}
-	function $removeClass(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false;}}return true;});a.className=c.join(' ').trim();}}
-	function $hasClass(f,b){var h=false;if(f&&b){var a=b.split(' ')||[];var e=f.className.split(' ')||[];for(var d=0,c=e.length;d<c;d++){for(var q=0,r=a.length;q<r;q++){if(e[d]===a[q]){h=true;break;}}}}return h;}
-	function $toggleClass(a,c){/*var b=false;*/if(a&&c){if($hasClass(a,c)){$removeClass(a,c);}else{$addClass(a,c);}}}
-	function $create(a){return _doc.createElement(a);}
-	function $bind(a,b,c){if(!a){return;}a.addEventListener(b,c,false);}
-	function getValue(a){var b=localStorage.getItem(a);return(b)?JSON.parse(b):null;}
-	function setValue(a,b){localStorage.setItem(a,JSON.stringify(b));}
-	function deleteValue(a){localStorage.removeItem(a);}
-	function isNumeric(a){if(Number.isFinite){return Number.isFinite(a);}else{return(typeof a==='number')&&isFinite(a);}}
-	function toNumber(a){if(a){return a-0;}}
-	function round(a,b){var c=Math.pow(10,b);return Math.round(a*c)/c;}
-	function trim(a){return(a)?a.replace(/^[\s　]+|[\s　]+$/g,''):null;}
-
 	// =========================================================================
 	// メイン処理
 	// =========================================================================
-
-	var _doc = document;
-	var _root = _doc.documentElement;
-	var _body = _doc.body;
-	var _location = location;
-	var _param = _location.search.substring(1);
-	var _topURL = 'http://sp.pf.mbga.jp/12008305/?guid=ON';
-	var _baseURL = _topURL + '&url=http%3A%2F%2F125.6.169.35%2Fidolmaster%2F';
-	var _content = $id('headerAcdPanel')||_body;
 
 	// ユーザー設定を読み込む
 	var _settings = loadSettings();
