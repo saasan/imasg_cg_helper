@@ -2251,17 +2251,27 @@
 			var okButton = $id('cghpOkButton');
 			if (okButton) {
 				$bind(okButton, 'click', function() {
+					var i, key;
 					var urlPattern = /^s?https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:@&=+$,%#]+$/;
 
-					var hideBannerInMenu = $id('cghp_hideBannerInMenu');
-					if (hideBannerInMenu) {
-						_settings.hideBannerInMenu = hideBannerInMenu.checked;
+					// 画面を設定に反映
+					for (key in _settingsSettings) {
+						// orderが0以下は設定画面に表示していない
+						if (_settingsSettings[key].order <= 0) {
+							continue;
+						}
+
+						// typeに応じて設定を反映
+						switch (_settingsSettings[key].type) {
+							case 'checkbox':
+								_settings[key] = $id('cghp_' + key).checked;
+								break;
+
+							default:
+								break;
+						}
 					}
-					var customMenuIcon = $id('cghp_customMenuIcon');
-					if (customMenuIcon) {
-						_settings.customMenuIcon = customMenuIcon.checked;
-					}
-					for (var i = 1; i <= 3; i++) {
+					for (i = 1; i <= 3; i++) {
 						var customMenu = $id('cghp_customMenu' + i);
 						if (customMenu) {
 							var menuItem = [];
@@ -2293,22 +2303,6 @@
 							}
 						}
 					}
-					var pointFilterHp = $id('cghp_pointFilterHp');
-					if (pointFilterHp) {
-						_settings.pointFilterHp = pointFilterHp.checked;
-					}
-					var pointFilterAtk = $id('cghp_pointFilterAtk');
-					if (pointFilterAtk) {
-						_settings.pointFilterAtk = pointFilterAtk.checked;
-					}
-					var pointFilterDef = $id('cghp_pointFilterDef');
-					if (pointFilterDef) {
-						_settings.pointFilterDef = pointFilterDef.checked;
-					}
-					var pointFilterAuto = $id('cghp_pointFilterAuto');
-					if (pointFilterAuto) {
-						_settings.pointFilterAuto = pointFilterAuto.checked;
-					}
 					var attackCostLimit = $id('cghp_attackCostLimit');
 					if (attackCostLimit) {
 						value = toNumber(attackCostLimit.value);
@@ -2322,10 +2316,6 @@
 						if (isNumeric(value) && 1 < value) {
 							_settings.swfZoom = value;
 						}
-					}
-					var uncheckPresent = $id('cghp_uncheckPresent');
-					if (uncheckPresent) {
-						_settings.uncheckPresent = uncheckPresent.checked;
 					}
 
 					saveSettings();
