@@ -1937,7 +1937,7 @@
 				settingMenu.push('<section>');
 				settingMenu.push('<h3>カスタムメニュー' + i + '（0～8個まで）');
 				settingMenu.push('<a id="cghpHelpCustomMenu' + i + '" class="a_link cghp_cm_help_link">...</a>：</h3>');
-				settingMenu.push('<p><input id="cghpSetCustomMenu' + i + '" type="text" pattern="^(?:\d+(?:,\s*\d+){0,7})?$" value="' + _settings['custom_menu' + i].join(',') + '"></p>');
+				settingMenu.push('<p><input id="cghpSetCustomMenu' + i + '" type="text" pattern="^(?:\\d+(?:,\\s*\\d+){0,7})?$" value="' + _settings['custom_menu' + i].join(',') + '"></p>');
 				settingMenu.push('</section>');
 			}
 			settingMenu.push('<section>');
@@ -2433,9 +2433,5 @@
 			}
 		});
 	})();
-
-	// =========================================================================
-	// メイン処理 ここまで
-	// =========================================================================
 
 })();
