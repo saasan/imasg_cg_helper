@@ -1612,7 +1612,7 @@
 						helpArea.id = 'cghpCustomMenuHelp';
 						var helpList = helpArea.appendChild($create('ul'));
 						helpList.className = 'cghp_cm_help_list';
-						_customMenu.forEach(function(value, index, array) {
+						_customMenu.forEach(function(value, index) {
 							var helpItem = helpList.appendChild($create('li'));
 							var helpLink = helpItem.appendChild($create('a'));
 							helpLink.className = 'cghp_link';
@@ -2417,7 +2417,7 @@
 	// その他関数
 	function $id(a){return _doc.getElementById(a);}
 	function $addClass(d,b){if(d&&b){var e=b.split(' ')||[];var f=d.className.split(' ')||[];for(var c=0,a=e.length;c<a;c++){if(f.indexOf(e[c])===-1){f.push(e[c]);}}d.className=f.join(' ').trim();}}
-	function $removeClass(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g,j){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false;}}return true;});a.className=c.join(' ').trim();}}
+	function $removeClass(a,e){if(a&&e){var b=e.split(' ')||[];var d=a.className.split(' ')||[];var c=d.filter(function(g){for(var h=0,f=b.length;h<f;h++){if(g===b[h]){return false;}}return true;});a.className=c.join(' ').trim();}}
 	function $hasClass(f,b){var h=false;if(f&&b){var a=b.split(' ')||[];var e=f.className.split(' ')||[];for(var d=0,c=e.length;d<c;d++){for(var q=0,r=a.length;q<r;q++){if(e[d]===a[q]){h=true;break;}}}}return h;}
 	function $toggleClass(a,c){/*var b=false;*/if(a&&c){if($hasClass(a,c)){$removeClass(a,c);}else{$addClass(a,c);}}}
 	function $create(a){return _doc.createElement(a);}
