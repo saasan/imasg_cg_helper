@@ -1152,7 +1152,7 @@
 	_customMenu[105] = { 'fullName': 'カスタム5', 'shortName': 'ｶｽﾀﾑ5', 'icon': 'fa-cogs', 'url': _settings.customUrl5 };
 
 	(function() {
-		var headerNavi = $id('headerNavi');
+		var headerNavi = $id('headerNaviPetitOn');
 		if (headerNavi) {
 			var customMenu = [];
 			for (var i = 1; i <= 3; i++) {
