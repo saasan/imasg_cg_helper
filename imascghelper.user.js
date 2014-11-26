@@ -123,7 +123,7 @@
 			dojoUrl: {
 				order: order++,
 				displayName: '道場URL',
-				default: 'http://saasan.github.io/mobamas-dojo/lv.html',
+				default: 'http://saasan.github.io/mobamas-dojo/',
 				type: 'url'
 			},
 			customUrl1: {
