@@ -1771,7 +1771,7 @@
 	// レベルアップ計算＠各種イベント時お仕事(演出OFF)
 	// -------------------------------------------------------------------------
 	(function() {
-		if ((/%2Fevent_\w+%2F(?:mission_list|get_\w+)(?:%2F|%3F)/).test(_param)) {
+        if ((/%2Fevent_\w+%2F(?:work|mission_list|get_\w+)(?:%2F|%3F)/).test(_param)) {
 			var status = getWorkStatus(0);
 			// 後方一致だとファイル名の後にゴミが付いていて拾えないからここだけ部分一致
 			var insertTarget = _content.querySelector('img[src*="%2Fline_hoshi.jpg"]');
