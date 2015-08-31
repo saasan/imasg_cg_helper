@@ -1314,10 +1314,10 @@
 			(/(?:%2F|%3F)deck_modify_card|event_deck_edit(?:%2F|%3F|$)/).test(_param)) {
 			var imageBaseURL = 'http://sp.pf-img-a.mbga.jp/12008305?url=http%3A%2F%2F125.6.169.35%2Fidolmaster%2F';
 			var imageURL = {
-				'ｽﾀﾐﾅﾄﾞﾘﾝｸ': imageBaseURL + 'image_sp%2Fitem%2Fm%2F1.jpg',
-				'ｴﾅｼﾞｰﾄﾞﾘﾝｸ': imageBaseURL + 'image_sp%2Fitem%2Fm%2F2.jpg',
-				'鍵付きｸﾛｰｾﾞｯﾄ': imageBaseURL + 'image_sp%2Fitem%2Fm%2F3.jpg',
-				'ﾏﾆｰ': _baseURL + 'image_sp%2Fui%2Ficon_many_m.jpg',
+				'スタミナドリンク': imageBaseURL + 'image_sp%2Fitem%2Fm%2F1.jpg',
+				'エナジードリンク': imageBaseURL + 'image_sp%2Fitem%2Fm%2F2.jpg',
+				'鍵付きクローゼット': imageBaseURL + 'image_sp%2Fitem%2Fm%2F3.jpg',
+				'マニー': _baseURL + 'image_sp%2Fui%2Ficon_many_m.jpg',
 			};
 
 			// アイドル情報を取得
@@ -1445,13 +1445,13 @@
 
 						var item;
 
-						item = (list.textContent.match(/^(ｽﾀﾐﾅﾄﾞﾘﾝｸ|ｴﾅｼﾞｰﾄﾞﾘﾝｸ|鍵付きｸﾛｰｾﾞｯﾄ) \((\d+)\)$/)||[]);
+						item = (list.textContent.match(/^(スタミナドリンク|エナジードリンク|鍵付きクローゼット) \((\d+)\)$/)||[]);
 						if (item.length === 3) {
 							// アイテム
 							itemName = item[1];
 							itemValue = item[2];
 						} else {
-							item = (list.textContent.match(/^([\d,]+)(ﾏﾆｰ)$/)||[]);
+							item = (list.textContent.match(/^([\d,]+)(マニー)$/)||[]);
 							if (item.length === 3) {
 								// マニー
 								itemName = item[2];
